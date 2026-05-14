@@ -149,25 +149,34 @@ function renderFieldList(containerId, fields) {
 
   container.replaceChildren(
     ...fields.map((field) => {
+      const column = document.createElement("div");
+      column.className = "col-12 col-md-6";
+
       const item = document.createElement("div");
-      item.className = "detail";
+      item.className = "card h-100";
+
+      const body = document.createElement("div");
+      body.className = "card-body";
 
       const title = document.createElement("div");
-      title.className = "detail-title";
+      title.className = "d-flex flex-column flex-sm-row justify-content-between align-items-sm-start gap-2";
 
       const name = document.createElement("code");
       name.textContent = field.name;
 
       const meta = document.createElement("span");
-      meta.className = "muted";
+      meta.className = "text-secondary";
       meta.textContent = `${field.type}${field.required === undefined ? "" : field.required ? " | verplicht" : " | optioneel"}`;
 
       const description = document.createElement("p");
+      description.className = "card-text text-secondary mt-2 mb-0";
       description.textContent = field.description;
 
       title.append(name, meta);
-      item.append(title, description);
-      return item;
+      body.append(title, description);
+      item.append(body);
+      column.append(item);
+      return column;
     })
   );
 }

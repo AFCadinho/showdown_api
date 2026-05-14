@@ -25,15 +25,21 @@ function renderRoutes() {
 
   container.replaceChildren(
     ...routes.map((route) => {
+      const column = document.createElement("div");
+      column.className = "col-12 col-md-6 col-xl-4";
+
       const item = document.createElement("div");
-      item.className = "item";
+      item.className = "card h-100";
+
+      const body = document.createElement("div");
+      body.className = "card-body";
 
       const routeHeader = document.createElement("div");
-      routeHeader.className = "route";
+      routeHeader.className = "d-flex justify-content-between align-items-start gap-3";
 
       const code = document.createElement("code");
       const method = document.createElement("span");
-      method.className = "method";
+      method.className = "text-success";
       method.textContent = route.method;
       code.append(method, ` ${route.path}`);
 
@@ -42,15 +48,19 @@ function renderRoutes() {
       if (route.href) {
         const link = document.createElement("a");
         link.href = route.href;
+        link.className = "link-primary text-decoration-none";
         link.textContent = route.linkText ?? "open";
         routeHeader.append(link);
       }
 
       const description = document.createElement("p");
+      description.className = "card-text text-secondary mt-2 mb-0";
       description.textContent = route.description;
 
-      item.append(routeHeader, description);
-      return item;
+      body.append(routeHeader, description);
+      item.append(body);
+      column.append(item);
+      return column;
     })
   );
 }

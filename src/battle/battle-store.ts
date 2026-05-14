@@ -10,7 +10,7 @@ export class BattleStore {
         this.battles.set(battleID, battleData);
     }
 
-    private getBattle(battleId: string) {
+    public getBattle(battleId: string) {
         return this.battles.get(battleId)
     }
 
