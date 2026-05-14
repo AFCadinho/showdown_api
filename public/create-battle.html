@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Create Battle | Showdown API</title>
+  <link rel="stylesheet" href="/styles.css">
+  <script src="/create-battle.js" defer></script>
+</head>
+<body>
+  <main>
+    <header>
+      <p><a href="/">Terug naar overzicht</a></p>
+      <h1>Create Battle</h1>
+      <p>Maakt een Pokemon Showdown battle aan met twee spelers en geeft de eerste battle state terug.</p>
+    </header>
+
+    <section>
+      <h2>Endpoint</h2>
+      <div class="item">
+        <div class="route">
+          <code><span class="method">POST</span> /create_battle</code>
+          <span class="muted">Content-Type: application/json</span>
+        </div>
+        <p>Gebruik deze route wanneer je een nieuwe battle wilt starten.</p>
+      </div>
+    </section>
+
+    <section>
+      <h2>Wat Geef Je Mee?</h2>
+      <p>Je stuurt een JSON body met een format en twee spelers. Beide spelers moeten een team hebben.</p>
+      <div id="request-fields" class="details"></div>
+    </section>
+
+    <section>
+      <h2>Request Voorbeeld</h2>
+      <pre><code id="request-example"></code></pre>
+    </section>
+
+    <section>
+      <h2>Wat Krijg Je Terug?</h2>
+      <p>Bij succes krijg je een battle id, de spelers, de beschikbare requests en de ruwe Showdown log terug.</p>
+      <div id="response-fields" class="details"></div>
+    </section>
+
+    <section>
+      <h2>Succes Response</h2>
+      <pre><code id="success-example"></code></pre>
+    </section>
+
+    <section>
+      <h2>Error Response</h2>
+      <p>Als een van de teams ontbreekt, krijg je een foutmelding terug.</p>
+      <pre><code id="error-example"></code></pre>
+    </section>
+
+    <section>
+      <h2>Curl Voorbeeld</h2>
+      <pre><code id="curl-example"></code></pre>
+    </section>
+
+    <section>
+      <h2>Machine Schema</h2>
+      <p>Dezelfde documentatie is ook als JSON beschikbaar voor tooling.</p>
+      <p><a href="/create_battle/schema">Open /create_battle/schema</a></p>
+    </section>
+  </main>
+</body>
+</html>

@@ -4,9 +4,10 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "build": "tsc",
     "test": "vitest",
     "typecheck": "tsc --noEmit",
-    "start": "ts-node-dev --respawn src/server.ts",
+    "start": "node dist/server.js",
     "dev": "ts-node-dev --respawn -r tsconfig-paths/register src/server.ts"
   },
   "keywords": [],

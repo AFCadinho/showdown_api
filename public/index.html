@@ -3,9 +3,36 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Hello World</title>
+  <title>Showdown API</title>
+  <link rel="stylesheet" href="/styles.css">
+  <script src="/docs.js" defer></script>
 </head>
 <body>
-  
+  <main>
+    <header>
+      <h1>Showdown API</h1>
+      <p>API om een Pokemon Showdown battle aan te maken en de eerste battle requests terug te krijgen.</p>
+
+      <div class="meta" aria-label="API metadata">
+        <div class="item">
+          <div class="label">API versie</div>
+          <p id="api-version" class="muted">laden...</p>
+        </div>
+        <div class="item">
+          <div class="label">Engine</div>
+          <p><span id="engine-name">pokemon-showdown</span> <span id="engine-version" class="muted"></span></p>
+        </div>
+        <div class="item">
+          <div class="label">Base URL</div>
+          <p class="muted"><code id="base-url">laden...</code></p>
+        </div>
+      </div>
+    </header>
+
+    <section>
+      <h2>Routes</h2>
+      <div id="routes" class="routes"></div>
+    </section>
+  </main>
 </body>
 </html>

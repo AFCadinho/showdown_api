@@ -8,17 +8,40 @@ Base URL:
 http://localhost:3001
 ```
 
+Op productie vervang je dit door je Render/custom domain URL, bijvoorbeeld:
+
+```txt
+https://api.afcadinho.com
+```
+
 ## Health Check
 
 ```http
-GET /
+GET /health
 ```
 
 Response:
 
 ```json
 {
-  "message": "Hello World"
+  "status": "ok"
+}
+```
+
+## API Info
+
+```http
+GET /info
+```
+
+Response:
+
+```json
+{
+  "name": "showdown-api",
+  "version": "1.0.0",
+  "engine": "pokemon-showdown",
+  "engineVersion": "0.11.10"
 }
 ```
 
@@ -207,7 +230,7 @@ Als `p1.team` of `p2.team` ontbreekt:
 ## Curl Voorbeeld
 
 ```bash
-curl -X POST http://localhost:3001/create_battle \
+curl -X POST <base-url>/create_battle \
   -H "Content-Type: application/json" \
   -d '{
     "formatId": "gen9nationaldex",

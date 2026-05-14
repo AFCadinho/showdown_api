@@ -22,6 +22,7 @@ coverage/
 
 # Build output
 build/
+dist/
 out/
 .tsbuildinfo
 *.tsbuildinfo
