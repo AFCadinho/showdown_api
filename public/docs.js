@@ -18,6 +18,13 @@ const routes = [
     href: "/create_battle",
     linkText: "docs",
   },
+  {
+    method: "POST",
+    path: "/battles/:battleId/lead",
+    description: "Kiest de lead Pokemon voor p1 of p2 in een bestaande battle. Open de docs met een voorbeeld battle id.",
+    href: "/battles/example-battle-id/lead",
+    linkText: "docs",
+  },
 ];
 
 function renderRoutes() {

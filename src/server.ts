@@ -121,6 +121,7 @@ app.get("/info", (_, res) => {
       info: "/info",
       createBattle: "/create_battle",
       createBattleSchema: "/create_battle/schema",
+      chooseLead: "/battles/:battleId/lead",
     },
   });
 });
@@ -131,6 +132,10 @@ app.get("/create_battle", (_, res) => {
 
 app.get("/create_battle/schema", (_, res) => {
   res.json(createBattleDocs);
+});
+
+app.get("/battles/:battleId/lead", (_, res) => {
+  res.sendFile(path.join(__dirname, "../public/lead-battle.html"));
 });
 
 app.post("/create_battle", async (req, res) => {
