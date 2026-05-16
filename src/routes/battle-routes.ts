@@ -1,8 +1,9 @@
 import { Router } from "express";
-import { createBattle } from "../battle/battle-service";
-import { battleStore } from "../battle/battle-store";
-import { PlayerId } from "../battle/types";
-import { presentBattleRequests } from "../battle/battle-request-presenter";
+import { createBattle } from "@/battle/battle-service";
+import { battleStore } from "@/battle/battle-store";
+import { PlayerId } from "@/battle/types";
+import { presentBattleRequests } from "@/battle/battle-request-presenter";
+import { validateChoiceInput } from "@/battle/choice-validator";
 
 export const battleRoutes = Router();
 
@@ -58,4 +59,31 @@ battleRoutes.post("/battles/:battleId/lead", async (req, res) => {
     state: battle.state,
   })
 
+})
+
+battleRoutes.post("/battles/:battleId/choice", async (req, res) => {
+  const { battleId } = req.params;
+
+  const battle = battleStore.getBattle(battleId)
+
+  if (!battle) {
+    return res.status(404).json({
+      success: false,
+      error: "Battle not found",
+    });
+  }
+
+  const validation = validateChoiceInput(req.body);
+
+  if (!validation.success) return res.status(400).json(validation)
+
+  return res.json({
+    success: true,
+    battleId,
+    formatId: battle.formatid,
+    players: battle.players,
+    requests: presentBattleRequests(battle.requests, battle.formatid),
+    log: battle.log,
+    state: battle.state
+  })
 })
