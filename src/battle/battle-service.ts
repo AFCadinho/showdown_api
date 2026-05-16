@@ -1,7 +1,7 @@
 import { battleStore } from "./battle-store";
 import { listenToBattleStream } from "./battle-stream-listener";
 import { BattleStream, getPlayerStreams, Teams } from "pokemon-showdown";
-import type { BattleData } from "@/battle/types";
+import type { BattleData } from "./types";
 import { presentBattleRequests } from "./battle-request-presenter";
 
 type PokemonTeam = NonNullable<Parameters<typeof Teams.pack>[0]>;

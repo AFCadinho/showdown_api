@@ -1,4 +1,4 @@
-import { presentMove } from "@/dex/dex-presenter";
+import { presentMove } from "../dex/dex-presenter";
 
 type BattleRequest = {
   active?: Array<{

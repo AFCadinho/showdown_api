@@ -2,7 +2,7 @@ import { Router } from "express";
 import { createBattle } from "../battle/battle-service";
 import { battleStore } from "../battle/battle-store";
 import { PlayerId } from "../battle/types";
-import { presentBattleRequests } from "@/battle/battle-request-presenter";
+import { presentBattleRequests } from "../battle/battle-request-presenter";
 
 export const battleRoutes = Router();
 
