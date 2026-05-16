@@ -1,9 +1,11 @@
 import { Router } from "express";
 import { createBattle } from "@/battle/battle-service";
 import { battleStore } from "@/battle/battle-store";
-import { PlayerId } from "@/battle/types";
 import { presentBattleRequests } from "@/battle/battle-request-presenter";
-import { validateChoiceInput } from "@/battle/choice-validator";
+import {
+  validateChoiceInput,
+  validateLeadInput,
+} from "@/battle/battle-route-validators";
 
 export const battleRoutes = Router();
 
@@ -19,7 +21,6 @@ battleRoutes.post("/create_battle", async (req, res) => {
 
 battleRoutes.post("/battles/:battleId/lead", async (req, res) => {
   const { battleId } = req.params;
-  const { playerId, slot } = req.body;
 
   const battle = battleStore.getBattle(battleId);
 
@@ -30,23 +31,12 @@ battleRoutes.post("/battles/:battleId/lead", async (req, res) => {
     });
   }
 
-  if (playerId !== "p1" && playerId !== "p2") {
-    return res.status(400).json({
-      success: false,
-      error: "Invalid player"
-    })
-  }
+  const validation = validateLeadInput(req.body);
+  if (!validation.success) return res.status(400).json(validation);
 
-  const player = playerId as PlayerId
+  const { playerId, slot } = validation.data;
 
-  if (!Number.isInteger(slot) || slot < 1 || slot > 6) {
-    return res.status(400).json({
-      success: false,
-      error: "Invalid lead slot"
-    });
-  }
-
-  await battle.playerStreams[player].write(`team ${slot}`);
+  await battle.playerStreams[playerId].write(`team ${slot}`);
   await new Promise((resolve) => setTimeout(resolve, 10));
 
   return res.json({
@@ -57,14 +47,13 @@ battleRoutes.post("/battles/:battleId/lead", async (req, res) => {
     requests: presentBattleRequests(battle.requests, battle.formatid),
     log: battle.log,
     state: battle.state,
-  })
-
-})
+  });
+});
 
 battleRoutes.post("/battles/:battleId/choice", async (req, res) => {
   const { battleId } = req.params;
 
-  const battle = battleStore.getBattle(battleId)
+  const battle = battleStore.getBattle(battleId);
 
   if (!battle) {
     return res.status(404).json({
@@ -75,7 +64,7 @@ battleRoutes.post("/battles/:battleId/choice", async (req, res) => {
 
   const validation = validateChoiceInput(req.body);
 
-  if (!validation.success) return res.status(400).json(validation)
+  if (!validation.success) return res.status(400).json(validation);
 
   return res.json({
     success: true,
@@ -84,6 +73,6 @@ battleRoutes.post("/battles/:battleId/choice", async (req, res) => {
     players: battle.players,
     requests: presentBattleRequests(battle.requests, battle.formatid),
     log: battle.log,
-    state: battle.state
-  })
-})
+    state: battle.state,
+  });
+});
