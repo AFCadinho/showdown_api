@@ -112,6 +112,7 @@ export const createBattleDocs = {
         },
       },
     },
+    events: [],
     log: [],
   },
   errorResponse: {

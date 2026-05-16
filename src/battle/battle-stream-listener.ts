@@ -1,6 +1,25 @@
-import type { BattleData, PlayerId, PlayerStream, PlayerStreams } from "./types";
+import type {
+  BattleData,
+  PlayerId,
+  PlayerStream,
+  PlayerStreams,
+} from "./types";
 
-export function listenToBattleStream(playerStreams: PlayerStreams, battleData: BattleData) {
+/**
+ * Start listeners voor beide spelerstreams van een Showdown battle.
+ *
+ * Deze functie wordt maar een keer aangeroepen wanneer de battle wordt
+ * aangemaakt. De onderliggende player stream listeners blijven daarna actief
+ * zolang de Showdown streams open zijn.
+ *
+ * Elke spelerstream krijgt eigen request-data terug. Door beide streams te
+ * volgen kan de API per speler de laatste request en de gedeelde battle state
+ * bijhouden.
+ */
+export function listenToBattleStream(
+  playerStreams: PlayerStreams,
+  battleData: BattleData
+) {
   listenToPlayerStream("p1", playerStreams.p1, battleData);
   listenToPlayerStream("p2", playerStreams.p2, battleData);
 }
@@ -12,6 +31,9 @@ async function listenToPlayerStream(
   battleStream: PlayerStream,
   battleData: BattleData
 ) {
+  // Deze async loop blijft wachten op nieuwe chunks uit dezelfde player stream.
+  // Latere route calls zoals /lead en /choice schrijven naar deze stream, waarna
+  // Showdown hier weer nieuwe output teruggeeft.
   for await (const chunk of battleStream) {
     if (DEBUG_BATTLE_STREAM) {
       console.log(`${side} battleStream output:`);
@@ -23,15 +45,48 @@ async function listenToPlayerStream(
     const lines = chunk.split("\n");
 
     for (const line of lines) {
-      if (!line.startsWith("|request|")) continue;
-
-      const requestText = line.replace("|request|", "");
-
-      try {
-        battleData.requests[side] = JSON.parse(requestText);
-      } catch (error) {
-        console.log(`Could not parse ${side} request:`, error);
-      }
+      handleBattleStreamLine(line, side, battleData);
     }
+  }
+}
+
+function handleBattleStreamLine(
+  line: string,
+  side: PlayerId,
+  battleData: BattleData
+) {
+  // Request-regels bevatten de actuele keuzes voor een specifieke speler.
+  if (line.startsWith("|request|")) {
+    const requestText = line.replace("|request|", "");
+
+    try {
+      battleData.requests[side] = JSON.parse(requestText);
+    } catch (error) {
+      console.log(`Could not parse ${side} request:`, error);
+    }
+
+    return;
+  }
+
+  // Turn-regels geven aan dat Showdown een nieuwe turn is gestart.
+  if (line.startsWith("|turn|")) {
+    const turnText = line.replace("|turn|", "");
+    const turn = Number(turnText);
+
+    if (Number.isInteger(turn)) {
+      battleData.state.turn = turn;
+    }
+
+    return;
+  }
+
+  // Win-regels betekenen dat de battle is afgelopen en wie gewonnen heeft.
+  if (line.startsWith("|win|")) {
+    const winner = line.replace("|win|", "");
+
+    battleData.state.ended = true;
+    battleData.state.winner = winner;
+
+    return;
   }
 }

@@ -41,7 +41,16 @@ Response:
   "name": "showdown-api",
   "version": "1.0.0",
   "engine": "pokemon-showdown",
-  "engineVersion": "0.11.10"
+  "engineVersion": "0.11.10",
+  "routes": {
+    "home": "/",
+    "health": "/health",
+    "info": "/info",
+    "createBattle": "/create_battle",
+    "createBattleSchema": "/create_battle/schema",
+    "chooseLead": "/battles/:battleId/lead",
+    "chooseAction": "/battles/:battleId/choice"
+  }
 }
 ```
 
@@ -233,6 +242,7 @@ Voorbeeld:
       }
     }
   },
+  "events": [],
   "log": [
     "p1\n|request|{\"teamPreview\":true,\"side\":{...}}",
     "p2\n|request|{\"teamPreview\":true,\"side\":{...}}"
@@ -254,6 +264,7 @@ verrijkt met Dex-data zoals `type`, `category`, `basePower`, `accuracy`,
 | `formatId` | `string` | Gebruikt Showdown format. |
 | `players` | `object` | Namen van `p1` en `p2`. |
 | `requests` | `object` | Laatste request per speler, verrijkt met Dex-data voor UI-gebruik. Bij `create_battle` is dit meestal een `teamPreview` request. |
+| `events` | `BattleEvent[]` | Game-vriendelijke events uit de Showdown log. Bij `create_battle` meestal nog leeg. |
 | `log` | `string[]` | Ruwe stream output die de API tot nu toe heeft ontvangen. |
 
 ### Move Velden
@@ -276,6 +287,52 @@ Moves in `requests` bevatten naast de Showdown request-data ook Dex-data:
 | `disabled` | `boolean` | Alleen bij actieve battle keuzes; of de move momenteel niet gekozen kan worden. |
 | `shortDesc` | `string` | Korte Showdown omschrijving. |
 | `desc` | `string` | Volledige Showdown omschrijving. |
+
+### Event Velden
+
+`events` bevat dezelfde battle-informatie als de ruwe Showdown log, maar als JSON
+die Godot direct kan gebruiken voor animaties en UI updates.
+
+Voorbeeld:
+
+```json
+[
+  {
+    "type": "move",
+    "actor": "p1a: Pikachu",
+    "move": "Thunderbolt",
+    "target": "p2a: Bulbasaur"
+  },
+  {
+    "type": "damage",
+    "target": "p2a: Bulbasaur",
+    "condition": "176/231"
+  },
+  {
+    "type": "heal",
+    "target": "p2a: Bulbasaur",
+    "condition": "231/231",
+    "source": "drain",
+    "sourceTarget": "p1a: Pikachu"
+  },
+  {
+    "type": "turn",
+    "turn": 2
+  }
+]
+```
+
+Ondersteunde event types:
+
+| Type | Velden | Beschrijving |
+| --- | --- | --- |
+| `move` | `actor`, `move`, `target` | Een Pokemon gebruikt een move. |
+| `damage` | `target`, `condition` | Een Pokemon krijgt damage. |
+| `heal` | `target`, `condition`, `source`, `sourceTarget` | Een Pokemon krijgt HP terug. |
+| `status` | `target`, `status` | Een Pokemon krijgt een status, zoals `par`. |
+| `faint` | `target` | Een Pokemon faint. |
+| `turn` | `turn` | Showdown start een nieuwe turn. |
+| `win` | `winner` | De battle is afgelopen. |
 
 ## Error Response
 
@@ -378,6 +435,12 @@ kiezen.
       "rqid": 2
     }
   },
+  "events": [
+    {
+      "type": "turn",
+      "turn": 1
+    }
+  ],
   "log": [
     "p1\n|request|{\"active\":[...],\"side\":{...},\"rqid\":2}"
   ],
@@ -392,6 +455,9 @@ kiezen.
 Na de lead keuze staan de beschikbare battle-acties meestal onder
 `requests[p1|p2].active[].moves`. Deze moves bevatten zowel Dex-data als live
 battle-data zoals `move`, `pp`, `maxpp` en `disabled`.
+
+`events` bevat game-vriendelijke events uit de Showdown log. Bij lead selectie
+is dit vaak alleen een `turn` event zodra beide spelers hun lead hebben gekozen.
 
 ### Error Responses
 
@@ -413,6 +479,176 @@ battle-data zoals `move`, `pp`, `maxpp` en `disabled`.
 {
   "success": false,
   "error": "Invalid lead slot"
+}
+```
+
+## Battle Choice
+
+```http
+POST /battles/:battleId/choice
+Content-Type: application/json
+```
+
+Gebruik deze route om een move of switch keuze voor een speler naar Showdown te
+sturen. Showdown verwerkt de turn zodra beide spelers een geldige keuze hebben
+doorgestuurd.
+
+### Request Body
+
+Move:
+
+```json
+{
+  "playerId": "p1",
+  "type": "move",
+  "slot": 1
+}
+```
+
+Switch:
+
+```json
+{
+  "playerId": "p2",
+  "type": "switch",
+  "slot": 3
+}
+```
+
+| Veld | Type | Verplicht | Beschrijving |
+| --- | --- | --- | --- |
+| `playerId` | `"p1" \| "p2"` | Ja | Speler waarvoor je de keuze doorstuurt. |
+| `type` | `"move" \| "switch"` | Ja | Soort keuze. |
+| `slot` | `number` | Ja | Move slot of switch slot, van `1` tot en met `6`. |
+
+### Succes Response
+
+```json
+{
+  "success": true,
+  "battleId": "b7c68e40-2e60-4c11-8f92-87b4f6856c2d",
+  "formatId": "gen9nationaldex",
+  "players": {
+    "p1": {
+      "name": "Ash"
+    },
+    "p2": {
+      "name": "Gary"
+    }
+  },
+  "requests": {
+    "p1": {
+      "active": [
+        {
+          "moves": [
+            {
+              "id": "thunderbolt",
+              "name": "Thunderbolt",
+              "exists": true,
+              "type": "Electric",
+              "category": "Special",
+              "basePower": 90,
+              "accuracy": 100,
+              "pp": 23,
+              "priority": 0,
+              "target": "normal",
+              "shortDesc": "10% chance to paralyze the target.",
+              "desc": "Has a 10% chance to paralyze the target.",
+              "move": "Thunderbolt",
+              "maxpp": 24,
+              "disabled": false
+            }
+          ]
+        }
+      ],
+      "side": {
+        "name": "Ash",
+        "id": "p1",
+        "pokemon": [
+          {
+            "ident": "p1: Pikachu",
+            "details": "Pikachu, M",
+            "condition": "94/211",
+            "active": true
+          }
+        ]
+      }
+    }
+  },
+  "events": [
+    {
+      "type": "move",
+      "actor": "p1a: Pikachu",
+      "move": "Thunderbolt",
+      "target": "p2a: Bulbasaur"
+    },
+    {
+      "type": "damage",
+      "target": "p2a: Bulbasaur",
+      "condition": "176/231"
+    },
+    {
+      "type": "move",
+      "actor": "p2a: Bulbasaur",
+      "move": "Giga Drain",
+      "target": "p1a: Pikachu"
+    },
+    {
+      "type": "heal",
+      "target": "p2a: Bulbasaur",
+      "condition": "231/231",
+      "source": "drain",
+      "sourceTarget": "p1a: Pikachu"
+    },
+    {
+      "type": "turn",
+      "turn": 2
+    }
+  ],
+  "log": [
+    "p1\n|move|p1a: Pikachu|Thunderbolt|p2a: Bulbasaur\n|-damage|p2a: Bulbasaur|176/231\n|turn|2"
+  ],
+  "state": {
+    "turn": 2,
+    "ended": false,
+    "winner": null
+  }
+}
+```
+
+Na een choice response gebruik je:
+
+- `requests` voor de actuele UI state zoals HP, PP, disabled moves en switches.
+- `events` voor animaties en feedback van wat er gebeurde.
+- `state` voor de huidige turn en of de battle gewonnen is.
+
+### Error Responses
+
+```json
+{
+  "success": false,
+  "error": "Battle not found"
+}
+```
+
+```json
+{
+  "success": false,
+  "error": "Invalid player"
+}
+```
+
+```json
+{
+  "success": false,
+  "error": "Invalid choice type"
+}
+```
+
+```json
+{
+  "success": false,
+  "error": "Invalid choice slot"
 }
 ```
 

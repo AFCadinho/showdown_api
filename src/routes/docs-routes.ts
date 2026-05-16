@@ -21,3 +21,7 @@ docsRoutes.get("/create_battle/schema", (_, res) => {
 docsRoutes.get("/battles/:battleId/lead", (_, res) => {
   res.sendFile(path.join(publicPath, "lead-battle.html"));
 });
+
+docsRoutes.get("/battles/:battleId/choice", (_, res) => {
+  res.sendFile(path.join(publicPath, "choice-battle.html"));
+});

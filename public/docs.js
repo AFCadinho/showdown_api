@@ -25,6 +25,13 @@ const routes = [
     href: "/battles/example-battle-id/lead",
     linkText: "docs",
   },
+  {
+    method: "POST",
+    path: "/battles/:battleId/choice",
+    description: "Stuurt een move of switch keuze voor p1 of p2 naar een bestaande battle.",
+    href: "/battles/example-battle-id/choice",
+    linkText: "docs",
+  },
 ];
 
 function renderRoutes() {

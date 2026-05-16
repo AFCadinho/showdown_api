@@ -58,6 +58,11 @@ const responseFields = [
     description: "Laatste request per speler, verrijkt met Dex-data. Bij create_battle is dit meestal een teamPreview request met moves onder side.pokemon[].moves.",
   },
   {
+    name: "events",
+    type: "BattleEvent[]",
+    description: "Game-vriendelijke events die uit de Showdown log zijn afgeleid. Bij create_battle is dit meestal nog leeg.",
+  },
+  {
     name: "log",
     type: "string[]",
     description: "Ruwe stream output die de API tot nu toe van Pokemon Showdown heeft ontvangen.",
@@ -154,6 +159,7 @@ const successExample = {
       },
     },
   },
+  events: [],
   log: [
     "p1\\n|request|{...}",
     "p2\\n|request|{...}",

@@ -6,6 +6,8 @@ import {
   validateChoiceInput,
   validateLeadInput,
 } from "@/battle/battle-route-validators";
+import { buildChoiceCommand } from "@/battle/battle-choice-command";
+import { presentBattleEvents } from "@/battle/battle-event-presenter";
 
 export const battleRoutes = Router();
 
@@ -45,6 +47,7 @@ battleRoutes.post("/battles/:battleId/lead", async (req, res) => {
     formatId: battle.formatid,
     players: battle.players,
     requests: presentBattleRequests(battle.requests, battle.formatid),
+    events: presentBattleEvents(battle.log),
     log: battle.log,
     state: battle.state,
   });
@@ -63,8 +66,13 @@ battleRoutes.post("/battles/:battleId/choice", async (req, res) => {
   }
 
   const validation = validateChoiceInput(req.body);
-
   if (!validation.success) return res.status(400).json(validation);
+
+  const { playerId } = validation.data;
+  const choiceCommand = buildChoiceCommand(validation.data);
+
+  await battle.playerStreams[playerId].write(choiceCommand);
+  await new Promise((resolve) => setTimeout(resolve, 10));
 
   return res.json({
     success: true,
@@ -72,6 +80,7 @@ battleRoutes.post("/battles/:battleId/choice", async (req, res) => {
     formatId: battle.formatid,
     players: battle.players,
     requests: presentBattleRequests(battle.requests, battle.formatid),
+    events: presentBattleEvents(battle.log),
     log: battle.log,
     state: battle.state,
   });

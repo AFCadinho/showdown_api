@@ -14,13 +14,19 @@ const requestFields = [
     name: "playerId",
     type: '"p1" | "p2"',
     required: true,
-    description: "De speler waarvoor je de lead Pokemon kiest.",
+    description: "De speler waarvoor je een battle keuze doorstuurt.",
+  },
+  {
+    name: "type",
+    type: '"move" | "switch"',
+    required: true,
+    description: "Het soort keuze. move gebruikt een move slot; switch gebruikt een team slot.",
   },
   {
     name: "slot",
     type: "number",
     required: true,
-    description: "Team slot van de Pokemon die je wilt kiezen. Dit moet een heel getal van 1 tot en met 6 zijn.",
+    description: "Slot van de move of switch. Dit moet een heel getal van 1 tot en met 6 zijn.",
   },
 ];
 
@@ -28,7 +34,7 @@ const responseFields = [
   {
     name: "success",
     type: "boolean",
-    description: "Geeft aan of de lead succesvol is gekozen.",
+    description: "Geeft aan of de choice succesvol is verwerkt.",
   },
   {
     name: "battleId",
@@ -48,12 +54,12 @@ const responseFields = [
   {
     name: "requests",
     type: "object",
-    description: "Laatste request per speler na de lead keuze, verrijkt met Dex-data. Na team preview staan de beschikbare acties meestal onder active[].moves.",
+    description: "Laatste request per speler, verrijkt met Dex-data. Hierin staan actuele HP, beschikbare moves, PP en disabled state.",
   },
   {
     name: "events",
     type: "BattleEvent[]",
-    description: "Game-vriendelijke events uit de Showdown log, zoals turn, move, damage, heal, status, faint en win.",
+    description: "Game-vriendelijke events uit de Showdown log, bedoeld voor animaties en UI updates.",
   },
   {
     name: "log",
@@ -69,6 +75,7 @@ const responseFields = [
 
 const requestExample = {
   playerId: "p1",
+  type: "move",
   slot: 1,
 };
 
@@ -93,7 +100,7 @@ const successExample = {
               category: "Special",
               basePower: 90,
               accuracy: 100,
-              pp: 24,
+              pp: 23,
               priority: 0,
               target: "normal",
               shortDesc: "10% chance to paralyze the target.",
@@ -112,37 +119,48 @@ const successExample = {
           {
             ident: "p1: Pikachu",
             details: "Pikachu, M",
-            condition: "211/211",
+            condition: "94/211",
             active: true,
-            moves: [
-              {
-                id: "thunderbolt",
-                name: "Thunderbolt",
-                type: "Electric",
-                category: "Special",
-                basePower: 90,
-                accuracy: 100,
-                pp: 15,
-              },
-            ],
           },
         ],
       },
-      rqid: 2,
     },
   },
   events: [
     {
+      type: "move",
+      actor: "p1a: Pikachu",
+      move: "Thunderbolt",
+      target: "p2a: Bulbasaur",
+    },
+    {
+      type: "damage",
+      target: "p2a: Bulbasaur",
+      condition: "176/231",
+    },
+    {
+      type: "move",
+      actor: "p2a: Bulbasaur",
+      move: "Giga Drain",
+      target: "p1a: Pikachu",
+    },
+    {
+      type: "heal",
+      target: "p2a: Bulbasaur",
+      condition: "231/231",
+      source: "drain",
+      sourceTarget: "p1a: Pikachu",
+    },
+    {
       type: "turn",
-      turn: 1,
+      turn: 2,
     },
   ],
   log: [
-    "p1\\n|request|{...}",
-    "p2\\n|request|{...}",
+    "p1\\n|move|p1a: Pikachu|Thunderbolt|p2a: Bulbasaur\\n|-damage|p2a: Bulbasaur|176/231\\n|turn|2",
   ],
   state: {
-    turn: 0,
+    turn: 2,
     ended: false,
     winner: null,
   },
@@ -150,7 +168,7 @@ const successExample = {
 
 const errorExample = {
   success: false,
-  error: "Battle not found",
+  error: "Invalid choice type",
 };
 
 function renderFieldList(containerId, fields) {
@@ -200,6 +218,6 @@ renderFieldList("response-fields", responseFields);
 renderJson("request-example", requestExample);
 renderJson("success-example", successExample);
 renderJson("error-example", errorExample);
-document.getElementById("curl-example").textContent = `curl -X POST ${window.location.origin}/battles/${battleId}/lead \\
+document.getElementById("curl-example").textContent = `curl -X POST ${window.location.origin}/battles/${battleId}/choice \\
   -H "Content-Type: application/json" \\
   -d '${JSON.stringify(requestExample, null, 2)}'`;

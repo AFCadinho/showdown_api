@@ -24,6 +24,7 @@ systemRoutes.get("/info", (_, res) => {
       createBattle: "/create_battle",
       createBattleSchema: "/create_battle/schema",
       chooseLead: "/battles/:battleId/lead",
+      chooseAction: "/battles/:battleId/choice",
     },
   });
 });
