@@ -13,7 +13,8 @@
     "types": ["node"],
     "baseUrl": ".",
     "paths": {
-      "@/*": ["src/*"]
+      "@/*": ["src/*"],
+      "pokemon-showdown": ["node_modules/pokemon-showdown"]
     }
   },
   "include": ["src"],

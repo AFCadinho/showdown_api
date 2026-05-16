@@ -1,6 +1,6 @@
-import type { BattleData, PlayerId } from "./types";
+import type { BattleData, PlayerId, PlayerStream, PlayerStreams } from "./types";
 
-export function listenToBattleStream(playerStreams: any, battleData: BattleData) {
+export function listenToBattleStream(playerStreams: PlayerStreams, battleData: BattleData) {
   listenToPlayerStream("p1", playerStreams.p1, battleData);
   listenToPlayerStream("p2", playerStreams.p2, battleData);
 }
@@ -9,7 +9,7 @@ const DEBUG_BATTLE_STREAM = false;
 
 async function listenToPlayerStream(
   side: PlayerId,
-  battleStream: any,
+  battleStream: PlayerStream,
   battleData: BattleData
 ) {
   for await (const chunk of battleStream) {

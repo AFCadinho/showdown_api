@@ -55,7 +55,7 @@ const responseFields = [
   {
     name: "requests",
     type: "object",
-    description: "Laatste Showdown request per speler. Hierin staan de beschikbare keuzes, zoals moves.",
+    description: "Laatste request per speler, verrijkt met Dex-data. Bij create_battle is dit meestal een teamPreview request met moves onder side.pokemon[].moves.",
   },
   {
     name: "log",
@@ -112,25 +112,46 @@ const successExample = {
   },
   requests: {
     p1: {
-      active: [
-        {
-          moves: [
-            {
-              move: "Thunderbolt",
-              id: "thunderbolt",
-              pp: 24,
-              maxpp: 24,
-              target: "normal",
-              disabled: false,
-            },
-          ],
-        },
-      ],
+      teamPreview: true,
       side: {
         name: "Ash",
         id: "p1",
+        pokemon: [
+          {
+            ident: "p1: Pikachu",
+            details: "Pikachu, M",
+            condition: "211/211",
+            active: true,
+            stats: {
+              atk: 146,
+              def: 116,
+              spa: 136,
+              spd: 136,
+              spe: 216,
+            },
+            moves: [
+              {
+                id: "thunderbolt",
+                name: "Thunderbolt",
+                exists: true,
+                type: "Electric",
+                category: "Special",
+                basePower: 90,
+                accuracy: 100,
+                pp: 15,
+                priority: 0,
+                target: "normal",
+                shortDesc: "10% chance to paralyze the target.",
+                desc: "Has a 10% chance to paralyze the target.",
+              },
+            ],
+            baseAbility: "static",
+            item: "lightball",
+            ability: "static",
+            teraType: "Electric",
+          },
+        ],
       },
-      rqid: 2,
     },
   },
   log: [

@@ -75,7 +75,43 @@ export const createBattleDocs = {
       p1: { name: "Ash" },
       p2: { name: "Gary" },
     },
-    requests: {},
+    requests: {
+      p1: {
+        teamPreview: true,
+        side: {
+          name: "Ash",
+          id: "p1",
+          pokemon: [
+            {
+              ident: "p1: Pikachu",
+              details: "Pikachu, M",
+              condition: "211/211",
+              active: true,
+              moves: [
+                {
+                  id: "thunderbolt",
+                  name: "Thunderbolt",
+                  exists: true,
+                  type: "Electric",
+                  category: "Special",
+                  basePower: 90,
+                  accuracy: 100,
+                  pp: 15,
+                  priority: 0,
+                  target: "normal",
+                  shortDesc: "10% chance to paralyze the target.",
+                  desc: "Has a 10% chance to paralyze the target.",
+                },
+              ],
+              baseAbility: "static",
+              item: "lightball",
+              ability: "static",
+              teraType: "Electric",
+            },
+          ],
+        },
+      },
+    },
     log: [],
   },
   errorResponse: {

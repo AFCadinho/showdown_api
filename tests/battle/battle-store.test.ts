@@ -1,18 +1,16 @@
 import { describe, expect, it } from "vitest";
+import { BattleStream, getPlayerStreams } from "pokemon-showdown";
 import { BattleStore } from "../../src/battle/battle-store";
 import type { BattleData } from "../../src/battle/types";
 
 function createBattleData(): BattleData {
+  const stream = new BattleStream();
+  const playerStreams = getPlayerStreams(stream);
+
   return {
-    stream: {},
-    playerStreams: {
-      p1: {
-        write: async () => {},
-      },
-      p2: {
-        write: async () => {},
-      },
-    },
+    stream,
+    playerStreams,
+    formatid: "gen9nationaldex",
     log: [],
     requests: {},
     state: {

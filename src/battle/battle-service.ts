@@ -1,21 +1,19 @@
 import { battleStore } from "./battle-store";
 import { listenToBattleStream } from "./battle-stream-listener";
+import { BattleStream, getPlayerStreams, Teams } from "pokemon-showdown";
 import type { BattleData } from "@/battle/types";
+import { presentBattleRequests } from "./battle-request-presenter";
 
-const {
-  BattleStream,
-  getPlayerStreams,
-  Teams,
-} = require("pokemon-showdown");
+type PokemonTeam = NonNullable<Parameters<typeof Teams.pack>[0]>;
 
 type CreateBattleBody = {
   p1?: {
     name?: string;
-    team?: unknown[];
+    team?: PokemonTeam;
   };
   p2?: {
     name?: string;
-    team?: unknown[];
+    team?: PokemonTeam;
   };
   formatId?: string;
 };
@@ -45,6 +43,7 @@ export async function createBattle(body: CreateBattleBody) {
   const battleData: BattleData = {
     stream: battleStream,
     playerStreams,
+    formatid,
     log: [] as string[],
     requests: {} as Record<string, unknown>,
     state: {
@@ -86,9 +85,9 @@ export async function createBattle(body: CreateBattleBody) {
   return {
     success: true,
     battleId,
-    formatId: formatid,
+    formatId: battleData.formatid,
     players: battleData.players,
-    requests: battleData.requests,
+    requests: presentBattleRequests(battleData.requests, battleData.formatid),
     log: battleData.log,
   };
 }

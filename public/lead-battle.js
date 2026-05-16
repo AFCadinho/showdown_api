@@ -36,6 +36,11 @@ const responseFields = [
     description: "De id van de battle waarin de keuze is verwerkt.",
   },
   {
+    name: "formatId",
+    type: "string",
+    description: "Het Pokemon Showdown format dat voor deze battle is gebruikt.",
+  },
+  {
     name: "players",
     type: "object",
     description: "De namen van p1 en p2 zoals de battle ze gebruikt.",
@@ -43,7 +48,7 @@ const responseFields = [
   {
     name: "requests",
     type: "object",
-    description: "Laatste Showdown request per speler na het verwerken van de lead keuze.",
+    description: "Laatste request per speler na de lead keuze, verrijkt met Dex-data. Na team preview staan de beschikbare acties meestal onder active[].moves.",
   },
   {
     name: "log",
@@ -65,6 +70,7 @@ const requestExample = {
 const successExample = {
   success: true,
   battleId,
+  formatId: "gen9nationaldex",
   players: {
     p1: { name: "Ash" },
     p2: { name: "Gary" },
@@ -75,11 +81,20 @@ const successExample = {
         {
           moves: [
             {
-              move: "Thunderbolt",
               id: "thunderbolt",
+              name: "Thunderbolt",
+              exists: true,
+              type: "Electric",
+              category: "Special",
+              basePower: 90,
+              accuracy: 100,
               pp: 24,
-              maxpp: 24,
+              priority: 0,
               target: "normal",
+              shortDesc: "10% chance to paralyze the target.",
+              desc: "Has a 10% chance to paralyze the target.",
+              move: "Thunderbolt",
+              maxpp: 24,
               disabled: false,
             },
           ],
@@ -88,6 +103,25 @@ const successExample = {
       side: {
         name: "Ash",
         id: "p1",
+        pokemon: [
+          {
+            ident: "p1: Pikachu",
+            details: "Pikachu, M",
+            condition: "211/211",
+            active: true,
+            moves: [
+              {
+                id: "thunderbolt",
+                name: "Thunderbolt",
+                type: "Electric",
+                category: "Special",
+                basePower: 90,
+                accuracy: 100,
+                pp: 15,
+              },
+            ],
+          },
+        ],
       },
       rqid: 2,
     },

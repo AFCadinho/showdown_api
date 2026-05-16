@@ -1,8 +1,11 @@
+import type { BattleStream, getPlayerStreams } from "pokemon-showdown";
+
 export type PlayerId = "p1" | "p2";
 
 export type BattleData = {
-  stream: unknown;
+  stream: BattleStream;
   playerStreams: PlayerStreams;
+  formatid: string;
   log: string[];
   requests: Record<string, unknown>;
 
@@ -22,9 +25,9 @@ export type BattleData = {
   };
 };
 
-export type PlayerStream = {
-  write: (message: string) => Promise<void>;
-};
+type ShowdownPlayerStreams = ReturnType<typeof getPlayerStreams>;
+
+export type PlayerStream = ShowdownPlayerStreams[PlayerId];
 
 export type PlayerStreams = {
   p1: PlayerStream;

@@ -2,6 +2,7 @@ import { Router } from "express";
 import { createBattle } from "../battle/battle-service";
 import { battleStore } from "../battle/battle-store";
 import { PlayerId } from "../battle/types";
+import { presentBattleRequests } from "@/battle/battle-request-presenter";
 
 export const battleRoutes = Router();
 
@@ -50,8 +51,9 @@ battleRoutes.post("/battles/:battleId/lead", async (req, res) => {
   return res.json({
     success: true,
     battleId,
+    formatId: battle.formatid,
     players: battle.players,
-    requests: battle.requests,
+    requests: presentBattleRequests(battle.requests, battle.formatid),
     log: battle.log,
     state: battle.state,
   })

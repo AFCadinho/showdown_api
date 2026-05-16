@@ -81,4 +81,30 @@ describe("createBattle", () => {
     });
     expect(result.battleId).toEqual(expect.any(String));
   });
+
+  it("returns presented move details in battle requests", async () => {
+    const result = await createBattle({
+      p1: {
+        team: [pikachu],
+      },
+      p2: {
+        team: [bulbasaur],
+      },
+    });
+
+    expect(result.success).toBe(true);
+
+    const requests = result.requests as Record<string, any>;
+    const firstMove = requests.p1.side.pokemon[0].moves[0];
+
+    expect(requests.p1.teamPreview).toBe(true);
+    expect(firstMove).toMatchObject({
+      id: "thunderbolt",
+      name: "Thunderbolt",
+      type: "Electric",
+      category: "Special",
+      basePower: 90,
+      accuracy: 100,
+    });
+  });
 });
