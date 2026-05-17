@@ -1,3 +1,5 @@
+import type { BattleData } from "@/battle/types";
+
 export type MoveEvent = {
   type: "move";
   actor: string;
@@ -186,4 +188,22 @@ function parseBracketValue(
   }
 
   return metadataPart.slice(marker.length + 1);
+}
+
+
+/**
+ * Geeft alleen de events terug die sinds de vorige response nieuw zijn.
+ *
+ * De API bewaart de volledige raw battle log in `battleData.log`.
+ * `eventCursor` wijst naar de eerste logregel die nog niet naar de game
+ * is vertaald. Na het parsen schuiven we de cursor door naar het einde
+ * van de log, zodat dezelfde events niet opnieuw terugkomen.
+ */
+export function consumeBattleEventsForResponse(battleData: BattleData): BattleEvent[] {
+  const newLogEntries = battleData.log.slice(battleData.eventCursor);
+  const events = presentBattleEventsForResponse(newLogEntries)
+
+  battleData.eventCursor = battleData.log.length;
+
+  return events
 }

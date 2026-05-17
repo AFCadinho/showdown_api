@@ -12,6 +12,7 @@ function createBattleData(): BattleData {
     playerStreams,
     formatid: "gen9nationaldex",
     log: [],
+    eventCursor: 0,
     requests: {},
     state: {
       turn: 1,

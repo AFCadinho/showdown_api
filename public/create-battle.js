@@ -60,7 +60,7 @@ const responseFields = [
   {
     name: "events",
     type: "BattleEvent[]",
-    description: "Game-vriendelijke events uit de canonieke battle log. Bij create_battle is dit meestal nog leeg.",
+    description: "Nieuwe game-vriendelijke events sinds de vorige API response. Bij create_battle is dit meestal nog leeg.",
   },
   {
     name: "log",

@@ -7,6 +7,7 @@ export type BattleData = {
   playerStreams: PlayerStreams;
   formatid: string;
   log: string[];
+  eventCursor: number;
   requests: Record<string, unknown>;
 
   state: {

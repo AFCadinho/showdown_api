@@ -264,7 +264,7 @@ verrijkt met Dex-data zoals `type`, `category`, `basePower`, `accuracy`,
 | `formatId` | `string` | Gebruikt Showdown format. |
 | `players` | `object` | Namen van `p1` en `p2`. |
 | `requests` | `object` | Laatste request per speler, verrijkt met Dex-data voor UI-gebruik. Bij `create_battle` is dit meestal een `teamPreview` request. |
-| `events` | `BattleEvent[]` | Game-vriendelijke events uit de canonieke battle log. Bij `create_battle` meestal nog leeg. |
+| `events` | `BattleEvent[]` | Nieuwe game-vriendelijke events sinds de vorige API response. Bij `create_battle` meestal nog leeg. |
 | `log` | `string[]` | Ruwe stream output die de API tot nu toe heeft ontvangen. |
 
 ### Move Velden
@@ -290,11 +290,13 @@ Moves in `requests` bevatten naast de Showdown request-data ook Dex-data:
 
 ### Event Velden
 
-`events` bevat dezelfde battle-informatie als de ruwe Showdown log, maar als JSON
-die Godot direct kan gebruiken voor animaties en UI updates. Omdat Showdown veel
-battle-regels naar beide player streams stuurt, gebruikt de API voor `events`
-een canonieke stream zodat events niet dubbel terugkomen. De volledige ruwe log
-blijft beschikbaar in `log` voor debugging.
+`events` bevat nieuwe battle-informatie sinds de vorige API response, als JSON
+die Godot direct kan gebruiken voor animaties en UI updates. De API houdt zelf
+bij welke log chunks al als events zijn teruggegeven, zodat dezelfde move,
+damage of turn events niet opnieuw terugkomen bij latere requests. Omdat
+Showdown veel battle-regels naar beide player streams stuurt, gebruikt de API
+voor `events` een canonieke stream zodat events niet dubbel terugkomen. De
+volledige ruwe log blijft beschikbaar in `log` voor debugging.
 
 Voorbeeld:
 
@@ -459,8 +461,10 @@ Na de lead keuze staan de beschikbare battle-acties meestal onder
 `requests[p1|p2].active[].moves`. Deze moves bevatten zowel Dex-data als live
 battle-data zoals `move`, `pp`, `maxpp` en `disabled`.
 
-`events` bevat game-vriendelijke events uit de Showdown log. Bij lead selectie
-is dit vaak alleen een `turn` event zodra beide spelers hun lead hebben gekozen.
+`events` bevat alleen de nieuwe game-vriendelijke events sinds de vorige API
+response. Bij lead selectie is dit vaak alleen een `turn` event zodra beide
+spelers hun lead hebben gekozen. Als er sinds de vorige response niets nieuws is
+gebeurd, is dit een lege array.
 
 ### Error Responses
 
@@ -622,7 +626,7 @@ Switch:
 Na een choice response gebruik je:
 
 - `requests` voor de actuele UI state zoals HP, PP, disabled moves en switches.
-- `events` voor animaties en feedback van wat er gebeurde.
+- `events` voor animaties en feedback van wat er sinds de vorige response gebeurde.
 - `state` voor de huidige turn en of de battle gewonnen is.
 
 ### Error Responses

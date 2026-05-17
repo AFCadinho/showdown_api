@@ -7,7 +7,7 @@ import {
   validateLeadInput,
 } from "@/battle/battle-route-validators";
 import { buildChoiceCommand } from "@/battle/battle-choice-command";
-import { presentBattleEventsForResponse } from "@/battle/battle-event-presenter";
+import { consumeBattleEventsForResponse } from "@/battle/battle-event-presenter";
 
 export const battleRoutes = Router();
 
@@ -47,7 +47,7 @@ battleRoutes.post("/battles/:battleId/lead", async (req, res) => {
     formatId: battle.formatid,
     players: battle.players,
     requests: presentBattleRequests(battle.requests, battle.formatid),
-    events: presentBattleEventsForResponse(battle.log),
+    events: consumeBattleEventsForResponse(battle),
     log: battle.log,
     state: battle.state,
   });
@@ -80,7 +80,7 @@ battleRoutes.post("/battles/:battleId/choice", async (req, res) => {
     formatId: battle.formatid,
     players: battle.players,
     requests: presentBattleRequests(battle.requests, battle.formatid),
-    events: presentBattleEventsForResponse(battle.log),
+    events: consumeBattleEventsForResponse(battle),
     log: battle.log,
     state: battle.state,
   });

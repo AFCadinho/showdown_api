@@ -53,7 +53,7 @@ const responseFields = [
   {
     name: "events",
     type: "BattleEvent[]",
-    description: "Game-vriendelijke events uit de canonieke battle log, zoals turn, move, damage, heal, status, faint en win.",
+    description: "Nieuwe game-vriendelijke events sinds de vorige API response, zoals turn, move, damage, heal, status, faint en win.",
   },
   {
     name: "log",
@@ -142,7 +142,7 @@ const successExample = {
     "p2\\n|request|{...}",
   ],
   state: {
-    turn: 0,
+    turn: 1,
     ended: false,
     winner: null,
   },

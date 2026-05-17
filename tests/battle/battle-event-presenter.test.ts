@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { presentBattleEventsForResponse } from "../../src/battle/battle-event-presenter";
+import {
+  consumeBattleEventsForResponse,
+  presentBattleEventsForResponse,
+} from "../../src/battle/battle-event-presenter";
+import type { BattleData } from "../../src/battle/types";
 
 describe("presentBattleEventsForResponse", () => {
   it("parses move, damage, heal and turn events", () => {
@@ -106,5 +110,51 @@ describe("presentBattleEventsForResponse", () => {
         turn: 1,
       },
     ]);
+  });
+});
+
+describe("consumeBattleEventsForResponse", () => {
+  it("returns only events that were added after the event cursor", () => {
+    const battleData = {
+      log: [
+        ["p1", "|turn|1"].join("\n"),
+        ["p2", "|turn|1"].join("\n"),
+      ],
+      eventCursor: 0,
+    } as BattleData;
+
+    expect(consumeBattleEventsForResponse(battleData)).toEqual([
+      {
+        type: "turn",
+        turn: 1,
+      },
+    ]);
+    expect(battleData.eventCursor).toBe(2);
+
+    expect(consumeBattleEventsForResponse(battleData)).toEqual([]);
+    expect(battleData.eventCursor).toBe(2);
+
+    battleData.log.push(
+      [
+        "p1",
+        "|move|p1a: Pikachu|Thunderbolt|p2a: Bulbasaur",
+        "|-damage|p2a: Bulbasaur|176/231",
+      ].join("\n")
+    );
+
+    expect(consumeBattleEventsForResponse(battleData)).toEqual([
+      {
+        type: "move",
+        actor: "p1a: Pikachu",
+        move: "Thunderbolt",
+        target: "p2a: Bulbasaur",
+      },
+      {
+        type: "damage",
+        target: "p2a: Bulbasaur",
+        condition: "176/231",
+      },
+    ]);
+    expect(battleData.eventCursor).toBe(3);
   });
 });
