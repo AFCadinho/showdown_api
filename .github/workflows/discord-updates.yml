@@ -1,60 +1,78 @@
-name: Discord updates
+name: Post Battle Logic Updates to Discord
 
 on:
   push:
     branches:
       - main
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
-  notify-discord:
-    name: Notify Discord
+  notify:
+    name: Send battle logic summary
     runs-on: ubuntu-latest
 
     steps:
-      - name: Send commit updates
+      - name: Send battle logic commits to Discord
         env:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
-          COMMITS: ${{ toJson(github.event.commits) }}
+          DISCORD_TESTER_ROLE_ID: ${{ secrets.DISCORD_TESTER_ROLE_ID }}
+          COMMITS_JSON: ${{ toJson(github.event.commits) }}
         run: |
-          if [ -z "$DISCORD_WEBHOOK_URL" ]; then
-            echo "DISCORD_WEBHOOK_URL secret is not configured."
-            exit 1
-          fi
+          test -n "${DISCORD_WEBHOOK_URL}"
 
-          node <<'NODE'
-          const commits = JSON.parse(process.env.COMMITS);
-          const webhookUrl = process.env.DISCORD_WEBHOOK_URL;
+          python - <<'PY' > discord_payload.json
+          import json
+          import os
 
-          const updates = commits
-            .map((commit) => {
-              const [title, ...bodyLines] = commit.message.split("\n");
-              const details = bodyLines
-                .map((line) => line.trim())
-                .filter(Boolean)
-                .join("\n");
+          commits = json.loads(os.environ["COMMITS_JSON"])
+          tester_role_id = os.environ.get("DISCORD_TESTER_ROLE_ID", "").strip()
 
-              return details ? `**${title}**\n${details}` : `**${title}**`;
-            })
-            .join("\n\n");
+          if not commits:
+              changes = "No commit details were provided."
+          else:
+              lines = []
+              for commit in commits[:10]:
+                  message = commit["message"].strip()
+                  lines.append(f"```text\n{message}\n```")
 
-          const payload = {
-            content: `**Battle update**\n${updates || "A new battle update is live."}`.slice(0, 2000),
-          };
+              if len(commits) > 10:
+                  lines.append(f"- ... and {len(commits) - 10} additional commits")
 
-          async function sendUpdate() {
-            const response = await fetch(webhookUrl, {
-              method: "POST",
-              headers: {"Content-Type": "application/json"},
-              body: JSON.stringify(payload),
-            });
+              changes = "\n".join(lines)
 
-            if (!response.ok) {
-              throw new Error(`Discord webhook failed with ${response.status}`);
-            }
+          description = (
+              "A new battle logic update is live.\n"
+              "This update may affect battle flow, move handling, turn events, or API data used by the game."
+          )
+
+          payload = {
+              "username": "Pokemon Aether Battle API",
+              "content": f"<@&{tester_role_id}>" if tester_role_id else "",
+              "allowed_mentions": {
+                  "roles": [tester_role_id] if tester_role_id else [],
+              },
+              "embeds": [
+                  {
+                      "title": "New battle logic update available",
+                      "description": description,
+                      "color": 15158332,
+                      "fields": [
+                          {
+                              "name": "Battle logic changes",
+                              "value": changes,
+                              "inline": False,
+                          },
+                      ],
+                  }
+              ],
           }
 
-          sendUpdate().catch((error) => {
-            console.error(error);
-            process.exit(1);
-          });
-          NODE
+          print(json.dumps(payload))
+          PY
+
+          curl -sS \
+            -H "Content-Type: application/json" \
+            -d @discord_payload.json \
+            "${DISCORD_WEBHOOK_URL}"
