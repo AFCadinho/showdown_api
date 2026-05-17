@@ -264,7 +264,7 @@ verrijkt met Dex-data zoals `type`, `category`, `basePower`, `accuracy`,
 | `formatId` | `string` | Gebruikt Showdown format. |
 | `players` | `object` | Namen van `p1` en `p2`. |
 | `requests` | `object` | Laatste request per speler, verrijkt met Dex-data voor UI-gebruik. Bij `create_battle` is dit meestal een `teamPreview` request. |
-| `events` | `BattleEvent[]` | Game-vriendelijke events uit de Showdown log. Bij `create_battle` meestal nog leeg. |
+| `events` | `BattleEvent[]` | Game-vriendelijke events uit de canonieke battle log. Bij `create_battle` meestal nog leeg. |
 | `log` | `string[]` | Ruwe stream output die de API tot nu toe heeft ontvangen. |
 
 ### Move Velden
@@ -291,7 +291,10 @@ Moves in `requests` bevatten naast de Showdown request-data ook Dex-data:
 ### Event Velden
 
 `events` bevat dezelfde battle-informatie als de ruwe Showdown log, maar als JSON
-die Godot direct kan gebruiken voor animaties en UI updates.
+die Godot direct kan gebruiken voor animaties en UI updates. Omdat Showdown veel
+battle-regels naar beide player streams stuurt, gebruikt de API voor `events`
+een canonieke stream zodat events niet dubbel terugkomen. De volledige ruwe log
+blijft beschikbaar in `log` voor debugging.
 
 Voorbeeld:
 

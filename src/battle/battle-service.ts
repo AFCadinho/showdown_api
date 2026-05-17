@@ -3,7 +3,7 @@ import { listenToBattleStream } from "./battle-stream-listener";
 import { BattleStream, getPlayerStreams, Teams } from "pokemon-showdown";
 import type { BattleData } from "@/battle/types";
 import { presentBattleRequests } from "@/battle/battle-request-presenter";
-import { presentBattleEvents } from "@/battle/battle-event-presenter";
+import { presentBattleEventsForResponse } from "./battle-event-presenter";
 
 type PokemonTeam = NonNullable<Parameters<typeof Teams.pack>[0]>;
 
@@ -89,7 +89,7 @@ export async function createBattle(body: CreateBattleBody) {
     formatId: battleData.formatid,
     players: battleData.players,
     requests: presentBattleRequests(battleData.requests, battleData.formatid),
-    events: presentBattleEvents(battleData.log),
+    events: presentBattleEventsForResponse(battleData.log),
     log: battleData.log,
   };
 }

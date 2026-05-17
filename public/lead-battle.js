@@ -53,7 +53,7 @@ const responseFields = [
   {
     name: "events",
     type: "BattleEvent[]",
-    description: "Game-vriendelijke events uit de Showdown log, zoals turn, move, damage, heal, status, faint en win.",
+    description: "Game-vriendelijke events uit de canonieke battle log, zoals turn, move, damage, heal, status, faint en win.",
   },
   {
     name: "log",

@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { presentBattleEvents } from "../../src/battle/battle-event-presenter";
+import { presentBattleEventsForResponse } from "../../src/battle/battle-event-presenter";
 
-describe("presentBattleEvents", () => {
+describe("presentBattleEventsForResponse", () => {
   it("parses move, damage, heal and turn events", () => {
-    const events = presentBattleEvents([
+    const events = presentBattleEventsForResponse([
       [
         "p1",
         "|move|p1a: Pikachu|Thunderbolt|p2a: Bulbasaur",
@@ -53,9 +53,9 @@ describe("presentBattleEvents", () => {
   });
 
   it("parses status, faint and win events", () => {
-    const events = presentBattleEvents([
+    const events = presentBattleEventsForResponse([
       [
-        "p2",
+        "p1",
         "|-status|p2a: Bulbasaur|par",
         "|faint|p1a: Pikachu",
         "|win|Gary",
@@ -80,7 +80,7 @@ describe("presentBattleEvents", () => {
   });
 
   it("ignores lines that are not supported battle events", () => {
-    const events = presentBattleEvents([
+    const events = presentBattleEventsForResponse([
       [
         "p1",
         "",
@@ -92,5 +92,19 @@ describe("presentBattleEvents", () => {
     ]);
 
     expect(events).toEqual([]);
+  });
+
+  it("ignores duplicate battle events from player two stream chunks", () => {
+    const events = presentBattleEventsForResponse([
+      ["p1", "|turn|1"].join("\n"),
+      ["p2", "|turn|1"].join("\n"),
+    ]);
+
+    expect(events).toEqual([
+      {
+        type: "turn",
+        turn: 1,
+      },
+    ]);
   });
 });

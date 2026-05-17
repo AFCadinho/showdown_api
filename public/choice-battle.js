@@ -59,7 +59,7 @@ const responseFields = [
   {
     name: "events",
     type: "BattleEvent[]",
-    description: "Game-vriendelijke events uit de Showdown log, bedoeld voor animaties en UI updates.",
+    description: "Game-vriendelijke events uit de canonieke battle log, bedoeld voor animaties en UI updates.",
   },
   {
     name: "log",

@@ -69,7 +69,7 @@ export type BattleEvent =
  * Deze presenter haalt alleen de regels eruit die Godot direct kan gebruiken
  * voor animaties, HP updates, status icons, turn transitions en win screens.
  */
-export function presentBattleEvents(log: string[]): BattleEvent[] {
+function presentBattleEvents(log: string[]): BattleEvent[] {
   return log.flatMap((chunk) => {
     const lines = chunk.split("\n");
 
@@ -77,6 +77,12 @@ export function presentBattleEvents(log: string[]): BattleEvent[] {
       .map(parseBattleEventLine)
       .filter((event): event is BattleEvent => event !== null);
   });
+}
+
+export function presentBattleEventsForResponse(log: string[]): BattleEvent[] {
+  const playerOneChunks = log.filter((chunk) => chunk.startsWith("p1\n"));
+
+  return presentBattleEvents(playerOneChunks);
 }
 
 function parseBattleEventLine(line: string): BattleEvent | null {
