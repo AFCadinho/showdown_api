@@ -1,0 +1,60 @@
+name: Discord updates
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  notify-discord:
+    name: Notify Discord
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Send commit updates
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          COMMITS: ${{ toJson(github.event.commits) }}
+        run: |
+          if [ -z "$DISCORD_WEBHOOK_URL" ]; then
+            echo "DISCORD_WEBHOOK_URL secret is not configured."
+            exit 1
+          fi
+
+          node <<'NODE'
+          const commits = JSON.parse(process.env.COMMITS);
+          const webhookUrl = process.env.DISCORD_WEBHOOK_URL;
+
+          const updates = commits
+            .map((commit) => {
+              const [title, ...bodyLines] = commit.message.split("\n");
+              const details = bodyLines
+                .map((line) => line.trim())
+                .filter(Boolean)
+                .join("\n");
+
+              return details ? `**${title}**\n${details}` : `**${title}**`;
+            })
+            .join("\n\n");
+
+          const payload = {
+            content: `**Battle update**\n${updates || "A new battle update is live."}`.slice(0, 2000),
+          };
+
+          async function sendUpdate() {
+            const response = await fetch(webhookUrl, {
+              method: "POST",
+              headers: {"Content-Type": "application/json"},
+              body: JSON.stringify(payload),
+            });
+
+            if (!response.ok) {
+              throw new Error(`Discord webhook failed with ${response.status}`);
+            }
+          }
+
+          sendUpdate().catch((error) => {
+            console.error(error);
+            process.exit(1);
+          });
+          NODE
