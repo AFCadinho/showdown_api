@@ -48,7 +48,7 @@ jobs:
           )
 
           payload = {
-              "username": "Pokemon Aether Battle API",
+              "username": "Pokemon Aether Online",
               "content": f"<@&{tester_role_id}>" if tester_role_id else "",
               "allowed_mentions": {
                   "roles": [tester_role_id] if tester_role_id else [],
