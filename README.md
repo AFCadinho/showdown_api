@@ -336,6 +336,7 @@ Ondersteunde event types:
 | `heal` | `target`, `condition`, `source`, `sourceTarget` | Een Pokemon krijgt HP terug. |
 | `status` | `target`, `status` | Een Pokemon krijgt een status, zoals `par`. |
 | `cant` | `target`, `reason`, `move` | Een Pokemon kan geen move uitvoeren, bijvoorbeeld door flinch, paralysis, sleep of recharge. |
+| `fail` | `target`, `action` | Een move of action faalt door eigen mechanics, zoals Fake Out buiten de eerste beurt of Protect die faalt. |
 | `faint` | `target` | Een Pokemon faint. |
 | `turn` | `turn` | Showdown start een nieuwe turn. |
 | `win` | `winner` | De battle is afgelopen. |

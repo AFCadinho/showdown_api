@@ -108,6 +108,29 @@ describe("presentBattleEventsForResponse", () => {
     ]);
   });
 
+  it("parses fail events when a move action fails", () => {
+    const events = presentBattleEventsForResponse([
+      [
+        "p1",
+        "|-fail|p1a: Pikachu|move: Protect",
+        "|-fail|p2a: Persian",
+      ].join("\n"),
+    ]);
+
+    expect(events).toEqual([
+      {
+        type: "fail",
+        target: "p1a: Pikachu",
+        action: "move: Protect",
+      },
+      {
+        type: "fail",
+        target: "p2a: Persian",
+        action: undefined,
+      },
+    ]);
+  });
+
   it("ignores lines that are not supported battle events", () => {
     const events = presentBattleEventsForResponse([
       [
