@@ -83,6 +83,31 @@ describe("presentBattleEventsForResponse", () => {
     ]);
   });
 
+  it("parses cant events when a Pokemon cannot move", () => {
+    const events = presentBattleEventsForResponse([
+      [
+        "p1",
+        "|cant|p1a: Pikachu|flinch",
+        "|cant|p2a: Charizard|recharge|Hyper Beam",
+      ].join("\n"),
+    ]);
+
+    expect(events).toEqual([
+      {
+        type: "cant",
+        target: "p1a: Pikachu",
+        reason: "flinch",
+        move: undefined,
+      },
+      {
+        type: "cant",
+        target: "p2a: Charizard",
+        reason: "recharge",
+        move: "Hyper Beam",
+      },
+    ]);
+  });
+
   it("ignores lines that are not supported battle events", () => {
     const events = presentBattleEventsForResponse([
       [

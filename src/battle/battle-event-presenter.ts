@@ -27,6 +27,13 @@ export type StatusEvent = {
   status: string;
 };
 
+export type CantEvent = {
+  type: "cant";
+  target: string;
+  reason: string;
+  move?: string;
+};
+
 export type FaintEvent = {
   type: "faint";
   target: string;
@@ -47,6 +54,7 @@ export type BattleEvent =
   | DamageEvent
   | HealEvent
   | StatusEvent
+  | CantEvent
   | FaintEvent
   | TurnEvent
   | WinEvent;
@@ -102,6 +110,8 @@ function parseBattleEventLine(line: string): BattleEvent | null {
       return parseHealEvent(parts);
     case "-status":
       return parseStatusEvent(parts);
+    case "cant":
+      return parseCantEvent(parts);
     case "faint":
       return parseFaintEvent(parts);
     case "turn":
@@ -148,6 +158,15 @@ function parseStatusEvent(parts: string[]): StatusEvent {
     type: "status",
     target: parts[2],
     status: parts[3],
+  };
+}
+
+function parseCantEvent(parts: string[]): CantEvent {
+  return {
+    type: "cant",
+    target: parts[2],
+    reason: parts[3],
+    move: parts[4],
   };
 }
 
