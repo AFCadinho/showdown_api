@@ -337,6 +337,7 @@ Ondersteunde event types:
 | `status` | `target`, `status` | Een Pokemon krijgt een status, zoals `par`. |
 | `cant` | `target`, `reason`, `move` | Een Pokemon kan geen move uitvoeren, bijvoorbeeld door flinch, paralysis, sleep of recharge. |
 | `fail` | `target`, `action` | Een move of action faalt door eigen mechanics, zoals Fake Out buiten de eerste beurt of Protect die faalt. |
+| `switch` | `pokemon`, `details`, `condition` | Een Pokemon komt actief het veld in. |
 | `faint` | `target` | Een Pokemon faint. |
 | `turn` | `turn` | Showdown start een nieuwe turn. |
 | `win` | `winner` | De battle is afgelopen. |

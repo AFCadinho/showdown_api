@@ -59,7 +59,7 @@ const responseFields = [
   {
     name: "events",
     type: "BattleEvent[]",
-    description: "Nieuwe game-vriendelijke events sinds de vorige API response, zoals turn, move, damage, heal, status, cant, fail, faint en win.",
+    description: "Nieuwe game-vriendelijke events sinds de vorige API response, zoals turn, move, damage, heal, status, cant, fail, switch, faint en win.",
   },
   {
     name: "log",

@@ -40,6 +40,13 @@ export type FailEvent = {
   action?: string;
 };
 
+export type SwitchEvent = {
+  type: "switch";
+  pokemon: string;
+  details: string;
+  condition: string;
+};
+
 export type FaintEvent = {
   type: "faint";
   target: string;
@@ -62,6 +69,7 @@ export type BattleEvent =
   | StatusEvent
   | CantEvent
   | FailEvent
+  | SwitchEvent
   | FaintEvent
   | TurnEvent
   | WinEvent;
@@ -121,6 +129,8 @@ function parseBattleEventLine(line: string): BattleEvent | null {
       return parseCantEvent(parts);
     case "-fail":
       return parseFailEvent(parts);
+    case "switch":
+      return parseSwitchEvent(parts);
     case "faint":
       return parseFaintEvent(parts);
     case "turn":
@@ -185,6 +195,15 @@ function parseFailEvent(parts: string[]): FailEvent {
     target: parts[2],
     action: parts[3],
   };
+}
+
+function parseSwitchEvent(parts: string[]): SwitchEvent {
+  return {
+    type: "switch",
+    pokemon: parts[2],
+    details: parts[3],
+    condition: parts[4]
+  }
 }
 
 function parseFaintEvent(parts: string[]): FaintEvent {

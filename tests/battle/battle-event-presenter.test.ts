@@ -131,6 +131,31 @@ describe("presentBattleEventsForResponse", () => {
     ]);
   });
 
+  it("parses switch events when a Pokemon enters battle", () => {
+    const events = presentBattleEventsForResponse([
+      [
+        "p1",
+        "|switch|p1a: Gyarados|Gyarados, M|353/353",
+        "|switch|p2a: Venusaur|Venusaur, F|364/364",
+      ].join("\n"),
+    ]);
+
+    expect(events).toEqual([
+      {
+        type: "switch",
+        pokemon: "p1a: Gyarados",
+        details: "Gyarados, M",
+        condition: "353/353",
+      },
+      {
+        type: "switch",
+        pokemon: "p2a: Venusaur",
+        details: "Venusaur, F",
+        condition: "364/364",
+      },
+    ]);
+  });
+
   it("ignores lines that are not supported battle events", () => {
     const events = presentBattleEventsForResponse([
       [
