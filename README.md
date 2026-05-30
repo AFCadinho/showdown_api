@@ -287,8 +287,17 @@ Moves in `requests` bevatten naast de Showdown request-data ook Dex-data:
 | `priority` | `number` | Move priority. |
 | `target` | `string` | Showdown target type, zoals `normal`, `self` of `allAdjacent`. |
 | `disabled` | `boolean` | Alleen bij actieve battle keuzes; of de move momenteel niet gekozen kan worden. |
+| `effectiveness` | `object \| null` | Alleen bij actieve battle keuzes; type-effectiveness tegen de actieve tegenstander. `null` als er geen actieve tegenstander bekend is of als de move geen damage move is. |
 | `shortDesc` | `string` | Korte Showdown omschrijving. |
 | `desc` | `string` | Volledige Showdown omschrijving. |
+
+`effectiveness` bevat:
+
+| Veld | Type | Beschrijving |
+| --- | --- | --- |
+| `multiplier` | `number` | Type multiplier, zoals `0`, `0.5`, `1`, `2` of `4`. |
+| `label` | `"immune" \| "not_very_effective" \| "normal" \| "super_effective"` | UI-vriendelijke classificatie. |
+| `immune` | `boolean` | Of de move door type immunity geen effect heeft. |
 
 ## Wild Battle Aanmaken
 
@@ -308,8 +317,8 @@ move-keuzes:
 requests[p1|p2].active[].moves
 ```
 
-Die moves bevatten live battle-data uit Showdown, zoals actuele `pp`, `maxpp`
-en `disabled`.
+Die moves bevatten live battle-data uit Showdown, zoals actuele `pp`, `maxpp`,
+`disabled` en `effectiveness`.
 
 Voorbeeld response-fragment:
 
@@ -333,7 +342,12 @@ Voorbeeld response-fragment:
               "type": "Electric",
               "category": "Special",
               "basePower": 90,
-              "accuracy": 100
+              "accuracy": 100,
+              "effectiveness": {
+                "multiplier": 0.5,
+                "label": "not_very_effective",
+                "immune": false
+              }
             }
           ]
         }
@@ -479,7 +493,12 @@ kiezen.
               "desc": "Has a 10% chance to paralyze the target.",
               "move": "Thunderbolt",
               "maxpp": 24,
-              "disabled": false
+              "disabled": false,
+              "effectiveness": {
+                "multiplier": 0.5,
+                "label": "not_very_effective",
+                "immune": false
+              }
             }
           ]
         }
@@ -529,7 +548,7 @@ kiezen.
 
 Na de lead keuze staan de beschikbare battle-acties meestal onder
 `requests[p1|p2].active[].moves`. Deze moves bevatten zowel Dex-data als live
-battle-data zoals `move`, `pp`, `maxpp` en `disabled`.
+battle-data zoals `move`, `pp`, `maxpp`, `disabled` en `effectiveness`.
 
 `events` bevat alleen de nieuwe game-vriendelijke events sinds de vorige API
 response. Bij lead selectie is dit vaak alleen een `turn` event zodra beide
@@ -633,7 +652,12 @@ Switch:
               "desc": "Has a 10% chance to paralyze the target.",
               "move": "Thunderbolt",
               "maxpp": 24,
-              "disabled": false
+              "disabled": false,
+              "effectiveness": {
+                "multiplier": 0.5,
+                "label": "not_very_effective",
+                "immune": false
+              }
             }
           ]
         }
@@ -695,7 +719,7 @@ Switch:
 
 Na een choice response gebruik je:
 
-- `requests` voor de actuele UI state zoals HP, PP, disabled moves en switches.
+- `requests` voor de actuele UI state zoals HP, PP, disabled moves, effectiveness en switches.
 - `events` voor animaties en feedback van wat er sinds de vorige response gebeurde.
 - `state` voor de huidige turn en of de battle gewonnen is.
 

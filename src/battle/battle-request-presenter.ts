@@ -1,4 +1,5 @@
 import { presentMove } from "@/dex/dex-presenter";
+import { getMoveEffectiveness } from "@/dex/dex-effectiveness";
 
 type BattleRequest = {
   active?: Array<{
@@ -13,6 +14,8 @@ type BattleRequest = {
   }>;
   side?: {
     pokemon?: Array<{
+      active?: boolean;
+      details?: string;
       moves?: unknown[];
       [key: string]: unknown;
     }>;
@@ -28,7 +31,11 @@ type BattleRequest = {
  * presenter laat die live battle-data intact en verrijkt elke zichtbare move
  * met vaste Dex-data zoals type, categorie, base power en accuracy.
  */
-export function presentBattleRequest(request: unknown, formatid: string) {
+export function presentBattleRequest(
+  request: unknown,
+  formatid: string,
+  opponentActiveSpecies?: string
+) {
   if (!isBattleRequest(request)) return request;
 
   const presentedRequest = { ...request };
@@ -51,6 +58,9 @@ export function presentBattleRequest(request: unknown, formatid: string) {
           const presentedMove = {
             ...moveDetails,
             ...move,
+            effectiveness: opponentActiveSpecies
+              ? getMoveEffectiveness(moveName, opponentActiveSpecies, formatid)
+              : null,
           };
 
           presentedPokemon.moves.push(presentedMove);
@@ -100,16 +110,40 @@ export function presentBattleRequests(
   requests: Record<string, unknown>,
   formatid: string
 ) {
-  // Object.entries maakt van `{ p1: req }` een lijst: `[["p1", req]]`.
-  // Object.fromEntries maakt van die aangepaste lijst weer een object.
-  return Object.fromEntries(
-    Object.entries(requests).map(([playerId, request]) => [
-      playerId,
-      presentBattleRequest(request, formatid),
-    ])
-  );
+  const presentedRequests: Record<string, unknown> = {};
+
+  // Per speler verrijken we de request met context van de actieve tegenstander.
+  for (const [playerId, request] of Object.entries(requests)) {
+    const opponentId = getOpponentId(playerId);
+    const opponentRequest = requests[opponentId];
+    const opponentActiveSpecies = getActiveSpecies(opponentRequest);
+
+    presentedRequests[playerId] = presentBattleRequest(
+      request,
+      formatid,
+      opponentActiveSpecies
+    );
+  }
+
+  return presentedRequests;
 }
 
 function isBattleRequest(request: unknown): request is BattleRequest {
   return typeof request === "object" && request !== null;
+}
+
+function getOpponentId(playerId: string): string {
+  if (playerId === "p1") return "p2";
+
+  return "p1";
+}
+
+function getActiveSpecies(request: unknown): string | undefined {
+  if (!isBattleRequest(request)) return undefined;
+
+  const activePokemon = request.side?.pokemon?.find(
+    (pokemon) => pokemon.active === true
+  );
+
+  return activePokemon?.details?.split(",")[0];
 }

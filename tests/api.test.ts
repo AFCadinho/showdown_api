@@ -120,6 +120,11 @@ describe("Showdown API", () => {
       id: "thunderbolt",
       pp: 24,
       maxpp: 24,
+      effectiveness: {
+        multiplier: 0.5,
+        label: "not_very_effective",
+        immune: false,
+      },
     });
     expect(body.requests.p2.active[0].moves[0]).toMatchObject({
       id: "gigadrain",

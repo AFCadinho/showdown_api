@@ -129,7 +129,7 @@ export const createWildBattleDocs = {
   notes: [
     "Request body is gelijk aan /create_battle.",
     "De route voert intern direct team 1 uit voor p1 en p2.",
-    "De response bevat daardoor normaal direct requests[p1|p2].active[].moves met actuele pp, maxpp en disabled state.",
+    "De response bevat daardoor normaal direct requests[p1|p2].active[].moves met actuele pp, maxpp, disabled state en type-effectiveness tegen de actieve tegenstander.",
     "Gebruik deze route voor wild battles waarin geen handmatige team preview stap nodig is.",
   ],
   successResponse: {
@@ -159,6 +159,11 @@ export const createWildBattleDocs = {
                 priority: 0,
                 target: "normal",
                 disabled: false,
+                effectiveness: {
+                  multiplier: 0.5,
+                  label: "not_very_effective",
+                  immune: false,
+                },
                 shortDesc: "10% chance to paralyze the target.",
                 desc: "Has a 10% chance to paralyze the target.",
               },
@@ -184,6 +189,11 @@ export const createWildBattleDocs = {
                 priority: 0,
                 target: "normal",
                 disabled: false,
+                effectiveness: {
+                  multiplier: 1,
+                  label: "normal",
+                  immune: false,
+                },
                 shortDesc: "User recovers 50% of the damage dealt.",
                 desc: "The user recovers 1/2 the HP lost by the target, rounded half up.",
               },

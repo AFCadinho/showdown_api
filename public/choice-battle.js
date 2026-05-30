@@ -54,7 +54,7 @@ const responseFields = [
   {
     name: "requests",
     type: "object",
-    description: "Laatste request per speler, verrijkt met Dex-data. Hierin staan actuele HP, beschikbare moves, PP en disabled state.",
+    description: "Laatste request per speler, verrijkt met Dex-data. Hierin staan actuele HP, beschikbare moves, PP, disabled state en type-effectiveness.",
   },
   {
     name: "events",
@@ -108,6 +108,11 @@ const successExample = {
               move: "Thunderbolt",
               maxpp: 24,
               disabled: false,
+              effectiveness: {
+                multiplier: 0.5,
+                label: "not_very_effective",
+                immune: false,
+              },
             },
           ],
         },

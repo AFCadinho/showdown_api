@@ -101,6 +101,11 @@ const successExample = {
               move: "Thunderbolt",
               maxpp: 24,
               disabled: false,
+              effectiveness: {
+                multiplier: 0.5,
+                label: "not_very_effective",
+                immune: false,
+              },
             },
           ],
         },

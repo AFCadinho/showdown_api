@@ -55,7 +55,7 @@ const responseFields = [
   {
     name: "requests",
     type: "object",
-    description: "Laatste request per speler. Bij create_wild_battle staan moves direct onder active[].moves met live PP, max PP en disabled state.",
+    description: "Laatste request per speler. Bij create_wild_battle staan moves direct onder active[].moves met live PP, max PP, disabled state en type-effectiveness.",
   },
   {
     name: "events",
@@ -139,6 +139,11 @@ const successExample = {
               priority: 0,
               target: "normal",
               disabled: false,
+              effectiveness: {
+                multiplier: 0.5,
+                label: "not_very_effective",
+                immune: false,
+              },
               shortDesc: "10% chance to paralyze the target.",
               desc: "Has a 10% chance to paralyze the target.",
             },
@@ -164,6 +169,11 @@ const successExample = {
               priority: 0,
               target: "normal",
               disabled: false,
+              effectiveness: {
+                multiplier: 1,
+                label: "normal",
+                immune: false,
+              },
               shortDesc: "User recovers 50% of the damage dealt.",
               desc: "The user recovers 1/2 the HP lost by the target, rounded half up.",
             },
