@@ -20,6 +20,13 @@ const routes = [
   },
   {
     method: "POST",
+    path: "/create_wild_battle",
+    description: "Maakt een wild battle aan en kiest automatisch slot 1 als lead voor beide spelers, zodat active moves direct beschikbaar zijn.",
+    href: "/create_wild_battle",
+    linkText: "docs",
+  },
+  {
+    method: "POST",
     path: "/battles/:battleId/lead",
     description: "Kiest de lead Pokemon voor p1 of p2 in een bestaande battle. Open de docs met een voorbeeld battle id.",
     href: "/battles/example-battle-id/lead",

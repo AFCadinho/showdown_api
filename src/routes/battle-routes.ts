@@ -8,6 +8,7 @@ import {
 } from "@/battle/battle-route-validators";
 import { buildChoiceCommand } from "@/battle/battle-choice-command";
 import { consumeBattleEventsForResponse } from "@/battle/battle-event-presenter";
+import type { BattleData } from "@/battle/types";
 
 export const battleRoutes = Router();
 
@@ -21,6 +22,32 @@ battleRoutes.post("/create_battle", async (req, res) => {
   return res.json(result);
 });
 
+
+battleRoutes.post("/create_wild_battle", async (req, res) => {
+  const result = await createBattle(req.body);
+
+  if (!result.success) {
+    return res.status(400).json(result);
+  }
+
+  const battle = battleStore.getBattle(result.battleId);
+
+  if (!battle) return res.status(500).json({
+    success: false,
+    error: "Battle was created but not found"
+  })
+
+  await battle.playerStreams.p1.write("team 1")
+  await battle.playerStreams.p2.write("team 1")
+
+  await new Promise((resolve) => setTimeout(resolve, 10));
+
+  return res.json(buildBattleResponse(result.battleId, battle))
+
+})
+
+
+// Battle Leads
 battleRoutes.post("/battles/:battleId/lead", async (req, res) => {
   const { battleId } = req.params;
 
@@ -41,18 +68,10 @@ battleRoutes.post("/battles/:battleId/lead", async (req, res) => {
   await battle.playerStreams[playerId].write(`team ${slot}`);
   await new Promise((resolve) => setTimeout(resolve, 10));
 
-  return res.json({
-    success: true,
-    battleId,
-    formatId: battle.formatid,
-    players: battle.players,
-    requests: presentBattleRequests(battle.requests, battle.formatid),
-    events: consumeBattleEventsForResponse(battle),
-    log: battle.log,
-    state: battle.state,
-  });
+  return res.json(buildBattleResponse(battleId, battle));
 });
 
+// Battle Choices
 battleRoutes.post("/battles/:battleId/choice", async (req, res) => {
   const { battleId } = req.params;
 
@@ -74,7 +93,12 @@ battleRoutes.post("/battles/:battleId/choice", async (req, res) => {
   await battle.playerStreams[playerId].write(choiceCommand);
   await new Promise((resolve) => setTimeout(resolve, 10));
 
-  return res.json({
+  return res.json(buildBattleResponse(battleId, battle));
+});
+
+
+function buildBattleResponse(battleId: string, battle: BattleData) {
+  return {
     success: true,
     battleId,
     formatId: battle.formatid,
@@ -82,6 +106,6 @@ battleRoutes.post("/battles/:battleId/choice", async (req, res) => {
     requests: presentBattleRequests(battle.requests, battle.formatid),
     events: consumeBattleEventsForResponse(battle),
     log: battle.log,
-    state: battle.state,
-  });
-});
+    state: battle.state
+  }
+}

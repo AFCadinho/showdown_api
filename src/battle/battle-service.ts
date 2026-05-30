@@ -19,7 +19,24 @@ type CreateBattleBody = {
   formatId?: string;
 };
 
-export async function createBattle(body: CreateBattleBody) {
+type CreateBattleSuccess = {
+  success: true;
+  battleId: string;
+  formatId: string;
+  players: BattleData["players"];
+  requests: Record<string, unknown>;
+  events: ReturnType<typeof consumeBattleEventsForResponse>;
+  log: string[];
+};
+
+type CreateBattleFailure = {
+  success: false;
+  error: string;
+};
+
+type CreateBattleResult = CreateBattleSuccess | CreateBattleFailure;
+
+export async function createBattle(body: CreateBattleBody): Promise<CreateBattleResult> {
   // Ontvang JSON
   const { p1, p2, formatId } = body;
 

@@ -120,3 +120,84 @@ export const createBattleDocs = {
     error: "Missing teams",
   },
 };
+
+export const createWildBattleDocs = {
+  ...createBattleDocs,
+  path: "/create_wild_battle",
+  description:
+    "Maakt een Pokemon Showdown wild battle aan en kiest automatisch slot 1 als lead voor beide spelers.",
+  notes: [
+    "Request body is gelijk aan /create_battle.",
+    "De route voert intern direct team 1 uit voor p1 en p2.",
+    "De response bevat daardoor normaal direct requests[p1|p2].active[].moves met actuele pp, maxpp en disabled state.",
+    "Gebruik deze route voor wild battles waarin geen handmatige team preview stap nodig is.",
+  ],
+  successResponse: {
+    success: true,
+    battleId: "b7c68e40-2e60-4c11-8f92-87b4f6856c2d",
+    formatId: "gen9nationaldex",
+    players: {
+      p1: { name: "Ash" },
+      p2: { name: "Gary" },
+    },
+    requests: {
+      p1: {
+        active: [
+          {
+            moves: [
+              {
+                move: "Thunderbolt",
+                id: "thunderbolt",
+                name: "Thunderbolt",
+                exists: true,
+                type: "Electric",
+                category: "Special",
+                basePower: 90,
+                accuracy: 100,
+                pp: 24,
+                maxpp: 24,
+                priority: 0,
+                target: "normal",
+                disabled: false,
+                shortDesc: "10% chance to paralyze the target.",
+                desc: "Has a 10% chance to paralyze the target.",
+              },
+            ],
+          },
+        ],
+      },
+      p2: {
+        active: [
+          {
+            moves: [
+              {
+                move: "Giga Drain",
+                id: "gigadrain",
+                name: "Giga Drain",
+                exists: true,
+                type: "Grass",
+                category: "Special",
+                basePower: 75,
+                accuracy: 100,
+                pp: 16,
+                maxpp: 16,
+                priority: 0,
+                target: "normal",
+                disabled: false,
+                shortDesc: "User recovers 50% of the damage dealt.",
+                desc: "The user recovers 1/2 the HP lost by the target, rounded half up.",
+              },
+            ],
+          },
+        ],
+      },
+    },
+    events: [],
+    log: [],
+    state: {
+      turn: 1,
+      ended: false,
+      winner: null,
+    },
+  },
+};

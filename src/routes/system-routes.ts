@@ -23,6 +23,8 @@ systemRoutes.get("/info", (_, res) => {
       info: "/info",
       createBattle: "/create_battle",
       createBattleSchema: "/create_battle/schema",
+      createWildBattle: "/create_wild_battle",
+      createWildBattleSchema: "/create_wild_battle/schema",
       chooseLead: "/battles/:battleId/lead",
       chooseAction: "/battles/:battleId/choice",
     },

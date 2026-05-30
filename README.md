@@ -48,6 +48,8 @@ Response:
     "info": "/info",
     "createBattle": "/create_battle",
     "createBattleSchema": "/create_battle/schema",
+    "createWildBattle": "/create_wild_battle",
+    "createWildBattleSchema": "/create_wild_battle/schema",
     "chooseLead": "/battles/:battleId/lead",
     "chooseAction": "/battles/:battleId/choice"
   }
@@ -287,6 +289,71 @@ Moves in `requests` bevatten naast de Showdown request-data ook Dex-data:
 | `disabled` | `boolean` | Alleen bij actieve battle keuzes; of de move momenteel niet gekozen kan worden. |
 | `shortDesc` | `string` | Korte Showdown omschrijving. |
 | `desc` | `string` | Volledige Showdown omschrijving. |
+
+## Wild Battle Aanmaken
+
+```http
+POST /create_wild_battle
+Content-Type: application/json
+```
+
+Deze route gebruikt dezelfde request body als `POST /create_battle`, maar kiest
+daarna automatisch slot 1 als lead voor `p1` en `p2`. Gebruik deze route voor
+wild battles waarin de speler direct de eerste actie moet kunnen kiezen.
+
+Omdat beide leads al gekozen zijn, bevat de response normaal direct actieve
+move-keuzes:
+
+```txt
+requests[p1|p2].active[].moves
+```
+
+Die moves bevatten live battle-data uit Showdown, zoals actuele `pp`, `maxpp`
+en `disabled`.
+
+Voorbeeld response-fragment:
+
+```json
+{
+  "success": true,
+  "battleId": "b7c68e40-2e60-4c11-8f92-87b4f6856c2d",
+  "formatId": "gen9nationaldex",
+  "requests": {
+    "p1": {
+      "active": [
+        {
+          "moves": [
+            {
+              "move": "Thunderbolt",
+              "id": "thunderbolt",
+              "name": "Thunderbolt",
+              "pp": 24,
+              "maxpp": 24,
+              "disabled": false,
+              "type": "Electric",
+              "category": "Special",
+              "basePower": 90,
+              "accuracy": 100
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "events": [],
+  "state": {
+    "turn": 1,
+    "ended": false,
+    "winner": null
+  }
+}
+```
+
+Schema:
+
+```http
+GET /create_wild_battle/schema
+```
 
 ### Event Velden
 

@@ -1,6 +1,9 @@
 import { Router } from "express";
 import path from "path";
-import { createBattleDocs } from "../docs/create-battle-docs";
+import {
+  createBattleDocs,
+  createWildBattleDocs,
+} from "../docs/create-battle-docs";
 
 export const docsRoutes = Router();
 
@@ -14,8 +17,16 @@ docsRoutes.get("/create_battle", (_, res) => {
   res.sendFile(path.join(publicPath, "create-battle.html"));
 });
 
+docsRoutes.get("/create_wild_battle", (_, res) => {
+  res.sendFile(path.join(publicPath, "create-wild-battle.html"));
+});
+
 docsRoutes.get("/create_battle/schema", (_, res) => {
   res.json(createBattleDocs);
+});
+
+docsRoutes.get("/create_wild_battle/schema", (_, res) => {
+  res.json(createWildBattleDocs);
 });
 
 docsRoutes.get("/battles/:battleId/lead", (_, res) => {

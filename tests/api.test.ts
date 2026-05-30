@@ -50,6 +50,20 @@ async function postJson(path: string, body: unknown) {
   });
 }
 
+const pikachu = {
+  species: "Pikachu",
+  ability: "Static",
+  item: "Light Ball",
+  moves: ["Thunderbolt", "Quick Attack", "Iron Tail", "Volt Switch"],
+};
+
+const bulbasaur = {
+  species: "Bulbasaur",
+  ability: "Overgrow",
+  item: "Eviolite",
+  moves: ["Giga Drain", "Sludge Bomb", "Sleep Powder", "Protect"],
+};
+
 describe("Showdown API", () => {
   it("returns health status", async () => {
     const response = await fetch(`${baseUrl}/health`);
@@ -83,6 +97,34 @@ describe("Showdown API", () => {
     expect(await response.json()).toEqual({
       success: false,
       error: "Missing teams",
+    });
+  });
+
+  it("creates a wild battle with both slot 1 leads selected", async () => {
+    const response = await postJson("/create_wild_battle", {
+      p1: {
+        team: [pikachu],
+      },
+      p2: {
+        team: [bulbasaur],
+      },
+    });
+
+    const body = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(body.success).toBe(true);
+    expect(body.requests.p1.teamPreview).not.toBe(true);
+    expect(body.requests.p2.teamPreview).not.toBe(true);
+    expect(body.requests.p1.active[0].moves[0]).toMatchObject({
+      id: "thunderbolt",
+      pp: 24,
+      maxpp: 24,
+    });
+    expect(body.requests.p2.active[0].moves[0]).toMatchObject({
+      id: "gigadrain",
+      pp: 16,
+      maxpp: 16,
     });
   });
 
