@@ -54,7 +54,7 @@ const responseFields = [
   {
     name: "requests",
     type: "object",
-    description: "Laatste request per speler, verrijkt met Dex-data. Hierin staan actuele HP, beschikbare moves, PP, disabled state en type-effectiveness.",
+    description: "Laatste request per speler als actuele response-snapshot, verrijkt met Dex-data. Hierin staan actuele HP, beschikbare moves, PP, disabled state en type-effectiveness. Bij een final response wordt een fainted Pokemon als condition 0 fnt getoond.",
   },
   {
     name: "events",

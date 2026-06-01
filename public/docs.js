@@ -35,7 +35,7 @@ const routes = [
   {
     method: "POST",
     path: "/battles/:battleId/choice",
-    description: "Stuurt een move of switch keuze voor p1 of p2 naar een bestaande battle.",
+    description: "Stuurt een move of switch keuze voor p1 of p2 naar een bestaande battle. De response bevat een actuele request-snapshot, inclusief 0 fnt bij fainted Pokemon.",
     href: "/battles/example-battle-id/choice",
     linkText: "docs",
   },

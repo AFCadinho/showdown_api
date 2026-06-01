@@ -9,6 +9,7 @@ import {
 import { buildChoiceCommand } from "@/battle/battle-choice-command";
 import { consumeBattleEventsForResponse } from "@/battle/battle-event-presenter";
 import type { BattleData } from "@/battle/types";
+import { buildBattleRequestSnapshot } from "@/battle/battle-request-snapshot";
 
 export const battleRoutes = Router();
 
@@ -98,12 +99,14 @@ battleRoutes.post("/battles/:battleId/choice", async (req, res) => {
 
 
 function buildBattleResponse(battleId: string, battle: BattleData) {
+  const requestSnapshot = buildBattleRequestSnapshot(battle.requests, battle.log)
+
   return {
     success: true,
     battleId,
     formatId: battle.formatid,
     players: battle.players,
-    requests: presentBattleRequests(battle.requests, battle.formatid),
+    requests: presentBattleRequests(requestSnapshot, battle.formatid),
     events: consumeBattleEventsForResponse(battle),
     log: battle.log,
     state: battle.state

@@ -265,7 +265,7 @@ verrijkt met Dex-data zoals `type`, `category`, `basePower`, `accuracy`,
 | `battleId` | `string` | Unieke id van de aangemaakte battle. |
 | `formatId` | `string` | Gebruikt Showdown format. |
 | `players` | `object` | Namen van `p1` en `p2`. |
-| `requests` | `object` | Laatste request per speler, verrijkt met Dex-data voor UI-gebruik. Bij `create_battle` is dit meestal een `teamPreview` request. |
+| `requests` | `object` | Laatste request per speler, verrijkt met Dex-data voor UI-gebruik. De API werkt de response-snapshot bij met faint-informatie uit de battle log, zodat een final response ook `condition: "0 fnt"` kan tonen. Bij `create_battle` is dit meestal een `teamPreview` request. |
 | `events` | `BattleEvent[]` | Nieuwe game-vriendelijke events sinds de vorige API response. Bij `create_battle` meestal nog leeg. |
 | `log` | `string[]` | Ruwe stream output die de API tot nu toe heeft ontvangen. |
 
@@ -722,6 +722,42 @@ Na een choice response gebruik je:
 - `requests` voor de actuele UI state zoals HP, PP, disabled moves, effectiveness en switches.
 - `events` voor animaties en feedback van wat er sinds de vorige response gebeurde.
 - `state` voor de huidige turn en of de battle gewonnen is.
+
+Als een battle direct eindigt na een choice, kan Showdown geen nieuwe
+`|request|` meer sturen. De API corrigeert de response-snapshot dan met de
+laatste faint-informatie uit de log. Daardoor blijven `events`, `state` en
+`requests` consistent:
+
+```json
+{
+  "requests": {
+    "p2": {
+      "side": {
+        "pokemon": [
+          {
+            "ident": "p2: Pidgey",
+            "condition": "0 fnt",
+            "active": true
+          }
+        ]
+      }
+    }
+  },
+  "events": [
+    {
+      "type": "faint",
+      "target": "p2a: Pidgey"
+    },
+    {
+      "type": "win",
+      "winner": "Player 1"
+    }
+  ],
+  "state": {
+    "ended": true
+  }
+}
+```
 
 ### Error Responses
 

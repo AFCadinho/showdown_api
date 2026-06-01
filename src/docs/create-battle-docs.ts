@@ -67,6 +67,9 @@ export const createBattleDocs = {
       description: "Team van speler 2 in Pokemon Showdown set formaat.",
     },
   },
+  notes: [
+    "Requests worden als response-snapshot teruggegeven. Als een Pokemon fainted is, wordt side.pokemon[].condition in die snapshot bijgewerkt naar 0 fnt.",
+  ],
   successResponse: {
     success: true,
     battleId: "b7c68e40-2e60-4c11-8f92-87b4f6856c2d",
@@ -130,6 +133,7 @@ export const createWildBattleDocs = {
     "Request body is gelijk aan /create_battle.",
     "De route voert intern direct team 1 uit voor p1 en p2.",
     "De response bevat daardoor normaal direct requests[p1|p2].active[].moves met actuele pp, maxpp, disabled state en type-effectiveness tegen de actieve tegenstander.",
+    "Requests worden als response-snapshot teruggegeven. Als een Pokemon fainted is, wordt side.pokemon[].condition in die snapshot bijgewerkt naar 0 fnt.",
     "Gebruik deze route voor wild battles waarin geen handmatige team preview stap nodig is.",
   ],
   successResponse: {

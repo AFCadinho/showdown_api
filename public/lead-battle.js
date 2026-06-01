@@ -48,7 +48,7 @@ const responseFields = [
   {
     name: "requests",
     type: "object",
-    description: "Laatste request per speler na de lead keuze, verrijkt met Dex-data. Na team preview staan de beschikbare acties meestal onder active[].moves.",
+    description: "Laatste request per speler na de lead keuze, verrijkt met Dex-data. Na team preview staan de beschikbare acties meestal onder active[].moves. Fainted Pokemon worden in side.pokemon[].condition als 0 fnt getoond.",
   },
   {
     name: "events",

@@ -55,7 +55,7 @@ const responseFields = [
   {
     name: "requests",
     type: "object",
-    description: "Laatste request per speler. Bij create_wild_battle staan moves direct onder active[].moves met live PP, max PP, disabled state en type-effectiveness.",
+    description: "Laatste request per speler als response-snapshot. Bij create_wild_battle staan moves direct onder active[].moves met live PP, max PP, disabled state en type-effectiveness. Als een Pokemon fainted is, toont side.pokemon[].condition 0 fnt.",
   },
   {
     name: "events",

@@ -4,6 +4,7 @@ import { BattleStream, getPlayerStreams, Teams } from "pokemon-showdown";
 import type { BattleData } from "@/battle/types";
 import { presentBattleRequests } from "@/battle/battle-request-presenter";
 import { consumeBattleEventsForResponse } from "./battle-event-presenter";
+import { buildBattleRequestSnapshot } from "./battle-request-snapshot";
 
 type PokemonTeam = NonNullable<Parameters<typeof Teams.pack>[0]>;
 
@@ -101,12 +102,14 @@ export async function createBattle(body: CreateBattleBody): Promise<CreateBattle
   await new Promise((resolve) => setTimeout(resolve, 10));
   battleStore.saveBattle(battleId, battleData);
 
+  const requestSnapshot = buildBattleRequestSnapshot(battleData.requests, battleData.log);
+
   return {
     success: true,
     battleId,
     formatId: battleData.formatid,
     players: battleData.players,
-    requests: presentBattleRequests(battleData.requests, battleData.formatid),
+    requests: presentBattleRequests(requestSnapshot, battleData.formatid),
     events: consumeBattleEventsForResponse(battleData),
     log: battleData.log,
   };

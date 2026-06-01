@@ -55,7 +55,7 @@ const responseFields = [
   {
     name: "requests",
     type: "object",
-    description: "Laatste request per speler, verrijkt met Dex-data. Bij create_battle is dit meestal een teamPreview request met moves onder side.pokemon[].moves.",
+    description: "Laatste request per speler als response-snapshot, verrijkt met Dex-data. Fainted Pokemon worden in de snapshot als condition 0 fnt getoond. Bij create_battle is dit meestal een teamPreview request met moves onder side.pokemon[].moves.",
   },
   {
     name: "events",
