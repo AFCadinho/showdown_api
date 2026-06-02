@@ -392,12 +392,22 @@ Voorbeeld:
   {
     "type": "damage",
     "target": "p2a: Bulbasaur",
-    "condition": "176/231"
+    "previousCondition": "231/231",
+    "condition": "176/231",
+    "previousHp": 231,
+    "hp": 176,
+    "maxHp": 231,
+    "amount": 55
   },
   {
     "type": "heal",
     "target": "p2a: Bulbasaur",
+    "previousCondition": "176/231",
     "condition": "231/231",
+    "previousHp": 176,
+    "hp": 231,
+    "maxHp": 231,
+    "amount": 55,
     "source": "drain",
     "sourceTarget": "p1a: Pikachu"
   },
@@ -413,8 +423,8 @@ Ondersteunde event types:
 | Type | Velden | Beschrijving |
 | --- | --- | --- |
 | `move` | `actor`, `move`, `target` | Een Pokemon gebruikt een move. |
-| `damage` | `target`, `condition` | Een Pokemon krijgt damage. |
-| `heal` | `target`, `condition`, `source`, `sourceTarget` | Een Pokemon krijgt HP terug. |
+| `damage` | `target`, `previousCondition`, `condition`, `previousHp`, `hp`, `maxHp`, `amount` | Een Pokemon krijgt damage. Als vorige HP bekend is, bevat het event ook self-contained HP-waarden voor UI-animaties. |
+| `heal` | `target`, `previousCondition`, `condition`, `previousHp`, `hp`, `maxHp`, `amount`, `source`, `sourceTarget` | Een Pokemon krijgt HP terug. Als vorige HP bekend is, bevat het event ook self-contained HP-waarden voor UI-animaties. |
 | `status` | `target`, `status` | Een Pokemon krijgt een status, zoals `par`. |
 | `cant` | `target`, `reason`, `move` | Een Pokemon kan geen move uitvoeren, bijvoorbeeld door flinch, paralysis, sleep of recharge. |
 | `fail` | `target`, `action` | Een move of action faalt door eigen mechanics, zoals Fake Out buiten de eerste beurt of Protect die faalt. |

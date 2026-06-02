@@ -66,6 +66,7 @@ export async function createBattle(body: CreateBattleBody): Promise<CreateBattle
     log: [] as string[],
     eventCursor: 0,
     requests: {} as Record<string, unknown>,
+    conditionByPokemon: {},
     state: {
       turn: 1,
       ended: false,

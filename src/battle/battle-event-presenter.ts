@@ -11,12 +11,22 @@ export type DamageEvent = {
   type: "damage";
   target: string;
   condition: string;
+  previousCondition?: string;
+  previousHp?: number;
+  hp?: number;
+  maxHp?: number;
+  amount?: number;
 };
 
 export type HealEvent = {
   type: "heal";
   target: string;
   condition: string;
+  previousCondition?: string;
+  previousHp?: number;
+  hp?: number;
+  maxHp?: number;
+  amount?: number;
   source?: string;
   sourceTarget?: string;
 };
@@ -74,6 +84,13 @@ export type BattleEvent =
   | TurnEvent
   | WinEvent;
 
+
+type ParsedHpCondition = {
+  hp: number;
+  maxHp: number;
+};
+
+
 /**
  * Zet de raw Showdown log om naar game-vriendelijke battle events.
  *
@@ -94,23 +111,32 @@ export type BattleEvent =
  * Deze presenter haalt alleen de regels eruit die Godot direct kan gebruiken
  * voor animaties, HP updates, status icons, turn transitions en win screens.
  */
-function presentBattleEvents(log: string[]): BattleEvent[] {
+function presentBattleEvents(
+  log: string[],
+  conditionByPokemon: Record<string, string>
+): BattleEvent[] {
   return log.flatMap((chunk) => {
     const lines = chunk.split("\n");
 
     return lines
-      .map(parseBattleEventLine)
+      .map((line) => parseBattleEventLine(line, conditionByPokemon))
       .filter((event): event is BattleEvent => event !== null);
   });
 }
 
-export function presentBattleEventsForResponse(log: string[]): BattleEvent[] {
+export function presentBattleEventsForResponse(
+  log: string[],
+  conditionByPokemon: Record<string, string> = {}
+): BattleEvent[] {
   const playerOneChunks = log.filter((chunk) => chunk.startsWith("p1\n"));
 
-  return presentBattleEvents(playerOneChunks);
+  return presentBattleEvents(playerOneChunks, conditionByPokemon);
 }
 
-function parseBattleEventLine(line: string): BattleEvent | null {
+function parseBattleEventLine(
+  line: string,
+  conditionByPokemon: Record<string, string>
+): BattleEvent | null {
   const parts = line.split("|");
   // Showdown protocolregels beginnen meestal met "|"; daardoor is parts[0] leeg
   // en staat het event type op parts[1].
@@ -120,9 +146,9 @@ function parseBattleEventLine(line: string): BattleEvent | null {
     case "move":
       return parseMoveEvent(parts);
     case "-damage":
-      return parseDamageEvent(parts);
+      return parseDamageEvent(parts, conditionByPokemon);
     case "-heal":
-      return parseHealEvent(parts);
+      return parseHealEvent(parts, conditionByPokemon);
     case "-status":
       return parseStatusEvent(parts);
     case "cant":
@@ -152,23 +178,83 @@ function parseMoveEvent(parts: string[]): MoveEvent {
   };
 }
 
-function parseDamageEvent(parts: string[]): DamageEvent {
+function parseDamageEvent(
+  parts: string[],
+  conditionByPokemon: Record<string, string>
+): DamageEvent {
+  const target = parts[2];
+  const condition = parts[3];
+
+  const previousCondition = conditionByPokemon[target] ?? null;
+  const previous = previousCondition
+    ? parseHpCondition(previousCondition)
+    : null;
+  const current = previousCondition
+    ? parseHpCondition(condition, previousCondition)
+    : null;
+
+  conditionByPokemon[target] = condition;
+
+  if (!previousCondition || !previous || !current) {
+    return {
+      type: "damage",
+      target,
+      condition
+    }
+  }
+  
   return {
     type: "damage",
-    target: parts[2],
-    condition: parts[3],
+    target,
+    previousCondition,
+    condition,
+    previousHp: previous.hp,
+    hp: current.hp,
+    maxHp: current.maxHp,
+    amount: Math.abs(previous.hp - current.hp)
   };
 }
 
-function parseHealEvent(parts: string[]): HealEvent {
+function parseHealEvent(
+  parts: string[],
+  conditionByPokemon: Record<string, string>
+): HealEvent {
+  const target = parts[2];
+  const condition = parts[3];
+  const source = parseBracketValue(parts, "[from]");
+  const sourceTarget = parseBracketValue(parts, "[of]");
+
+  const previousCondition = conditionByPokemon[target] ?? null;
+  const previous = previousCondition
+    ? parseHpCondition(previousCondition)
+    : null;
+  const current = previousCondition
+    ? parseHpCondition(condition, previousCondition)
+    : null;
+
+  conditionByPokemon[target] = condition;
+
+  if (!previousCondition || !previous || !current) {
+    return {
+      type: "heal",
+      target,
+      condition,
+      source,
+      sourceTarget,
+    }
+  }
+  
   return {
     type: "heal",
-    target: parts[2],
-    condition: parts[3],
-    // Extra metadata staat in Showdown als marker/value paren:
-    // `|[from] drain|[of] p1a: Pikachu`.
-    source: parseBracketValue(parts, "[from]"),
-    sourceTarget: parseBracketValue(parts, "[of]"),
+    target,
+    previousCondition,
+    condition,
+    previousHp: previous.hp,
+    hp: current.hp,
+    maxHp: current.maxHp,
+    amount: Math.abs(previous.hp - current.hp),
+    source,
+    sourceTarget,
   };
 }
 
@@ -256,9 +342,50 @@ function parseBracketValue(
  */
 export function consumeBattleEventsForResponse(battleData: BattleData): BattleEvent[] {
   const newLogEntries = battleData.log.slice(battleData.eventCursor);
-  const events = presentBattleEventsForResponse(newLogEntries)
+  const events = presentBattleEventsForResponse(
+    newLogEntries,
+    battleData.conditionByPokemon
+  )
 
   battleData.eventCursor = battleData.log.length;
 
   return events
+}
+
+/**
+ * Parseert een Showdown HP-condition naar losse HP-waarden.
+ *
+ * Normale conditions hebben de vorm `huidigeHP/maxHP`, bijvoorbeeld `16/16`
+ * of `176/231`. Bij faint gebruikt Showdown vaak `0 fnt`; daarin staat geen
+ * max HP meer. Daarom kan deze helper optioneel de vorige condition gebruiken
+ * om bij `0 fnt` alsnog de juiste `maxHp` terug te geven.
+ *
+ * Geeft `null` terug als de condition niet veilig naar getallen te vertalen is.
+ */
+function parseHpCondition(condition: string, previousCondition?: string): ParsedHpCondition | null {
+  if (condition.endsWith(" fnt")) {
+    const previous = previousCondition
+      ? parseHpCondition(previousCondition)
+      : null
+
+    if (!previous) return null
+
+    return {
+      hp: 0,
+      maxHp: previous.maxHp
+    };
+  }
+
+  const [hpText, maxHpText] = condition.split("/");
+  const hp = Number(hpText);
+  const maxHp = Number(maxHpText);
+
+  if (!Number.isFinite(hp) || !Number.isFinite(maxHp)) {
+    return null
+  }
+
+  return {
+    hp,
+    maxHp
+  }
 }

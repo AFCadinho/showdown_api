@@ -9,6 +9,7 @@ export type BattleData = {
   log: string[];
   eventCursor: number;
   requests: Record<string, unknown>;
+  conditionByPokemon: Record<string, string>;
 
   state: {
     turn: number;

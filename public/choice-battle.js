@@ -59,7 +59,7 @@ const responseFields = [
   {
     name: "events",
     type: "BattleEvent[]",
-    description: "Nieuwe game-vriendelijke events sinds de vorige API response, zoals turn, move, damage, heal, status, cant, fail, switch, faint en win.",
+    description: "Nieuwe game-vriendelijke events sinds de vorige API response, zoals turn, move, damage, heal, status, cant, fail, switch, faint en win. Damage en heal events bevatten waar mogelijk previousHp, hp, maxHp en amount.",
   },
   {
     name: "log",
@@ -141,7 +141,12 @@ const successExample = {
     {
       type: "damage",
       target: "p2a: Bulbasaur",
+      previousCondition: "231/231",
       condition: "176/231",
+      previousHp: 231,
+      hp: 176,
+      maxHp: 231,
+      amount: 55,
     },
     {
       type: "move",
@@ -152,7 +157,12 @@ const successExample = {
     {
       type: "heal",
       target: "p2a: Bulbasaur",
+      previousCondition: "176/231",
       condition: "231/231",
+      previousHp: 176,
+      hp: 231,
+      maxHp: 231,
+      amount: 55,
       source: "drain",
       sourceTarget: "p1a: Pikachu",
     },

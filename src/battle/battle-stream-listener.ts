@@ -60,7 +60,9 @@ function handleBattleStreamLine(
     const requestText = line.replace("|request|", "");
 
     try {
-      battleData.requests[side] = JSON.parse(requestText);
+      const request = JSON.parse(requestText);
+      battleData.requests[side] = request;
+      updateKnownConditionsFromRequest(request, battleData);
     } catch (error) {
       console.log(`Could not parse ${side} request:`, error);
     }
@@ -89,4 +91,39 @@ function handleBattleStreamLine(
 
     return;
   }
+}
+
+type BattleRequest = {
+  side?: {
+    pokemon?: Array<{
+      ident?: string;
+      condition?: string;
+    }>;
+  };
+};
+
+function updateKnownConditionsFromRequest(
+  request: unknown,
+  battleData: BattleData
+) {
+  if (!isBattleRequest(request) || !request.side?.pokemon) return;
+
+  for (const pokemon of request.side.pokemon) {
+    if (!pokemon.ident || !pokemon.condition) continue;
+
+    const activeIdent = toActiveIdent(pokemon.ident);
+
+    // Requests zijn alleen de startbron voor condition state. Latere damage/heal
+    // events werken deze state bij nadat het enriched event is gebouwd, zodat
+    // previousCondition niet per ongeluk door een final request wordt overschreven.
+    battleData.conditionByPokemon[activeIdent] ??= pokemon.condition;
+  }
+}
+
+function toActiveIdent(ident: string) {
+  return ident.replace(/^(p[12]): /, "$1a: ");
+}
+
+function isBattleRequest(request: unknown): request is BattleRequest {
+  return typeof request === "object" && request !== null;
 }

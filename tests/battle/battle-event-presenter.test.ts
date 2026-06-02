@@ -45,7 +45,12 @@ describe("presentBattleEventsForResponse", () => {
       {
         type: "heal",
         target: "p2a: Bulbasaur",
+        previousCondition: "176/231",
         condition: "231/231",
+        previousHp: 176,
+        hp: 231,
+        maxHp: 231,
+        amount: 55,
         source: "drain",
         sourceTarget: "p1a: Pikachu",
       },
@@ -194,6 +199,9 @@ describe("consumeBattleEventsForResponse", () => {
         ["p2", "|turn|1"].join("\n"),
       ],
       eventCursor: 0,
+      conditionByPokemon: {
+        "p2a: Pidgey": "16/16",
+      },
     } as BattleData;
 
     expect(consumeBattleEventsForResponse(battleData)).toEqual([
@@ -229,5 +237,96 @@ describe("consumeBattleEventsForResponse", () => {
       },
     ]);
     expect(battleData.eventCursor).toBe(3);
+  });
+
+  it("adds previous HP values to damage events from condition state", () => {
+    const battleData = {
+      requests: {
+        p2: {
+          side: {
+            pokemon: [
+              {
+                ident: "p2: Pidgey",
+                condition: "16/16",
+                active: true,
+              },
+            ],
+          },
+        },
+      },
+      log: [
+        [
+          "p1",
+          "|move|p1a: Pikachu|Thunderbolt|p2a: Pidgey",
+          "|-damage|p2a: Pidgey|0 fnt",
+        ].join("\n"),
+      ],
+      eventCursor: 0,
+      conditionByPokemon: {
+        "p2a: Pidgey": "16/16",
+      },
+    } as BattleData;
+
+    expect(consumeBattleEventsForResponse(battleData)).toEqual([
+      {
+        type: "move",
+        actor: "p1a: Pikachu",
+        move: "Thunderbolt",
+        target: "p2a: Pidgey",
+      },
+      {
+        type: "damage",
+        target: "p2a: Pidgey",
+        previousCondition: "16/16",
+        condition: "0 fnt",
+        previousHp: 16,
+        hp: 0,
+        maxHp: 16,
+        amount: 16,
+      },
+    ]);
+  });
+
+  it("adds previous HP values to heal events from condition state", () => {
+    const battleData = {
+      requests: {
+        p2: {
+          side: {
+            pokemon: [
+              {
+                ident: "p2: Bulbasaur",
+                condition: "176/231",
+                active: true,
+              },
+            ],
+          },
+        },
+      },
+      log: [
+        [
+          "p1",
+          "|-heal|p2a: Bulbasaur|231/231|[from] drain|[of] p1a: Pikachu",
+        ].join("\n"),
+      ],
+      eventCursor: 0,
+      conditionByPokemon: {
+        "p2a: Bulbasaur": "176/231",
+      },
+    } as BattleData;
+
+    expect(consumeBattleEventsForResponse(battleData)).toEqual([
+      {
+        type: "heal",
+        target: "p2a: Bulbasaur",
+        previousCondition: "176/231",
+        condition: "231/231",
+        previousHp: 176,
+        hp: 231,
+        maxHp: 231,
+        amount: 55,
+        source: "drain",
+        sourceTarget: "p1a: Pikachu",
+      },
+    ]);
   });
 });

@@ -14,6 +14,7 @@ function createBattleData(): BattleData {
     log: [],
     eventCursor: 0,
     requests: {},
+    conditionByPokemon: {},
     state: {
       turn: 1,
       ended: false,
