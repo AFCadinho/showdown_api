@@ -634,6 +634,8 @@ Switch:
 
 ### Succes Response
 
+Move response:
+
 ```json
 {
   "success": true,
@@ -726,6 +728,89 @@ Switch:
   ],
   "state": {
     "turn": 2,
+    "ended": false,
+    "winner": null
+  }
+}
+```
+
+Switch response:
+
+```json
+{
+  "success": true,
+  "battleId": "b7c68e40-2e60-4c11-8f92-87b4f6856c2d",
+  "formatId": "gen9nationaldex",
+  "players": {
+    "p1": {
+      "name": "Ash"
+    },
+    "p2": {
+      "name": "Gary"
+    }
+  },
+  "requests": {
+    "p1": {
+      "active": [
+        {
+          "moves": [
+            {
+              "id": "thunderbolt",
+              "name": "Thunderbolt",
+              "move": "Thunderbolt",
+              "pp": 23,
+              "maxpp": 24,
+              "disabled": false,
+              "type": "Electric",
+              "category": "Special",
+              "basePower": 90,
+              "accuracy": 100,
+              "effectiveness": {
+                "multiplier": 1,
+                "label": "normal",
+                "immune": false
+              }
+            }
+          ]
+        }
+      ],
+      "side": {
+        "name": "Ash",
+        "id": "p1",
+        "pokemon": [
+          {
+            "ident": "p1: Pikachu",
+            "details": "Pikachu, M",
+            "condition": "94/211",
+            "active": false
+          },
+          {
+            "ident": "p1: Charizard",
+            "details": "Charizard, M",
+            "condition": "297/297",
+            "active": true
+          }
+        ]
+      }
+    }
+  },
+  "events": [
+    {
+      "type": "switch",
+      "pokemon": "p1a: Charizard",
+      "details": "Charizard, M",
+      "condition": "297/297"
+    },
+    {
+      "type": "turn",
+      "turn": 3
+    }
+  ],
+  "log": [
+    "p1\n|switch|p1a: Charizard|Charizard, M|297/297\n|turn|3"
+  ],
+  "state": {
+    "turn": 3,
     "ended": false,
     "winner": null
   }

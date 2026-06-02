@@ -181,6 +181,81 @@ const successExample = {
   },
 };
 
+const switchSuccessExample = {
+  success: true,
+  battleId,
+  formatId: "gen9nationaldex",
+  players: {
+    p1: { name: "Ash" },
+    p2: { name: "Gary" },
+  },
+  requests: {
+    p1: {
+      active: [
+        {
+          moves: [
+            {
+              id: "thunderbolt",
+              name: "Thunderbolt",
+              move: "Thunderbolt",
+              pp: 23,
+              maxpp: 24,
+              disabled: false,
+              type: "Electric",
+              category: "Special",
+              basePower: 90,
+              accuracy: 100,
+              effectiveness: {
+                multiplier: 1,
+                label: "normal",
+                immune: false,
+              },
+            },
+          ],
+        },
+      ],
+      side: {
+        name: "Ash",
+        id: "p1",
+        pokemon: [
+          {
+            ident: "p1: Pikachu",
+            details: "Pikachu, M",
+            condition: "94/211",
+            active: false,
+          },
+          {
+            ident: "p1: Charizard",
+            details: "Charizard, M",
+            condition: "297/297",
+            active: true,
+          },
+        ],
+      },
+    },
+  },
+  events: [
+    {
+      type: "switch",
+      pokemon: "p1a: Charizard",
+      details: "Charizard, M",
+      condition: "297/297",
+    },
+    {
+      type: "turn",
+      turn: 3,
+    },
+  ],
+  log: [
+    "p1\\n|switch|p1a: Charizard|Charizard, M|297/297\\n|turn|3",
+  ],
+  state: {
+    turn: 3,
+    ended: false,
+    winner: null,
+  },
+};
+
 const errorExample = {
   success: false,
   error: "Invalid choice type",
@@ -233,6 +308,22 @@ renderFieldList("response-fields", responseFields);
 renderJson("request-example", requestExample);
 renderJson("success-example", successExample);
 renderJson("error-example", errorExample);
+
+const successExampleElement = document.getElementById("success-example");
+if (successExampleElement) {
+  const switchTitle = document.createElement("h3");
+  switchTitle.className = "h5 mt-4 mb-3";
+  switchTitle.textContent = "Switch Response Voorbeeld";
+
+  const switchPre = document.createElement("pre");
+  switchPre.className = "border rounded bg-body p-3 overflow-auto";
+
+  const switchCode = document.createElement("code");
+  switchCode.textContent = JSON.stringify(switchSuccessExample, null, 2);
+
+  switchPre.append(switchCode);
+  successExampleElement.parentElement?.append(switchTitle, switchPre);
+}
 document.getElementById("curl-example").textContent = `curl -X POST ${window.location.origin}/battles/${battleId}/choice \\
   -H "Content-Type: application/json" \\
   -d '${JSON.stringify(requestExample, null, 2)}'`;
