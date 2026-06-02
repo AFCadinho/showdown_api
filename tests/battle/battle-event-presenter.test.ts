@@ -148,17 +148,55 @@ describe("presentBattleEventsForResponse", () => {
     expect(events).toEqual([
       {
         type: "switch",
+        playerId: "p1",
+        from: undefined,
+        fromIdent: undefined,
+        to: "Gyarados",
+        toIdent: "p1a: Gyarados",
         pokemon: "p1a: Gyarados",
         details: "Gyarados, M",
         condition: "353/353",
       },
       {
         type: "switch",
+        playerId: "p2",
+        from: undefined,
+        fromIdent: undefined,
+        to: "Venusaur",
+        toIdent: "p2a: Venusaur",
         pokemon: "p2a: Venusaur",
         details: "Venusaur, F",
         condition: "364/364",
       },
     ]);
+  });
+
+  it("adds from and to details to switch events from active state", () => {
+    const activeByPlayer = {
+      p1: "p1a: Venusaur",
+    };
+
+    const events = presentBattleEventsForResponse(
+      [["p1", "|switch|p1a: Blastoise|Blastoise, M|299/299"].join("\n")],
+      {},
+      {},
+      activeByPlayer
+    );
+
+    expect(events).toEqual([
+      {
+        type: "switch",
+        playerId: "p1",
+        from: "Venusaur",
+        fromIdent: "p1a: Venusaur",
+        to: "Blastoise",
+        toIdent: "p1a: Blastoise",
+        pokemon: "p1a: Blastoise",
+        details: "Blastoise, M",
+        condition: "299/299",
+      },
+    ]);
+    expect(activeByPlayer.p1).toBe("p1a: Blastoise");
   });
 
   it("ignores lines that are not supported battle events", () => {

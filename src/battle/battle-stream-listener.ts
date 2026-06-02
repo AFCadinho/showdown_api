@@ -95,9 +95,11 @@ function handleBattleStreamLine(
 
 type BattleRequest = {
   side?: {
+    id?: string;
     pokemon?: Array<{
       ident?: string;
       condition?: string;
+      active?: boolean;
     }>;
   };
 };
@@ -117,11 +119,20 @@ function updateKnownConditionsFromRequest(
     // events werken deze state bij nadat het enriched event is gebouwd, zodat
     // previousCondition niet per ongeluk door een final request wordt overschreven.
     battleData.conditionByPokemon[activeIdent] ??= pokemon.condition;
+
+    if (pokemon.active === true) {
+      const playerId = request.side.id ?? getPlayerIdFromIdent(pokemon.ident);
+      battleData.activeByPlayer[playerId] ??= activeIdent;
+    }
   }
 }
 
 function toActiveIdent(ident: string) {
   return ident.replace(/^(p[12]): /, "$1a: ");
+}
+
+function getPlayerIdFromIdent(ident: string) {
+  return ident.startsWith("p2") ? "p2" : "p1";
 }
 
 function isBattleRequest(request: unknown): request is BattleRequest {

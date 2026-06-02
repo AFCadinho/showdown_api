@@ -52,6 +52,11 @@ export type FailEvent = {
 
 export type SwitchEvent = {
   type: "switch";
+  playerId?: string;
+  from?: string;
+  fromIdent?: string;
+  to?: string;
+  toIdent?: string;
   pokemon: string;
   details: string;
   condition: string;
@@ -114,13 +119,16 @@ type ParsedHpCondition = {
 function presentBattleEvents(
   log: string[],
   conditionByPokemon: Record<string, string>,
-  requests: Record<string, unknown>
+  requests: Record<string, unknown>,
+  activeByPlayer: Record<string, string>
 ): BattleEvent[] {
   return log.flatMap((chunk) => {
     const lines = chunk.split("\n");
 
     return lines
-      .map((line) => parseBattleEventLine(line, conditionByPokemon, requests))
+      .map((line) =>
+        parseBattleEventLine(line, conditionByPokemon, requests, activeByPlayer)
+      )
       .filter((event): event is BattleEvent => event !== null);
   });
 }
@@ -128,17 +136,24 @@ function presentBattleEvents(
 export function presentBattleEventsForResponse(
   log: string[],
   conditionByPokemon: Record<string, string> = {},
-  requests: Record<string, unknown> = {}
+  requests: Record<string, unknown> = {},
+  activeByPlayer: Record<string, string> = {}
 ): BattleEvent[] {
   const playerOneChunks = log.filter((chunk) => chunk.startsWith("p1\n"));
 
-  return presentBattleEvents(playerOneChunks, conditionByPokemon, requests);
+  return presentBattleEvents(
+    playerOneChunks,
+    conditionByPokemon,
+    requests,
+    activeByPlayer
+  );
 }
 
 function parseBattleEventLine(
   line: string,
   conditionByPokemon: Record<string, string>,
-  requests: Record<string, unknown>
+  requests: Record<string, unknown>,
+  activeByPlayer: Record<string, string>
 ): BattleEvent | null {
   const parts = line.split("|");
   // Showdown protocolregels beginnen meestal met "|"; daardoor is parts[0] leeg
@@ -159,7 +174,7 @@ function parseBattleEventLine(
     case "-fail":
       return parseFailEvent(parts);
     case "switch":
-      return parseSwitchEvent(parts);
+      return parseSwitchEvent(parts, activeByPlayer);
     case "faint":
       return parseFaintEvent(parts);
     case "turn":
@@ -287,10 +302,25 @@ function parseFailEvent(parts: string[]): FailEvent {
   };
 }
 
-function parseSwitchEvent(parts: string[]): SwitchEvent {
+function parseSwitchEvent(
+  parts: string[],
+  activeByPlayer: Record<string, string>
+): SwitchEvent {
+  const pokemon = parts[2];
+  const playerId = getPlayerIdFromActiveIdent(pokemon);
+  const fromIdent = activeByPlayer[playerId];
+  const toIdent = pokemon;
+
+  activeByPlayer[playerId] = toIdent;
+
   return {
     type: "switch",
-    pokemon: parts[2],
+    playerId,
+    from: fromIdent ? getSpeciesFromIdent(fromIdent) : undefined,
+    fromIdent,
+    to: getSpeciesFromIdent(toIdent),
+    toIdent,
+    pokemon,
     details: parts[3],
     condition: parts[4]
   }
@@ -349,7 +379,8 @@ export function consumeBattleEventsForResponse(battleData: BattleData): BattleEv
   const events = presentBattleEventsForResponse(
     newLogEntries,
     battleData.conditionByPokemon,
-    battleData.requests
+    battleData.requests,
+    battleData.activeByPlayer
   )
 
   battleData.eventCursor = battleData.log.length;
@@ -439,4 +470,12 @@ function findRequestCondition(
   }
 
   return null;
+}
+
+function getPlayerIdFromActiveIdent(ident: string) {
+  return ident.startsWith("p2") ? "p2" : "p1";
+}
+
+function getSpeciesFromIdent(ident: string) {
+  return ident.split(": ")[1] ?? ident;
 }

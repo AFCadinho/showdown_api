@@ -237,6 +237,11 @@ const switchSuccessExample = {
   events: [
     {
       type: "switch",
+      playerId: "p1",
+      from: "Pikachu",
+      fromIdent: "p1a: Pikachu",
+      to: "Charizard",
+      toIdent: "p1a: Charizard",
       pokemon: "p1a: Charizard",
       details: "Charizard, M",
       condition: "297/297",

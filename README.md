@@ -433,7 +433,7 @@ Zo rekenen HUD en event-animaties met dezelfde eindstate.
 | `status` | `target`, `status` | Een Pokemon krijgt een status, zoals `par`. |
 | `cant` | `target`, `reason`, `move` | Een Pokemon kan geen move uitvoeren, bijvoorbeeld door flinch, paralysis, sleep of recharge. |
 | `fail` | `target`, `action` | Een move of action faalt door eigen mechanics, zoals Fake Out buiten de eerste beurt of Protect die faalt. |
-| `switch` | `pokemon`, `details`, `condition` | Een Pokemon komt actief het veld in. |
+| `switch` | `playerId`, `from`, `fromIdent`, `to`, `toIdent`, `pokemon`, `details`, `condition` | Een Pokemon komt actief het veld in. Als de vorige actieve Pokemon bekend is, bevat het event ook wie eruit ging. |
 | `faint` | `target` | Een Pokemon faint. |
 | `turn` | `turn` | Showdown start een nieuwe turn. |
 | `win` | `winner` | De battle is afgelopen. |
@@ -797,6 +797,11 @@ Switch response:
   "events": [
     {
       "type": "switch",
+      "playerId": "p1",
+      "from": "Pikachu",
+      "fromIdent": "p1a: Pikachu",
+      "to": "Charizard",
+      "toIdent": "p1a: Charizard",
       "pokemon": "p1a: Charizard",
       "details": "Charizard, M",
       "condition": "297/297"
