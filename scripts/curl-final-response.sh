@@ -88,6 +88,16 @@ for (const field of ["previousCondition", "previousHp", "hp", "maxHp", "amount"]
   }
 }
 
+if (damage.maxHp !== 100) {
+  console.error(`Expected damage.maxHp to use percentage units with maxHp 100, received ${damage.maxHp}.`);
+  process.exit(1);
+}
+
+if (damage.amount !== Math.abs(damage.previousHp - damage.hp)) {
+  console.error("Expected damage.amount to equal the difference between previousHp and hp.");
+  process.exit(1);
+}
+
 const faintedPokemon = p2Pokemon?.find((pokemon) => pokemon.condition === "0 fnt");
 if (!faintedPokemon) {
   console.error("Expected requests.p2.side.pokemon to contain condition 0 fnt.");

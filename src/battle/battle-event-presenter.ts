@@ -353,39 +353,37 @@ export function consumeBattleEventsForResponse(battleData: BattleData): BattleEv
 }
 
 /**
- * Parseert een Showdown HP-condition naar losse HP-waarden.
+ * Parseert een Showdown HP-condition naar UI HP-waarden op percentageschaal.
  *
  * Normale conditions hebben de vorm `huidigeHP/maxHP`, bijvoorbeeld `16/16`
- * of `176/231`. Bij faint gebruikt Showdown vaak `0 fnt`; daarin staat geen
- * max HP meer. Daarom kan deze helper optioneel de vorige condition gebruiken
- * om bij `0 fnt` alsnog de juiste `maxHp` terug te geven.
+ * of `176/231`. Die echte HP-schaal mengen we niet met battle event amounts:
+ * voor damage/heal events normaliseren we alles naar `0..100`, met `maxHp: 100`.
+ * Daardoor kan de game veilig `amount / maxHp` gebruiken zonder echte HP en
+ * Showdown visible HP door elkaar te halen.
+ *
+ * Bij faint gebruikt Showdown vaak `0 fnt`; daarin staat geen max HP meer. Voor
+ * event-HP is dat simpel: `hp: 0`, `maxHp: 100`.
  *
  * Geeft `null` terug als de condition niet veilig naar getallen te vertalen is.
  */
 function parseHpCondition(condition: string, previousCondition?: string): ParsedHpCondition | null {
   if (condition.endsWith(" fnt")) {
-    const previous = previousCondition
-      ? parseHpCondition(previousCondition)
-      : null
-
-    if (!previous) return null
-
     return {
       hp: 0,
-      maxHp: previous.maxHp
+      maxHp: 100
     };
   }
 
   const [hpText, maxHpText] = condition.split("/");
-  const hp = Number(hpText);
-  const maxHp = Number(maxHpText);
+  const rawHp = Number(hpText);
+  const rawMaxHp = Number(maxHpText);
 
-  if (!Number.isFinite(hp) || !Number.isFinite(maxHp)) {
+  if (!Number.isFinite(rawHp) || !Number.isFinite(rawMaxHp) || rawMaxHp <= 0) {
     return null
   }
 
   return {
-    hp,
-    maxHp
+    hp: Math.round((rawHp / rawMaxHp) * 100),
+    maxHp: 100
   }
 }
