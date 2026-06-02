@@ -47,10 +47,10 @@ describe("presentBattleEventsForResponse", () => {
         target: "p2a: Bulbasaur",
         previousCondition: "176/231",
         condition: "231/231",
-        previousHp: 76,
-        hp: 100,
-        maxHp: 100,
-        amount: 24,
+        previousHp: 176,
+        hp: 231,
+        maxHp: 231,
+        amount: 55,
         source: "drain",
         sourceTarget: "p1a: Pikachu",
       },
@@ -279,10 +279,10 @@ describe("consumeBattleEventsForResponse", () => {
         target: "p2a: Pidgey",
         previousCondition: "16/16",
         condition: "0 fnt",
-        previousHp: 100,
+        previousHp: 16,
         hp: 0,
-        maxHp: 100,
-        amount: 100,
+        maxHp: 16,
+        amount: 16,
       },
     ]);
   });
@@ -320,12 +320,53 @@ describe("consumeBattleEventsForResponse", () => {
         target: "p2a: Bulbasaur",
         previousCondition: "176/231",
         condition: "231/231",
-        previousHp: 76,
-        hp: 100,
-        maxHp: 100,
-        amount: 24,
+        previousHp: 176,
+        hp: 231,
+        maxHp: 231,
+        amount: 55,
         source: "drain",
         sourceTarget: "p1a: Pikachu",
+      },
+    ]);
+  });
+
+  it("uses the latest request condition when log damage uses visible HP percentages", () => {
+    const battleData = {
+      requests: {
+        p2: {
+          side: {
+            pokemon: [
+              {
+                ident: "p2: Mewtwo",
+                condition: "92/353",
+                active: true,
+              },
+            ],
+          },
+        },
+      },
+      log: [
+        [
+          "p1",
+          "|-damage|p2a: Mewtwo|27/100",
+        ].join("\n"),
+      ],
+      eventCursor: 0,
+      conditionByPokemon: {
+        "p2a: Mewtwo": "353/353",
+      },
+    } as BattleData;
+
+    expect(consumeBattleEventsForResponse(battleData)).toEqual([
+      {
+        type: "damage",
+        target: "p2a: Mewtwo",
+        previousCondition: "353/353",
+        condition: "92/353",
+        previousHp: 353,
+        hp: 92,
+        maxHp: 353,
+        amount: 261,
       },
     ]);
   });

@@ -113,29 +113,32 @@ type ParsedHpCondition = {
  */
 function presentBattleEvents(
   log: string[],
-  conditionByPokemon: Record<string, string>
+  conditionByPokemon: Record<string, string>,
+  requests: Record<string, unknown>
 ): BattleEvent[] {
   return log.flatMap((chunk) => {
     const lines = chunk.split("\n");
 
     return lines
-      .map((line) => parseBattleEventLine(line, conditionByPokemon))
+      .map((line) => parseBattleEventLine(line, conditionByPokemon, requests))
       .filter((event): event is BattleEvent => event !== null);
   });
 }
 
 export function presentBattleEventsForResponse(
   log: string[],
-  conditionByPokemon: Record<string, string> = {}
+  conditionByPokemon: Record<string, string> = {},
+  requests: Record<string, unknown> = {}
 ): BattleEvent[] {
   const playerOneChunks = log.filter((chunk) => chunk.startsWith("p1\n"));
 
-  return presentBattleEvents(playerOneChunks, conditionByPokemon);
+  return presentBattleEvents(playerOneChunks, conditionByPokemon, requests);
 }
 
 function parseBattleEventLine(
   line: string,
-  conditionByPokemon: Record<string, string>
+  conditionByPokemon: Record<string, string>,
+  requests: Record<string, unknown>
 ): BattleEvent | null {
   const parts = line.split("|");
   // Showdown protocolregels beginnen meestal met "|"; daardoor is parts[0] leeg
@@ -146,9 +149,9 @@ function parseBattleEventLine(
     case "move":
       return parseMoveEvent(parts);
     case "-damage":
-      return parseDamageEvent(parts, conditionByPokemon);
+      return parseDamageEvent(parts, conditionByPokemon, requests);
     case "-heal":
-      return parseHealEvent(parts, conditionByPokemon);
+      return parseHealEvent(parts, conditionByPokemon, requests);
     case "-status":
       return parseStatusEvent(parts);
     case "cant":
@@ -180,12 +183,12 @@ function parseMoveEvent(parts: string[]): MoveEvent {
 
 function parseDamageEvent(
   parts: string[],
-  conditionByPokemon: Record<string, string>
+  conditionByPokemon: Record<string, string>,
+  requests: Record<string, unknown>
 ): DamageEvent {
   const target = parts[2];
-  const condition = parts[3];
-
   const previousCondition = conditionByPokemon[target] ?? null;
+  const condition = resolveEventCondition(parts[3], requests, target, previousCondition);
   const previous = previousCondition
     ? parseHpCondition(previousCondition)
     : null;
@@ -217,14 +220,15 @@ function parseDamageEvent(
 
 function parseHealEvent(
   parts: string[],
-  conditionByPokemon: Record<string, string>
+  conditionByPokemon: Record<string, string>,
+  requests: Record<string, unknown>
 ): HealEvent {
   const target = parts[2];
-  const condition = parts[3];
+  const previousCondition = conditionByPokemon[target] ?? null;
+  const condition = resolveEventCondition(parts[3], requests, target, previousCondition);
   const source = parseBracketValue(parts, "[from]");
   const sourceTarget = parseBracketValue(parts, "[of]");
 
-  const previousCondition = conditionByPokemon[target] ?? null;
   const previous = previousCondition
     ? parseHpCondition(previousCondition)
     : null;
@@ -344,7 +348,8 @@ export function consumeBattleEventsForResponse(battleData: BattleData): BattleEv
   const newLogEntries = battleData.log.slice(battleData.eventCursor);
   const events = presentBattleEventsForResponse(
     newLogEntries,
-    battleData.conditionByPokemon
+    battleData.conditionByPokemon,
+    battleData.requests
   )
 
   battleData.eventCursor = battleData.log.length;
@@ -353,37 +358,85 @@ export function consumeBattleEventsForResponse(battleData: BattleData): BattleEv
 }
 
 /**
- * Parseert een Showdown HP-condition naar UI HP-waarden op percentageschaal.
+ * Parseert een Showdown HP-condition naar echte HP-waarden.
  *
  * Normale conditions hebben de vorm `huidigeHP/maxHP`, bijvoorbeeld `16/16`
- * of `176/231`. Die echte HP-schaal mengen we niet met battle event amounts:
- * voor damage/heal events normaliseren we alles naar `0..100`, met `maxHp: 100`.
- * Daardoor kan de game veilig `amount / maxHp` gebruiken zonder echte HP en
- * Showdown visible HP door elkaar te halen.
+ * of `176/231`. Damage/heal events gebruiken dezelfde schaal als de request
+ * snapshot, zodat HUD en event-animaties dezelfde eindstate zien.
  *
- * Bij faint gebruikt Showdown vaak `0 fnt`; daarin staat geen max HP meer. Voor
- * event-HP is dat simpel: `hp: 0`, `maxHp: 100`.
+ * Bij faint gebruikt Showdown vaak `0 fnt`; daarin staat geen max HP meer.
+ * Daarom gebruikt deze helper de vorige condition om de max HP te behouden.
  *
  * Geeft `null` terug als de condition niet veilig naar getallen te vertalen is.
  */
 function parseHpCondition(condition: string, previousCondition?: string): ParsedHpCondition | null {
   if (condition.endsWith(" fnt")) {
+    const previous = previousCondition
+      ? parseHpCondition(previousCondition)
+      : null
+
+    if (!previous) return null
+
     return {
       hp: 0,
-      maxHp: 100
+      maxHp: previous.maxHp
     };
   }
 
   const [hpText, maxHpText] = condition.split("/");
-  const rawHp = Number(hpText);
-  const rawMaxHp = Number(maxHpText);
+  const hp = Number(hpText);
+  const maxHp = Number(maxHpText);
 
-  if (!Number.isFinite(rawHp) || !Number.isFinite(rawMaxHp) || rawMaxHp <= 0) {
+  if (!Number.isFinite(hp) || !Number.isFinite(maxHp) || maxHp <= 0) {
     return null
   }
 
   return {
-    hp: Math.round((rawHp / rawMaxHp) * 100),
-    maxHp: 100
+    hp,
+    maxHp
   }
+}
+
+function resolveEventCondition(
+  logCondition: string,
+  requests: Record<string, unknown>,
+  target: string,
+  previousCondition: string | null
+) {
+  const requestCondition = findRequestCondition(requests, target);
+
+  if (requestCondition && requestCondition !== previousCondition) {
+    return requestCondition;
+  }
+
+  return logCondition;
+}
+
+function findRequestCondition(
+  requests: Record<string, unknown>,
+  target: string
+): string | null {
+  const ident = target.replace(/^(p[12])[a-z]?: /, "$1: ");
+
+  for (const request of Object.values(requests)) {
+    const battleRequest = request as {
+      side?: {
+        pokemon?: Array<{
+          ident?: string;
+          condition?: string;
+        }>;
+      };
+    };
+    const pokemonList = battleRequest.side?.pokemon;
+
+    if (!Array.isArray(pokemonList)) continue;
+
+    const pokemon = pokemonList.find((pokemon) => pokemon.ident === ident);
+
+    if (typeof pokemon?.condition === "string") {
+      return pokemon.condition;
+    }
+  }
+
+  return null;
 }

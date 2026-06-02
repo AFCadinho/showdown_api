@@ -394,20 +394,20 @@ Voorbeeld:
     "target": "p2a: Bulbasaur",
     "previousCondition": "231/231",
     "condition": "176/231",
-    "previousHp": 100,
-    "hp": 76,
-    "maxHp": 100,
-    "amount": 24
+    "previousHp": 231,
+    "hp": 176,
+    "maxHp": 231,
+    "amount": 55
   },
   {
     "type": "heal",
     "target": "p2a: Bulbasaur",
     "previousCondition": "176/231",
     "condition": "231/231",
-    "previousHp": 76,
-    "hp": 100,
-    "maxHp": 100,
-    "amount": 24,
+    "previousHp": 176,
+    "hp": 231,
+    "maxHp": 231,
+    "amount": 55,
     "source": "drain",
     "sourceTarget": "p1a: Pikachu"
   },
@@ -420,10 +420,10 @@ Voorbeeld:
 
 Ondersteunde event types:
 
-De numerieke HP-velden op `damage` en `heal` events gebruiken UI-percent units:
-`maxHp` is `100`, `hp` is de huidige HP als percentage, en `amount` is het
-verschil in percentagepunten. De stringvelden `previousCondition` en
-`condition` blijven de ruwe Showdown condition strings.
+De numerieke HP-velden op `damage` en `heal` events gebruiken dezelfde schaal
+als de request snapshot. Als `condition` bijvoorbeeld `92/353` is, dan is
+`hp: 92`, `maxHp: 353` en `amount` het verschil tussen `previousHp` en `hp`.
+Zo rekenen HUD en event-animaties met dezelfde eindstate.
 
 | Type | Velden | Beschrijving |
 | --- | --- | --- |

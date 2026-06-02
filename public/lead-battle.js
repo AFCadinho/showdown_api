@@ -53,7 +53,7 @@ const responseFields = [
   {
     name: "events",
     type: "BattleEvent[]",
-    description: "Nieuwe game-vriendelijke events sinds de vorige API response, zoals turn, move, damage, heal, status, cant, fail, switch, faint en win. Damage en heal events bevatten waar mogelijk previousHp, hp, maxHp en amount als percentage-units met maxHp 100.",
+    description: "Nieuwe game-vriendelijke events sinds de vorige API response, zoals turn, move, damage, heal, status, cant, fail, switch, faint en win. Damage en heal events bevatten waar mogelijk previousHp, hp, maxHp en amount op dezelfde schaal als de request snapshot.",
   },
   {
     name: "log",
