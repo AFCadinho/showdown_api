@@ -1,4 +1,5 @@
 import type { BattleStream, getPlayerStreams } from "pokemon-showdown";
+import type { BattleFieldSnapshot } from "./battle-field-presenter";
 
 export type PlayerId = "p1" | "p2";
 
@@ -11,6 +12,7 @@ export type BattleData = {
   requests: Record<string, unknown>;
   conditionByPokemon: Record<string, string>;
   activeByPlayer: Record<string, string>;
+  field: BattleFieldSnapshot;
   instanceIdsByPokemonIdent: Record<string, string[]>;
   pokemonSaveStateByIdent: Record<
     string,

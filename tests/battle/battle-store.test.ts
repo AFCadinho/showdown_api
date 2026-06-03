@@ -16,6 +16,7 @@ function createBattleData(): BattleData {
     requests: {},
     conditionByPokemon: {},
     activeByPlayer: {},
+    field: { effects: [] },
     instanceIdsByPokemonIdent: {},
     pokemonSaveStateByIdent: {},
     state: {

@@ -136,6 +136,126 @@ describe("presentBattleEventsForResponse", () => {
     ]);
   });
 
+  it("parses weather events as field effects", () => {
+    const events = presentBattleEventsForResponse([
+      [
+        "p1",
+        "|-weather|RainDance",
+        "|-weather|Sandstorm|[upkeep]",
+        "|-weather|none",
+      ].join("\n"),
+    ]);
+
+    expect(events).toEqual([
+      {
+        type: "fieldEffect",
+        scope: "field",
+        effectType: "weather",
+        effect: "RainDance",
+        state: "start",
+      },
+      {
+        type: "fieldEffect",
+        scope: "field",
+        effectType: "weather",
+        effect: "Sandstorm",
+        state: "upkeep",
+      },
+      {
+        type: "fieldEffect",
+        scope: "field",
+        effectType: "weather",
+        effect: "none",
+        state: "end",
+      },
+    ]);
+  });
+
+  it("parses field condition events as field effects", () => {
+    const events = presentBattleEventsForResponse([
+      [
+        "p1",
+        "|-fieldstart|move: Trick Room",
+        "|-fieldstart|move: Grassy Terrain",
+        "|-fieldend|move: Trick Room",
+      ].join("\n"),
+    ]);
+
+    expect(events).toEqual([
+      {
+        type: "fieldEffect",
+        scope: "field",
+        effectType: "fieldCondition",
+        effectGroup: undefined,
+        effect: "move: Trick Room",
+        state: "start",
+      },
+      {
+        type: "fieldEffect",
+        scope: "field",
+        effectType: "fieldCondition",
+        effectGroup: "terrain",
+        effect: "move: Grassy Terrain",
+        state: "start",
+      },
+      {
+        type: "fieldEffect",
+        scope: "field",
+        effectType: "fieldCondition",
+        effectGroup: undefined,
+        effect: "move: Trick Room",
+        state: "end",
+      },
+    ]);
+  });
+
+  it("parses side condition events as field effects", () => {
+    const events = presentBattleEventsForResponse([
+      [
+        "p1",
+        "|-sidestart|p1: Ash|move: Tailwind",
+        "|-sidestart|p2: Wild|move: Stealth Rock",
+        "|-sideend|p1: Ash|move: Tailwind",
+        "|-sideend|p2: Wild|Stealth Rock",
+      ].join("\n"),
+    ]);
+
+    expect(events).toEqual([
+      {
+        type: "fieldEffect",
+        scope: "side",
+        side: "p1",
+        effectType: "sideCondition",
+        effect: "move: Tailwind",
+        state: "start",
+      },
+      {
+        type: "fieldEffect",
+        scope: "side",
+        side: "p2",
+        effectType: "sideCondition",
+        effect: "move: Stealth Rock",
+        state: "start",
+      },
+      {
+        type: "fieldEffect",
+        scope: "side",
+        side: "p1",
+        effectType: "sideCondition",
+        effect: "move: Tailwind",
+        state: "end",
+      },
+      {
+        type: "fieldEffect",
+        scope: "side",
+        side: "p2",
+        effectType: "sideCondition",
+        effect: "move: Stealth Rock",
+        state: "end",
+      },
+    ]);
+  });
+
   it("parses switch events when a Pokemon enters battle", () => {
     const events = presentBattleEventsForResponse([
       [

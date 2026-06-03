@@ -16,6 +16,7 @@ import {
 } from "@/battle/battle-pokemon-instance-ids";
 import { validateChoiceAvailability } from "@/battle/battle-choice-availability";
 import { buildApplySavedHpEvalCommand } from "@/battle/battle-saved-hp";
+import { presentBattleField } from "@/battle/battle-field-presenter";
 
 export const battleRoutes = Router();
 
@@ -154,6 +155,7 @@ function buildBattleResponse(
     players: battle.players,
     requests: presentBattleRequests(requestSnapshot, battle.formatid),
     events: consumeBattleEventsForResponse(battle),
+    field: presentBattleField(battle.field),
     log: battle.log,
     state: battle.state
   }

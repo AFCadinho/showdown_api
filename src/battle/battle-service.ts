@@ -10,6 +10,7 @@ import {
   buildPokemonInstanceIdMap,
   buildPokemonSaveStateMap,
 } from "./battle-pokemon-instance-ids";
+import { presentBattleField } from "./battle-field-presenter";
 
 type ShowdownPokemonTeam = NonNullable<Parameters<typeof Teams.pack>[0]>;
 type PokemonTeam = Array<
@@ -39,6 +40,7 @@ type CreateBattleSuccess = {
   players: BattleData["players"];
   requests: Record<string, unknown>;
   events: ReturnType<typeof consumeBattleEventsForResponse>;
+  field: ReturnType<typeof presentBattleField>;
   log: string[];
 };
 
@@ -82,6 +84,7 @@ export async function createBattle(body: CreateBattleBody): Promise<CreateBattle
     requests: {} as Record<string, unknown>,
     conditionByPokemon: {},
     activeByPlayer: {},
+    field: { effects: [] },
     instanceIdsByPokemonIdent,
     pokemonSaveStateByIdent,
     state: {
@@ -132,6 +135,7 @@ export async function createBattle(body: CreateBattleBody): Promise<CreateBattle
     players: battleData.players,
     requests: presentBattleRequests(requestSnapshot, battleData.formatid),
     events: consumeBattleEventsForResponse(battleData),
+    field: presentBattleField(battleData.field),
     log: battleData.log,
   };
 }

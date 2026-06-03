@@ -60,7 +60,12 @@ const responseFields = [
   {
     name: "events",
     type: "BattleEvent[]",
-    description: "Nieuwe game-vriendelijke events sinds de vorige API response. Bij create_battle is dit meestal nog leeg.",
+    description: "Nieuwe game-vriendelijke events sinds de vorige API response. Weather, field conditions en side conditions komen terug als fieldEffect events. Bij create_battle is dit meestal nog leeg.",
+  },
+  {
+    name: "field",
+    type: "object",
+    description: "Actuele veldstatus voor UI-iconen en timers. field.effects bevat actieve weather, field conditions zoals Trick Room, terrain en side conditions zoals Tailwind of Stealth Rock. Terrain vervangt vorige terrain. Hazards blijven staan totdat Showdown removal meldt, bijvoorbeeld door Rapid Spin.",
   },
   {
     name: "log",
@@ -162,6 +167,9 @@ const successExample = {
     },
   },
   events: [],
+  field: {
+    effects: [],
+  },
   log: [
     "p1\\n|request|{...}",
     "p2\\n|request|{...}",

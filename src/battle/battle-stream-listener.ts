@@ -55,6 +55,8 @@ function handleBattleStreamLine(
   side: PlayerId,
   battleData: BattleData
 ) {
+  updateFieldFromBattleLine(line, battleData);
+
   // Request-regels bevatten de actuele keuzes voor een specifieke speler.
   if (line.startsWith("|request|")) {
     const requestText = line.replace("|request|", "");
@@ -91,6 +93,140 @@ function handleBattleStreamLine(
 
     return;
   }
+}
+
+export function updateFieldFromBattleLine(
+  line: string,
+  battleData: Pick<BattleData, "field">
+) {
+  const parts = line.split("|");
+  const eventType = parts[1];
+
+  if (eventType === "-fieldstart") {
+    const effect = parts[2];
+    if (!effect) return;
+    const effectGroup = getFieldConditionGroup(effect);
+
+    removeFieldEffect(battleData, "fieldCondition", effect);
+    if (effectGroup) removeFieldEffectGroup(battleData, effectGroup);
+
+    battleData.field.effects.push({
+      scope: "field",
+      effectType: "fieldCondition",
+      effectGroup,
+      effect,
+    });
+    return;
+  }
+
+  if (eventType === "-fieldend") {
+    const effect = parts[2];
+    if (!effect) return;
+
+    removeFieldEffect(battleData, "fieldCondition", effect);
+    return;
+  }
+
+  if (eventType === "-sidestart") {
+    const side = getPlayerIdFromSideText(parts[2]);
+    const effect = normalizeSideConditionEffect(parts[3]);
+    if (!side || !effect) return;
+
+    removeSideEffect(battleData, side, effect);
+    battleData.field.effects.push({
+      scope: "side",
+      side,
+      effectType: "sideCondition",
+      effect,
+    });
+    return;
+  }
+
+  if (eventType === "-sideend") {
+    const side = getPlayerIdFromSideText(parts[2]);
+    const effect = normalizeSideConditionEffect(parts[3]);
+    if (!side || !effect) return;
+
+    removeSideEffect(battleData, side, effect);
+    return;
+  }
+
+  if (eventType !== "-weather") return;
+
+  const weather = parts[2];
+
+  battleData.field.effects = battleData.field.effects.filter(
+    (effect) => effect.effectType !== "weather"
+  );
+
+  if (!weather || weather === "none") return;
+
+  battleData.field.effects.push({
+    scope: "field",
+    effectType: "weather",
+    effect: weather,
+  });
+}
+
+function removeFieldEffect(
+  battleData: Pick<BattleData, "field">,
+  effectType: "fieldCondition",
+  effectName: string
+) {
+  battleData.field.effects = battleData.field.effects.filter(
+    (effect) =>
+      effect.effectType !== effectType || effect.effect !== effectName
+  );
+}
+
+function removeSideEffect(
+  battleData: Pick<BattleData, "field">,
+  side: PlayerId,
+  effectName: string
+) {
+  battleData.field.effects = battleData.field.effects.filter(
+    (effect) =>
+      effect.effectType !== "sideCondition" ||
+      effect.side !== side ||
+      effect.effect !== effectName
+  );
+}
+
+function normalizeSideConditionEffect(effect: string | undefined) {
+  if (!effect) return undefined;
+  if (effect.includes(":")) return effect;
+
+  return `move: ${effect}`;
+}
+
+function removeFieldEffectGroup(
+  battleData: Pick<BattleData, "field">,
+  effectGroup: "terrain"
+) {
+  battleData.field.effects = battleData.field.effects.filter(
+    (effect) => effect.effectGroup !== effectGroup
+  );
+}
+
+function getFieldConditionGroup(effect: string): "terrain" | undefined {
+  if (
+    effect === "move: Electric Terrain" ||
+    effect === "move: Grassy Terrain" ||
+    effect === "move: Misty Terrain" ||
+    effect === "move: Psychic Terrain"
+  ) {
+    return "terrain";
+  }
+
+  return undefined;
+}
+
+function getPlayerIdFromSideText(sideText: string | undefined): PlayerId | null {
+  if (!sideText) return null;
+  if (sideText.startsWith("p2")) return "p2";
+  if (sideText.startsWith("p1")) return "p1";
+
+  return null;
 }
 
 type BattleRequest = {

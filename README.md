@@ -276,6 +276,7 @@ verrijkt met Dex-data zoals `type`, `category`, `basePower`, `accuracy`,
 | `players` | `object` | Namen van `p1` en `p2`. |
 | `requests` | `object` | Laatste request per speler, verrijkt met Dex-data voor UI-gebruik. De API werkt de response-snapshot bij met faint-informatie uit de battle log, zodat een final response ook `condition: "0 fnt"` kan tonen. Bij `create_battle` is dit meestal een `teamPreview` request. |
 | `events` | `BattleEvent[]` | Nieuwe game-vriendelijke events sinds de vorige API response. Bij `create_battle` meestal nog leeg. |
+| `field` | `object` | Actuele veldstatus voor UI-iconen en timers. `field.effects` bevat actieve weather, field conditions en side conditions. |
 | `log` | `string[]` | Ruwe stream output die de API tot nu toe heeft ontvangen. |
 
 ### Move Velden
@@ -472,6 +473,9 @@ Voorbeeld response-fragment:
     }
   },
   "events": [],
+  "field": {
+    "effects": []
+  },
   "state": {
     "turn": 1,
     "ended": false,
@@ -529,11 +533,142 @@ Voorbeeld:
     "sourceTarget": "p1a: Pikachu"
   },
   {
+    "type": "fieldEffect",
+    "scope": "field",
+    "effectType": "weather",
+    "effect": "RainDance",
+    "state": "start"
+  },
+  {
     "type": "turn",
     "turn": 2
   }
 ]
 ```
+
+### Field Snapshot
+
+`field` bevat de actuele veldstatus. Gebruik dit voor UI-iconen en later timers.
+`field.effects` kan drie soorten effecten bevatten:
+
+```json
+{
+  "field": {
+    "effects": [
+      {
+        "scope": "field",
+        "effectType": "weather",
+        "effect": "RainDance"
+      },
+      {
+        "scope": "field",
+        "effectType": "fieldCondition",
+        "effect": "move: Trick Room"
+      },
+      {
+        "scope": "field",
+        "effectType": "fieldCondition",
+        "effectGroup": "terrain",
+        "effect": "move: Grassy Terrain"
+      },
+      {
+        "scope": "side",
+        "side": "p1",
+        "effectType": "sideCondition",
+        "effect": "move: Tailwind"
+      },
+      {
+        "scope": "side",
+        "side": "p2",
+        "effectType": "sideCondition",
+        "effect": "move: Stealth Rock"
+      }
+    ]
+  }
+}
+```
+
+Het verschil met `events`:
+
+- `events` vertelt wat er sinds de vorige response gebeurde, bijvoorbeeld dat Rain net startte.
+- `field.effects` vertelt wat nu actief is, bijvoorbeeld dat Rain op dit moment aan staat.
+
+Weather, field conditions en side conditions gebruiken `fieldEffect` events.
+Weather kan daarnaast `state: "upkeep"` krijgen als Showdown meldt dat de
+weather doorgaat.
+
+```json
+{
+  "type": "fieldEffect",
+  "scope": "field",
+  "effectType": "weather",
+  "effect": "RainDance",
+  "state": "start"
+}
+```
+
+```json
+{
+  "type": "fieldEffect",
+  "scope": "field",
+  "effectType": "fieldCondition",
+  "effect": "move: Trick Room",
+  "state": "start"
+}
+```
+
+```json
+{
+  "type": "fieldEffect",
+  "scope": "side",
+  "side": "p1",
+  "effectType": "sideCondition",
+  "effect": "move: Tailwind",
+  "state": "start"
+}
+```
+
+Zolang een effect actief is, staat het in `field.effects`. Als Showdown meldt
+dat een effect eindigt, verwijdert de API die entry uit `field.effects`.
+Terrain effects gebruiken `effectGroup: "terrain"`, zodat een nieuwe terrain de
+vorige terrain vervangt.
+
+Voor terrain betekent dit dat er tegelijk maar een terrain in `field.effects`
+staat. Als Electric Terrain actief is en daarna Grassy Terrain start, wordt de
+oude terrain vervangen:
+
+```json
+{
+  "field": {
+    "effects": [
+      {
+        "scope": "field",
+        "effectType": "fieldCondition",
+        "effectGroup": "terrain",
+        "effect": "move: Grassy Terrain"
+      }
+    ]
+  }
+}
+```
+
+Hazards zoals Stealth Rock zijn side conditions. Ze blijven in `field.effects`
+staan totdat Showdown meldt dat ze verwijderd zijn, bijvoorbeeld door Rapid
+Spin. De API normaliseert de naam, zodat zowel start als end dezelfde
+`effect` waarde gebruiken:
+
+```json
+{
+  "type": "fieldEffect",
+  "scope": "side",
+  "side": "p2",
+  "effectType": "sideCondition",
+  "effect": "move: Stealth Rock",
+  "state": "end"
+}
+```
+
+Na zo'n end event staat Stealth Rock niet meer in `field.effects`.
 
 Ondersteunde event types:
 
@@ -551,6 +686,7 @@ Zo rekenen HUD en event-animaties met dezelfde eindstate.
 | `cant` | `target`, `reason`, `move` | Een Pokemon kan geen move uitvoeren, bijvoorbeeld door flinch, paralysis, sleep of recharge. |
 | `fail` | `target`, `action` | Een move of action faalt door eigen mechanics, zoals Fake Out buiten de eerste beurt of Protect die faalt. |
 | `switch` | `playerId`, `from`, `fromIdent`, `to`, `toIdent`, `pokemon`, `details`, `condition` | Een Pokemon komt actief het veld in. Als de vorige actieve Pokemon bekend is, bevat het event ook wie eruit ging. |
+| `fieldEffect` | `scope`, `side`, `effectType`, `effectGroup`, `effect`, `state` | Een veld-effect verandert. `effectType` is `weather`, `fieldCondition` of `sideCondition`. |
 | `faint` | `target` | Een Pokemon faint. |
 | `turn` | `turn` | Showdown start een nieuwe turn. |
 | `win` | `winner` | De battle is afgelopen. |
@@ -943,6 +1079,7 @@ Na een choice response gebruik je:
 
 - `requests` voor de actuele UI state zoals HP, PP, disabled moves, effectiveness en switches. Gebruik `forceSwitch[0]` om verplichte switch UI te openen, en gebruik `active[0].trapped` en `active[0].maybeTrapped` om normale switches te blokkeren.
 - `events` voor animaties en feedback van wat er sinds de vorige response gebeurde.
+- `field` voor actuele veldstatus zoals actieve weather, Trick Room, Terrain, Tailwind en hazards. Terrain vervangt vorige terrain; hazards blijven staan tot Showdown removal meldt.
 - `state` voor de huidige turn en of de battle gewonnen is.
 
 Als een battle direct eindigt na een choice, kan Showdown geen nieuwe

@@ -77,6 +77,16 @@ export type WinEvent = {
   winner: string;
 };
 
+export type FieldEffectEvent = {
+  type: "fieldEffect";
+  scope: "field" | "side";
+  side?: "p1" | "p2";
+  effectType: "weather" | "fieldCondition" | "sideCondition";
+  effect: string;
+  effectGroup?: "terrain";
+  state: "start" | "upkeep" | "end";
+};
+
 export type BattleEvent =
   | MoveEvent
   | DamageEvent
@@ -87,7 +97,8 @@ export type BattleEvent =
   | SwitchEvent
   | FaintEvent
   | TurnEvent
-  | WinEvent;
+  | WinEvent
+  | FieldEffectEvent;
 
 
 type ParsedHpCondition = {
@@ -173,6 +184,16 @@ function parseBattleEventLine(
       return parseCantEvent(parts);
     case "-fail":
       return parseFailEvent(parts);
+    case "-weather":
+      return parseWeatherEvent(parts);
+    case "-fieldstart":
+      return parseFieldConditionEvent(parts, "start");
+    case "-fieldend":
+      return parseFieldConditionEvent(parts, "end");
+    case "-sidestart":
+      return parseSideConditionEvent(parts, "start");
+    case "-sideend":
+      return parseSideConditionEvent(parts, "end");
     case "switch":
       return parseSwitchEvent(parts, activeByPlayer);
     case "faint":
@@ -349,6 +370,82 @@ function parseWinEvent(parts: string[]): WinEvent {
     type: "win",
     winner: parts[2],
   };
+}
+
+function parseWeatherEvent(parts: string[]): FieldEffectEvent {
+  const effect = parts[2];
+  const isUpkeep = parts.includes("[upkeep]");
+
+  return {
+    type: "fieldEffect",
+    scope: "field",
+    effectType: "weather",
+    effect,
+    state: effect === "none" ? "end" : isUpkeep ? "upkeep" : "start",
+  };
+}
+
+function parseFieldConditionEvent(
+  parts: string[],
+  state: "start" | "end"
+): FieldEffectEvent {
+  const effect = parts[2];
+
+  return {
+    type: "fieldEffect",
+    scope: "field",
+    effectType: "fieldCondition",
+    effectGroup: getFieldConditionGroup(effect),
+    effect,
+    state,
+  };
+}
+
+function parseSideConditionEvent(
+  parts: string[],
+  state: "start" | "end"
+): FieldEffectEvent | null {
+  const side = getPlayerIdFromSideText(parts[2]);
+  const effect = normalizeSideConditionEffect(parts[3]);
+
+  if (!side || !effect) return null;
+
+  return {
+    type: "fieldEffect",
+    scope: "side",
+    side,
+    effectType: "sideCondition",
+    effect,
+    state,
+  };
+}
+
+function getFieldConditionGroup(effect: string): "terrain" | undefined {
+  if (
+    effect === "move: Electric Terrain" ||
+    effect === "move: Grassy Terrain" ||
+    effect === "move: Misty Terrain" ||
+    effect === "move: Psychic Terrain"
+  ) {
+    return "terrain";
+  }
+
+  return undefined;
+}
+
+function getPlayerIdFromSideText(sideText: string | undefined): "p1" | "p2" | null {
+  if (!sideText) return null;
+  if (sideText.startsWith("p2")) return "p2";
+  if (sideText.startsWith("p1")) return "p1";
+
+  return null;
+}
+
+function normalizeSideConditionEffect(effect: string | undefined) {
+  if (!effect) return undefined;
+  if (effect.includes(":")) return effect;
+
+  return `move: ${effect}`;
 }
 
 function parseBracketValue(

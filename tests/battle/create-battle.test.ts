@@ -83,6 +83,24 @@ describe("createBattle", () => {
     expect(result.battleId).toEqual(expect.any(String));
   });
 
+  it("returns an empty field snapshot", async () => {
+    const result = await createBattle({
+      p1: {
+        team: [pikachu],
+      },
+      p2: {
+        team: [bulbasaur],
+      },
+    });
+
+    expect(result).toMatchObject({
+      success: true,
+      field: {
+        effects: [],
+      },
+    });
+  });
+
   it("returns presented move details in battle requests", async () => {
     const result = await createBattle({
       p1: {
@@ -164,6 +182,9 @@ describe("createBattle", () => {
 
     const battle = battleStore.getBattle(result.battleId);
 
+    expect(battle?.field).toEqual({
+      effects: [],
+    });
     expect(battle?.pokemonSaveStateByIdent).toEqual({
       "p1: Pikachu": [
         {
