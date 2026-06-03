@@ -55,7 +55,7 @@ const responseFields = [
   {
     name: "requests",
     type: "object",
-    description: "Laatste request per speler als response-snapshot. Als instanceId is meegestuurd, staat die terug op side.pokemon[].instanceId. Bij create_wild_battle staan moves direct onder active[].moves met live PP, max PP, disabled state, type-effectiveness en switch-blokkades zoals active[0].trapped of active[0].maybeTrapped. Als een Pokemon fainted is, toont side.pokemon[].condition 0 fnt.",
+    description: "Laatste request per speler als response-snapshot. Als instanceId is meegestuurd, staat die terug op side.pokemon[].instanceId. Bij create_wild_battle staan moves direct onder active[].moves met live PP, max PP, disabled state, type-effectiveness, verplichte switches via forceSwitch[0] en switch-blokkades zoals active[0].trapped of active[0].maybeTrapped. Als een Pokemon fainted is, toont side.pokemon[].condition 0 fnt.",
   },
   {
     name: "events",

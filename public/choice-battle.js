@@ -54,7 +54,7 @@ const responseFields = [
   {
     name: "requests",
     type: "object",
-    description: "Laatste request per speler als actuele response-snapshot, verrijkt met Dex-data. Hierin staan actuele HP, beschikbare moves, PP, disabled state, type-effectiveness en switch-blokkades zoals active[0].trapped of active[0].maybeTrapped. Bij een final response wordt een fainted Pokemon als condition 0 fnt getoond.",
+    description: "Laatste request per speler als actuele response-snapshot, verrijkt met Dex-data. Hierin staan actuele HP, beschikbare moves, PP, disabled state, type-effectiveness, verplichte switches via forceSwitch[0] en switch-blokkades zoals active[0].trapped of active[0].maybeTrapped. Bij een final response wordt een fainted Pokemon als condition 0 fnt getoond.",
   },
   {
     name: "events",

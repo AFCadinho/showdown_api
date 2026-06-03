@@ -2,6 +2,7 @@ import { presentMove } from "@/dex/dex-presenter";
 import { getMoveEffectiveness } from "@/dex/dex-effectiveness";
 
 type BattleRequest = {
+  forceSwitch?: boolean[];
   active?: Array<{
     moves?: Array<{
       move?: string;

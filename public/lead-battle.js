@@ -48,7 +48,7 @@ const responseFields = [
   {
     name: "requests",
     type: "object",
-    description: "Laatste request per speler na de lead keuze, verrijkt met Dex-data. Na team preview staan de beschikbare acties meestal onder active[].moves. Als active[0].trapped of active[0].maybeTrapped true is, moet de game switchen blokkeren. Fainted Pokemon worden in side.pokemon[].condition als 0 fnt getoond.",
+    description: "Laatste request per speler na de lead keuze, verrijkt met Dex-data. Na team preview staan de beschikbare acties meestal onder active[].moves. Als forceSwitch[0] true is, moet de game de verplichte switch UI openen. Als active[0].trapped of active[0].maybeTrapped true is, moet de game normale switches blokkeren. Fainted Pokemon worden in side.pokemon[].condition als 0 fnt getoond.",
   },
   {
     name: "events",

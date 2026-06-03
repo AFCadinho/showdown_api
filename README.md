@@ -360,6 +360,52 @@ Voorbeeld:
 }
 ```
 
+### Verplicht Wisselen
+
+Als de actieve Pokemon van een speler faint en de battle nog niet voorbij is,
+kan Showdown een verplichte switch request sturen. De API geeft die state door:
+
+```txt
+requests[p1|p2].forceSwitch[0]
+```
+
+Als `forceSwitch[0]` `true` is, moet de game de move-knoppen verbergen en de
+party/switch UI openen. Alleen levende, niet-actieve Pokemon mogen dan gekozen
+worden.
+
+Bij een verplichte switch mag `trapped` of `maybeTrapped` de party UI niet
+blokkeren. De speler moet dan namelijk wisselen. Als de battle al afgelopen is,
+staat `state.ended` op `true` en is `forceSwitch` niet nodig.
+
+Voorbeeld:
+
+```json
+{
+  "state": {
+    "ended": false
+  },
+  "requests": {
+    "p1": {
+      "forceSwitch": [true],
+      "side": {
+        "pokemon": [
+          {
+            "ident": "p1: Magikarp",
+            "condition": "0 fnt",
+            "active": true
+          },
+          {
+            "ident": "p1: Charizard",
+            "condition": "153/153",
+            "active": false
+          }
+        ]
+      }
+    }
+  }
+}
+```
+
 Voorbeeld response-fragment:
 
 ```json
@@ -864,7 +910,7 @@ Switch response:
 
 Na een choice response gebruik je:
 
-- `requests` voor de actuele UI state zoals HP, PP, disabled moves, effectiveness en switches. Gebruik `active[0].trapped` en `active[0].maybeTrapped` om switches te blokkeren.
+- `requests` voor de actuele UI state zoals HP, PP, disabled moves, effectiveness en switches. Gebruik `forceSwitch[0]` om verplichte switch UI te openen, en gebruik `active[0].trapped` en `active[0].maybeTrapped` om normale switches te blokkeren.
 - `events` voor animaties en feedback van wat er sinds de vorige response gebeurde.
 - `state` voor de huidige turn en of de battle gewonnen is.
 
