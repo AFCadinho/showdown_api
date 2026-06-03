@@ -139,6 +139,7 @@ export const createWildBattleDocs = {
   notes: [
     "Request body is gelijk aan /create_battle.",
     "De route voert intern direct team 1 uit voor p1 en p2.",
+    "Voor p1 mag elke team-Pokemon currentHp en maxHp meesturen. currentHp wordt gebruikt om de wild battle met bestaande HP te starten; de response condition gebruikt Showdown's berekende max HP.",
     "De response bevat daardoor normaal direct requests[p1|p2].active[].moves met actuele pp, maxpp, disabled state, type-effectiveness tegen de actieve tegenstander, verplichte switches via forceSwitch en eventuele switch-blokkades zoals trapped of maybeTrapped.",
     "Requests worden als response-snapshot teruggegeven. Als een Pokemon fainted is, wordt side.pokemon[].condition in die snapshot bijgewerkt naar 0 fnt.",
     "Tijdens actieve battle requests moet de game switchen blokkeren als requests[p1|p2].active[0].trapped of requests[p1|p2].active[0].maybeTrapped true is.",

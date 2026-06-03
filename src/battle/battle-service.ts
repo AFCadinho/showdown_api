@@ -8,10 +8,17 @@ import { buildBattleRequestSnapshot } from "./battle-request-snapshot";
 import {
   applyPokemonInstanceIdsToRequests,
   buildPokemonInstanceIdMap,
+  buildPokemonSaveStateMap,
 } from "./battle-pokemon-instance-ids";
 
 type ShowdownPokemonTeam = NonNullable<Parameters<typeof Teams.pack>[0]>;
-type PokemonTeam = Array<ShowdownPokemonTeam[number] & { instanceId?: string }>;
+type PokemonTeam = Array<
+  ShowdownPokemonTeam[number] & {
+    instanceId?: string;
+    currentHp?: number;
+    maxHp?: number;
+  }
+>;
 
 type CreateBattleBody = {
   p1?: {
@@ -58,6 +65,7 @@ export async function createBattle(body: CreateBattleBody): Promise<CreateBattle
   const p1PackedTeam = Teams.pack(p1.team);
   const p2PackedTeam = Teams.pack(p2.team);
   const instanceIdsByPokemonIdent = buildPokemonInstanceIdMap(p1.team, p2.team);
+  const pokemonSaveStateByIdent = buildPokemonSaveStateMap(p1.team, p2.team);
 
   // Maak BattleStream
   const battleStream = new BattleStream();
@@ -75,6 +83,7 @@ export async function createBattle(body: CreateBattleBody): Promise<CreateBattle
     conditionByPokemon: {},
     activeByPlayer: {},
     instanceIdsByPokemonIdent,
+    pokemonSaveStateByIdent,
     state: {
       turn: 1,
       ended: false,

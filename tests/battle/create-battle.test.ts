@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { createBattle } from "../../src/battle/battle-service";
+import { battleStore } from "../../src/battle/battle-store";
 
 const pikachu = {
   species: "Pikachu",
@@ -139,6 +140,38 @@ describe("createBattle", () => {
     expect(requests.p2.side.pokemon[0]).toMatchObject({
       ident: "p2: Bulbasaur",
       instanceId: "pokemon_456",
+    });
+  });
+
+  it("stores pokemon save HP state on battle data", async () => {
+    const result = await createBattle({
+      p1: {
+        team: [
+          {
+            ...pikachu,
+            instanceId: "pokemon_123",
+            currentHp: 12,
+            maxHp: 35,
+          },
+        ],
+      },
+      p2: {
+        team: [bulbasaur],
+      },
+    });
+
+    expect(result.success).toBe(true);
+
+    const battle = battleStore.getBattle(result.battleId);
+
+    expect(battle?.pokemonSaveStateByIdent).toEqual({
+      "p1: Pikachu": [
+        {
+          instanceId: "pokemon_123",
+          currentHp: 12,
+          maxHp: 35,
+        },
+      ],
     });
   });
 });

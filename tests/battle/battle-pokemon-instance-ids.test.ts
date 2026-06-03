@@ -1,10 +1,36 @@
 import { describe, expect, it } from "vitest";
 import {
   applyPokemonInstanceIdsToRequests,
+  applyPokemonSaveStateToRequests,
   buildPokemonInstanceIdMap,
+  buildPokemonSaveStateMap,
 } from "../../src/battle/battle-pokemon-instance-ids";
 
 describe("battle pokemon instance ids", () => {
+  it("stores saved HP state by the Showdown request ident", () => {
+    const saveState = buildPokemonSaveStateMap(
+      [
+        {
+          species: "Pikachu",
+          instanceId: "pokemon_123",
+          currentHp: 12,
+          maxHp: 35,
+        },
+      ],
+      []
+    );
+
+    expect(saveState).toEqual({
+      "p1: Pikachu": [
+        {
+          instanceId: "pokemon_123",
+          currentHp: 12,
+          maxHp: 35,
+        },
+      ],
+    });
+  });
+
   it("stores instance ids by the Showdown request ident", () => {
     const instanceIds = buildPokemonInstanceIdMap(
       [
@@ -128,5 +154,65 @@ describe("battle pokemon instance ids", () => {
     });
 
     expect(requests.p1.side.pokemon[0]).not.toHaveProperty("instanceId");
+  });
+
+  it("updates request conditions from saved HP state", () => {
+    const requests = {
+      p1: {
+        side: {
+          pokemon: [
+            {
+              ident: "p1: Pikachu",
+              condition: "20/20",
+            },
+          ],
+        },
+      },
+    };
+
+    const snapshot = applyPokemonSaveStateToRequests(requests, {
+      "p1: Pikachu": [
+        {
+          instanceId: "pokemon_123",
+          currentHp: 12,
+          maxHp: 35,
+        },
+      ],
+    }) as any;
+
+    expect(snapshot.p1.side.pokemon[0]).toMatchObject({
+      ident: "p1: Pikachu",
+      condition: "12/20",
+    });
+  });
+
+  it("uses 0 fnt condition for saved fainted Pokemon", () => {
+    const requests = {
+      p1: {
+        side: {
+          pokemon: [
+            {
+              ident: "p1: Pikachu",
+              condition: "35/35",
+            },
+          ],
+        },
+      },
+    };
+
+    const snapshot = applyPokemonSaveStateToRequests(requests, {
+      "p1: Pikachu": [
+        {
+          instanceId: "pokemon_123",
+          currentHp: 0,
+          maxHp: 35,
+        },
+      ],
+    }) as any;
+
+    expect(snapshot.p1.side.pokemon[0]).toMatchObject({
+      ident: "p1: Pikachu",
+      condition: "0 fnt",
+    });
   });
 });

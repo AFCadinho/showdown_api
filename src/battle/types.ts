@@ -12,6 +12,14 @@ export type BattleData = {
   conditionByPokemon: Record<string, string>;
   activeByPlayer: Record<string, string>;
   instanceIdsByPokemonIdent: Record<string, string[]>;
+  pokemonSaveStateByIdent: Record<
+    string,
+    Array<{
+      instanceId: string;
+      currentHp: number;
+      maxHp: number;
+    }>
+  >;
 
   state: {
     turn: number;

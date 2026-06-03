@@ -329,6 +329,37 @@ requests[p1|p2].active[].moves
 Die moves bevatten live battle-data uit Showdown, zoals actuele `pp`, `maxpp`,
 `disabled` en `effectiveness`.
 
+### Wild Battle Met Bestaande HP
+
+Bij `create_wild_battle` mag de client voor `p1.team[]` ook save-state HP
+meesturen:
+
+```json
+{
+  "species": "Pikachu",
+  "instanceId": "pokemon_123",
+  "currentHp": 12,
+  "maxHp": 35,
+  "moves": ["Thunderbolt"]
+}
+```
+
+`currentHp` wordt gebruikt om de Showdown battle met bestaande HP te starten,
+zodat de party niet automatisch volledig gehealed wordt. `maxHp` komt uit de
+save-state mee als context, maar de response gebruikt Showdown's berekende max
+HP als leidend.
+
+Voorbeeld: als de save `currentHp: 12` en `maxHp: 35` meestuurt, maar Showdown
+berekent de Pokemon in deze battle als `20` max HP, dan wordt de response:
+
+```json
+{
+  "ident": "p1: Pikachu",
+  "condition": "12/20",
+  "instanceId": "pokemon_123"
+}
+```
+
 ### Switch Beschikbaarheid
 
 Tijdens een actieve battle kan Showdown aangeven dat de actieve Pokemon niet

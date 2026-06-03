@@ -15,7 +15,7 @@ const requestFields = [
     name: "p1.team",
     type: "PokemonSet[]",
     required: true,
-    description: "Team van speler 1. Slot 1 wordt automatisch als lead gekozen. Elke Pokemon mag een instanceId bevatten voor save-sync.",
+    description: "Team van speler 1. Slot 1 wordt automatisch als lead gekozen. Elke Pokemon mag instanceId, currentHp en maxHp bevatten voor save-sync. currentHp wordt gebruikt om de wild battle met bestaande HP te starten.",
   },
   {
     name: "p2.name",
@@ -55,7 +55,7 @@ const responseFields = [
   {
     name: "requests",
     type: "object",
-    description: "Laatste request per speler als response-snapshot. Als instanceId is meegestuurd, staat die terug op side.pokemon[].instanceId. Bij create_wild_battle staan moves direct onder active[].moves met live PP, max PP, disabled state, type-effectiveness, verplichte switches via forceSwitch[0] en switch-blokkades zoals active[0].trapped of active[0].maybeTrapped. Als een Pokemon fainted is, toont side.pokemon[].condition 0 fnt.",
+    description: "Laatste request per speler als response-snapshot. Als instanceId is meegestuurd, staat die terug op side.pokemon[].instanceId. Als currentHp is meegestuurd voor p1, toont side.pokemon[].condition die HP met Showdown's berekende max HP. Bij create_wild_battle staan moves direct onder active[].moves met live PP, max PP, disabled state, type-effectiveness, verplichte switches via forceSwitch[0] en switch-blokkades zoals active[0].trapped of active[0].maybeTrapped. Als een Pokemon fainted is, toont side.pokemon[].condition 0 fnt.",
   },
   {
     name: "events",
@@ -82,6 +82,8 @@ const requestExample = {
       {
         species: "Pikachu",
         instanceId: "pokemon_123",
+        currentHp: 12,
+        maxHp: 35,
         ability: "Static",
         item: "Light Ball",
         moves: ["Thunderbolt", "Quick Attack", "Iron Tail", "Volt Switch"],
@@ -123,6 +125,19 @@ const successExample = {
   },
   requests: {
     p1: {
+      side: {
+        name: "Ash",
+        id: "p1",
+        pokemon: [
+          {
+            ident: "p1: Pikachu",
+            details: "Pikachu, M",
+            condition: "12/211",
+            active: true,
+            instanceId: "pokemon_123",
+          },
+        ],
+      },
       active: [
         {
           moves: [

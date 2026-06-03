@@ -10,8 +10,12 @@ import { buildChoiceCommand } from "@/battle/battle-choice-command";
 import { consumeBattleEventsForResponse } from "@/battle/battle-event-presenter";
 import type { BattleData } from "@/battle/types";
 import { buildBattleRequestSnapshot } from "@/battle/battle-request-snapshot";
-import { applyPokemonInstanceIdsToRequests } from "@/battle/battle-pokemon-instance-ids";
+import {
+  applyPokemonInstanceIdsToRequests,
+  applyPokemonSaveStateToRequests,
+} from "@/battle/battle-pokemon-instance-ids";
 import { validateChoiceAvailability } from "@/battle/battle-choice-availability";
+import { buildApplySavedHpEvalCommand } from "@/battle/battle-saved-hp";
 
 export const battleRoutes = Router();
 
@@ -45,7 +49,17 @@ battleRoutes.post("/create_wild_battle", async (req, res) => {
 
   await new Promise((resolve) => setTimeout(resolve, 10));
 
-  return res.json(buildBattleResponse(result.battleId, battle))
+  await battle.stream.write(
+    buildApplySavedHpEvalCommand("p1", battle.pokemonSaveStateByIdent)
+  );
+
+  await new Promise((resolve) => setTimeout(resolve, 10));
+
+  return res.json(
+    buildBattleResponse(result.battleId, battle, {
+      useSavedHpState: true,
+    })
+  )
 
 })
 
@@ -112,9 +126,24 @@ battleRoutes.post("/battles/:battleId/choice", async (req, res) => {
 });
 
 
-function buildBattleResponse(battleId: string, battle: BattleData) {
+type BuildBattleResponseOptions = {
+  useSavedHpState?: boolean;
+};
+
+function buildBattleResponse(
+  battleId: string,
+  battle: BattleData,
+  options: BuildBattleResponseOptions = {}
+) {
+  const baseSnapshot = buildBattleRequestSnapshot(battle.requests, battle.log);
+  const hpSnapshot = options.useSavedHpState
+    ? applyPokemonSaveStateToRequests(
+        baseSnapshot,
+        battle.pokemonSaveStateByIdent
+      )
+    : baseSnapshot;
   const requestSnapshot = applyPokemonInstanceIdsToRequests(
-    buildBattleRequestSnapshot(battle.requests, battle.log),
+    hpSnapshot,
     battle.instanceIdsByPokemonIdent
   );
 

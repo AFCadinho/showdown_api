@@ -4,6 +4,8 @@ type PokemonInput = {
   name?: string;
   species?: string;
   instanceId?: string;
+  currentHp?: number;
+  maxHp?: number;
 };
 
 type BattleRequestWithSide = {
@@ -18,6 +20,14 @@ type BattleRequestWithSide = {
 };
 
 export type PokemonInstanceIdMap = Record<string, string[]>;
+
+export type PokemonSaveState = {
+  instanceId: string;
+  currentHp: number;
+  maxHp: number;
+};
+
+export type PokemonSaveStateMap = Record<string, PokemonSaveState[]>;
 
 /**
  * Bouwt de vaste koppeling tussen een battle-Pokemon en de save-Pokemon.
@@ -36,6 +46,16 @@ export function buildPokemonInstanceIdMap(
   return {
     ...buildPlayerPokemonInstanceIdMap("p1", p1Team),
     ...buildPlayerPokemonInstanceIdMap("p2", p2Team),
+  };
+}
+
+export function buildPokemonSaveStateMap(
+  p1Team: PokemonInput[],
+  p2Team: PokemonInput[]
+): PokemonSaveStateMap {
+  return {
+    ...buildPlayerPokemonSaveStateMap("p1", p1Team),
+    ...buildPlayerPokemonSaveStateMap("p2", p2Team),
   };
 }
 
@@ -86,6 +106,45 @@ export function applyPokemonInstanceIdsToRequests(
   return requestsWithInstanceIds;
 }
 
+export function applyPokemonSaveStateToRequests(
+  requests: Record<string, unknown>,
+  saveStateByIdent: PokemonSaveStateMap
+) {
+  const requestsWithSaveState: Record<string, unknown> = {};
+
+  for (const [playerId, request] of Object.entries(requests)) {
+    if (!isBattleRequestWithSide(request) || !request.side?.pokemon) {
+      requestsWithSaveState[playerId] = request;
+      continue;
+    }
+
+    const seenByIdent: Record<string, number> = {};
+
+    requestsWithSaveState[playerId] = {
+      ...request,
+      side: {
+        ...request.side,
+        pokemon: request.side.pokemon.map((pokemon) => {
+          if (!pokemon.ident) return pokemon;
+
+          const occurrence = seenByIdent[pokemon.ident] ?? 0;
+          seenByIdent[pokemon.ident] = occurrence + 1;
+
+          const saveState = saveStateByIdent[pokemon.ident]?.[occurrence];
+          if (!saveState) return pokemon;
+
+          return {
+            ...pokemon,
+            condition: formatSavedHpCondition(saveState, pokemon.condition),
+          };
+        }),
+      },
+    };
+  }
+
+  return requestsWithSaveState;
+}
+
 function buildPlayerPokemonInstanceIdMap(
   playerId: PlayerId,
   team: PokemonInput[]
@@ -104,6 +163,55 @@ function buildPlayerPokemonInstanceIdMap(
   }
 
   return instanceIdsByIdent;
+}
+
+function buildPlayerPokemonSaveStateMap(
+  playerId: PlayerId,
+  team: PokemonInput[]
+): PokemonSaveStateMap {
+  const saveStateByIdent: PokemonSaveStateMap = {};
+
+  for (const pokemon of team) {
+    if (!pokemon.instanceId) continue;
+    if (typeof pokemon.currentHp !== "number") continue;
+    if (typeof pokemon.maxHp !== "number") continue;
+
+    const identName = pokemon.name || pokemon.species;
+    if (!identName) continue;
+
+    const ident = `${playerId}: ${identName}`;
+    saveStateByIdent[ident] ??= [];
+    saveStateByIdent[ident].push({
+      instanceId: pokemon.instanceId,
+      currentHp: pokemon.currentHp,
+      maxHp: pokemon.maxHp,
+    });
+  }
+
+  return saveStateByIdent;
+}
+
+function formatSavedHpCondition(
+  saveState: PokemonSaveState,
+  showdownCondition: unknown
+) {
+  if (saveState.currentHp <= 0) return "0 fnt";
+
+  const showdownMaxHp =
+    typeof showdownCondition === "string"
+      ? parseShowdownMaxHp(showdownCondition)
+      : null;
+
+  return `${saveState.currentHp}/${showdownMaxHp ?? saveState.maxHp}`;
+}
+
+function parseShowdownMaxHp(condition: string) {
+  const [, maxHpText] = condition.split("/");
+  const maxHp = Number(maxHpText);
+
+  if (!Number.isFinite(maxHp) || maxHp <= 0) return null;
+
+  return maxHp;
 }
 
 function isBattleRequestWithSide(
