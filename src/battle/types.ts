@@ -11,6 +11,7 @@ export type BattleData = {
   requests: Record<string, unknown>;
   conditionByPokemon: Record<string, string>;
   activeByPlayer: Record<string, string>;
+  instanceIdsByPokemonIdent: Record<string, string[]>;
 
   state: {
     turn: number;

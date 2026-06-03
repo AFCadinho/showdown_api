@@ -15,7 +15,7 @@ const requestFields = [
     name: "p1.team",
     type: "PokemonSet[]",
     required: true,
-    description: "Team van speler 1. Elke Pokemon gebruikt het normale Pokemon Showdown set formaat.",
+    description: "Team van speler 1. Elke Pokemon gebruikt het normale Pokemon Showdown set formaat en mag een instanceId bevatten voor save-sync.",
   },
   {
     name: "p2.name",
@@ -27,7 +27,7 @@ const requestFields = [
     name: "p2.team",
     type: "PokemonSet[]",
     required: true,
-    description: "Team van speler 2. Elke Pokemon gebruikt het normale Pokemon Showdown set formaat.",
+    description: "Team van speler 2. Elke Pokemon gebruikt het normale Pokemon Showdown set formaat en mag een instanceId bevatten voor save-sync.",
   },
 ];
 
@@ -55,7 +55,7 @@ const responseFields = [
   {
     name: "requests",
     type: "object",
-    description: "Laatste request per speler als response-snapshot, verrijkt met Dex-data. Fainted Pokemon worden in de snapshot als condition 0 fnt getoond. Bij create_battle is dit meestal een teamPreview request met moves onder side.pokemon[].moves.",
+    description: "Laatste request per speler als response-snapshot, verrijkt met Dex-data. Als instanceId is meegestuurd, staat die terug op side.pokemon[].instanceId. Fainted Pokemon worden in de snapshot als condition 0 fnt getoond. Bij create_battle is dit meestal een teamPreview request met moves onder side.pokemon[].moves.",
   },
   {
     name: "events",
@@ -76,6 +76,7 @@ const requestExample = {
     team: [
       {
         species: "Pikachu",
+        instanceId: "pokemon_123",
         ability: "Static",
         item: "Light Ball",
         moves: ["Thunderbolt", "Quick Attack", "Iron Tail", "Volt Switch"],
@@ -127,6 +128,7 @@ const successExample = {
             details: "Pikachu, M",
             condition: "211/211",
             active: true,
+            instanceId: "pokemon_123",
             stats: {
               atk: 146,
               def: 116,

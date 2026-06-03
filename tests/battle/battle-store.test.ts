@@ -16,6 +16,7 @@ function createBattleData(): BattleData {
     requests: {},
     conditionByPokemon: {},
     activeByPlayer: {},
+    instanceIdsByPokemonIdent: {},
     state: {
       turn: 1,
       ended: false,

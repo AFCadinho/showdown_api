@@ -5,8 +5,13 @@ import type { BattleData } from "@/battle/types";
 import { presentBattleRequests } from "@/battle/battle-request-presenter";
 import { consumeBattleEventsForResponse } from "./battle-event-presenter";
 import { buildBattleRequestSnapshot } from "./battle-request-snapshot";
+import {
+  applyPokemonInstanceIdsToRequests,
+  buildPokemonInstanceIdMap,
+} from "./battle-pokemon-instance-ids";
 
-type PokemonTeam = NonNullable<Parameters<typeof Teams.pack>[0]>;
+type ShowdownPokemonTeam = NonNullable<Parameters<typeof Teams.pack>[0]>;
+type PokemonTeam = Array<ShowdownPokemonTeam[number] & { instanceId?: string }>;
 
 type CreateBattleBody = {
   p1?: {
@@ -52,6 +57,7 @@ export async function createBattle(body: CreateBattleBody): Promise<CreateBattle
   const formatid = typeof formatId === "string" ? formatId : "gen9nationaldex";
   const p1PackedTeam = Teams.pack(p1.team);
   const p2PackedTeam = Teams.pack(p2.team);
+  const instanceIdsByPokemonIdent = buildPokemonInstanceIdMap(p1.team, p2.team);
 
   // Maak BattleStream
   const battleStream = new BattleStream();
@@ -68,6 +74,7 @@ export async function createBattle(body: CreateBattleBody): Promise<CreateBattle
     requests: {} as Record<string, unknown>,
     conditionByPokemon: {},
     activeByPlayer: {},
+    instanceIdsByPokemonIdent,
     state: {
       turn: 1,
       ended: false,
@@ -104,7 +111,10 @@ export async function createBattle(body: CreateBattleBody): Promise<CreateBattle
   await new Promise((resolve) => setTimeout(resolve, 10));
   battleStore.saveBattle(battleId, battleData);
 
-  const requestSnapshot = buildBattleRequestSnapshot(battleData.requests, battleData.log);
+  const requestSnapshot = applyPokemonInstanceIdsToRequests(
+    buildBattleRequestSnapshot(battleData.requests, battleData.log),
+    battleData.instanceIdsByPokemonIdent
+  );
 
   return {
     success: true,

@@ -15,7 +15,7 @@ const requestFields = [
     name: "p1.team",
     type: "PokemonSet[]",
     required: true,
-    description: "Team van speler 1. Slot 1 wordt automatisch als lead gekozen.",
+    description: "Team van speler 1. Slot 1 wordt automatisch als lead gekozen. Elke Pokemon mag een instanceId bevatten voor save-sync.",
   },
   {
     name: "p2.name",
@@ -27,7 +27,7 @@ const requestFields = [
     name: "p2.team",
     type: "PokemonSet[]",
     required: true,
-    description: "Team van speler 2. Slot 1 wordt automatisch als lead gekozen.",
+    description: "Team van speler 2. Slot 1 wordt automatisch als lead gekozen. Elke Pokemon mag een instanceId bevatten voor save-sync.",
   },
 ];
 
@@ -55,7 +55,7 @@ const responseFields = [
   {
     name: "requests",
     type: "object",
-    description: "Laatste request per speler als response-snapshot. Bij create_wild_battle staan moves direct onder active[].moves met live PP, max PP, disabled state en type-effectiveness. Als een Pokemon fainted is, toont side.pokemon[].condition 0 fnt.",
+    description: "Laatste request per speler als response-snapshot. Als instanceId is meegestuurd, staat die terug op side.pokemon[].instanceId. Bij create_wild_battle staan moves direct onder active[].moves met live PP, max PP, disabled state, type-effectiveness en switch-blokkades zoals active[0].trapped of active[0].maybeTrapped. Als een Pokemon fainted is, toont side.pokemon[].condition 0 fnt.",
   },
   {
     name: "events",
@@ -81,6 +81,7 @@ const requestExample = {
     team: [
       {
         species: "Pikachu",
+        instanceId: "pokemon_123",
         ability: "Static",
         item: "Light Ball",
         moves: ["Thunderbolt", "Quick Attack", "Iron Tail", "Volt Switch"],

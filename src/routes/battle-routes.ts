@@ -10,6 +10,8 @@ import { buildChoiceCommand } from "@/battle/battle-choice-command";
 import { consumeBattleEventsForResponse } from "@/battle/battle-event-presenter";
 import type { BattleData } from "@/battle/types";
 import { buildBattleRequestSnapshot } from "@/battle/battle-request-snapshot";
+import { applyPokemonInstanceIdsToRequests } from "@/battle/battle-pokemon-instance-ids";
+import { validateChoiceAvailability } from "@/battle/battle-choice-availability";
 
 export const battleRoutes = Router();
 
@@ -89,6 +91,18 @@ battleRoutes.post("/battles/:battleId/choice", async (req, res) => {
   if (!validation.success) return res.status(400).json(validation);
 
   const { playerId } = validation.data;
+  const availability = validateChoiceAvailability(
+    validation.data,
+    battle.requests[playerId]
+  );
+
+  if (!availability.success) {
+    return res.status(400).json({
+      ...buildBattleResponse(battleId, battle),
+      ...availability,
+    });
+  }
+
   const choiceCommand = buildChoiceCommand(validation.data);
 
   await battle.playerStreams[playerId].write(choiceCommand);
@@ -99,7 +113,10 @@ battleRoutes.post("/battles/:battleId/choice", async (req, res) => {
 
 
 function buildBattleResponse(battleId: string, battle: BattleData) {
-  const requestSnapshot = buildBattleRequestSnapshot(battle.requests, battle.log)
+  const requestSnapshot = applyPokemonInstanceIdsToRequests(
+    buildBattleRequestSnapshot(battle.requests, battle.log),
+    battle.instanceIdsByPokemonIdent
+  );
 
   return {
     success: true,

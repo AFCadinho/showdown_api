@@ -10,6 +10,7 @@ export const createBattleDocs = {
       team: [
         {
           species: "Pikachu",
+          instanceId: "pokemon_123",
           ability: "Static",
           item: "Light Ball",
           moves: ["Thunderbolt", "Quick Attack", "Iron Tail", "Volt Switch"],
@@ -54,7 +55,8 @@ export const createBattleDocs = {
     "p1.team": {
       type: "PokemonSet[]",
       required: true,
-      description: "Team van speler 1 in Pokemon Showdown set formaat.",
+      description:
+        "Team van speler 1 in Pokemon Showdown set formaat. Elke Pokemon mag een instanceId bevatten voor save-sync.",
     },
     "p2.name": {
       type: "string",
@@ -64,11 +66,14 @@ export const createBattleDocs = {
     "p2.team": {
       type: "PokemonSet[]",
       required: true,
-      description: "Team van speler 2 in Pokemon Showdown set formaat.",
+      description:
+        "Team van speler 2 in Pokemon Showdown set formaat. Elke Pokemon mag een instanceId bevatten voor save-sync.",
     },
   },
   notes: [
     "Requests worden als response-snapshot teruggegeven. Als een Pokemon fainted is, wordt side.pokemon[].condition in die snapshot bijgewerkt naar 0 fnt.",
+    "Als de client instanceId meestuurt op een team-Pokemon, geeft de API dezelfde instanceId terug in requests[p1|p2].side.pokemon[].instanceId.",
+    "Tijdens actieve battle requests moet de game switchen blokkeren als requests[p1|p2].active[0].trapped of requests[p1|p2].active[0].maybeTrapped true is.",
   ],
   successResponse: {
     success: true,
@@ -90,6 +95,7 @@ export const createBattleDocs = {
               details: "Pikachu, M",
               condition: "211/211",
               active: true,
+              instanceId: "pokemon_123",
               moves: [
                 {
                   id: "thunderbolt",
@@ -132,8 +138,9 @@ export const createWildBattleDocs = {
   notes: [
     "Request body is gelijk aan /create_battle.",
     "De route voert intern direct team 1 uit voor p1 en p2.",
-    "De response bevat daardoor normaal direct requests[p1|p2].active[].moves met actuele pp, maxpp, disabled state en type-effectiveness tegen de actieve tegenstander.",
+    "De response bevat daardoor normaal direct requests[p1|p2].active[].moves met actuele pp, maxpp, disabled state, type-effectiveness tegen de actieve tegenstander en eventuele switch-blokkades zoals trapped of maybeTrapped.",
     "Requests worden als response-snapshot teruggegeven. Als een Pokemon fainted is, wordt side.pokemon[].condition in die snapshot bijgewerkt naar 0 fnt.",
+    "Tijdens actieve battle requests moet de game switchen blokkeren als requests[p1|p2].active[0].trapped of requests[p1|p2].active[0].maybeTrapped true is.",
     "Gebruik deze route voor wild battles waarin geen handmatige team preview stap nodig is.",
   ],
   successResponse: {

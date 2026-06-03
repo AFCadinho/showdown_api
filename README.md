@@ -73,6 +73,7 @@ Content-Type: application/json
     "team": [
       {
         "species": "Pikachu",
+        "instanceId": "pokemon_123",
         "ability": "Static",
         "item": "Light Ball",
         "moves": ["Thunderbolt", "Quick Attack", "Iron Tail", "Volt Switch"],
@@ -120,6 +121,7 @@ Een Pokemon in `team` gebruikt het normale Pokemon Showdown set formaat:
 ```json
 {
   "species": "Pikachu",
+  "instanceId": "pokemon_123",
   "name": "Sparky",
   "gender": "M",
   "ability": "Static",
@@ -147,6 +149,12 @@ Een Pokemon in `team` gebruikt het normale Pokemon Showdown set formaat:
   "teraType": "Electric"
 }
 ```
+
+`instanceId` is optioneel voor Showdown, maar belangrijk voor de game-save. Als
+de client dit veld meestuurt, geeft de API dezelfde waarde terug in
+`requests[p1|p2].side.pokemon[].instanceId`. Daardoor kan de client HP na een
+battle terugschrijven op basis van de vaste opgeslagen Pokemon-id, niet op basis
+van de plek in de teamlijst.
 
 ## Succes Response
 
@@ -177,6 +185,7 @@ Voorbeeld:
             "details": "Pikachu, M",
             "condition": "211/211",
             "active": true,
+            "instanceId": "pokemon_123",
             "stats": {
               "atk": 146,
               "def": 116,
@@ -319,6 +328,37 @@ requests[p1|p2].active[].moves
 
 Die moves bevatten live battle-data uit Showdown, zoals actuele `pp`, `maxpp`,
 `disabled` en `effectiveness`.
+
+### Switch Beschikbaarheid
+
+Tijdens een actieve battle kan Showdown aangeven dat de actieve Pokemon niet
+mag switchen. De API geeft die velden door in de actuele request:
+
+```txt
+requests[p1|p2].active[0].trapped
+requests[p1|p2].active[0].maybeTrapped
+```
+
+Als `trapped` of `maybeTrapped` `true` is, moet de game de switch-optie voor
+die speler blokkeren. Dit kan bijvoorbeeld gebeuren bij Outrage-lock, trapping
+moves of abilities die switchen blokkeren.
+
+Voorbeeld:
+
+```json
+{
+  "requests": {
+    "p1": {
+      "active": [
+        {
+          "moves": [],
+          "trapped": true
+        }
+      ]
+    }
+  }
+}
+```
 
 Voorbeeld response-fragment:
 
@@ -824,7 +864,7 @@ Switch response:
 
 Na een choice response gebruik je:
 
-- `requests` voor de actuele UI state zoals HP, PP, disabled moves, effectiveness en switches.
+- `requests` voor de actuele UI state zoals HP, PP, disabled moves, effectiveness en switches. Gebruik `active[0].trapped` en `active[0].maybeTrapped` om switches te blokkeren.
 - `events` voor animaties en feedback van wat er sinds de vorige response gebeurde.
 - `state` voor de huidige turn en of de battle gewonnen is.
 
@@ -893,6 +933,18 @@ laatste faint-informatie uit de log. Daardoor blijven `events`, `state` en
   "error": "Invalid choice slot"
 }
 ```
+
+```json
+{
+  "success": false,
+  "invalidChoice": true,
+  "error": "Cannot switch: active Pokemon is trapped"
+}
+```
+
+Deze laatste response komt terug als de game toch een switch doorstuurt terwijl
+de laatste request voor die speler `active[0].trapped` of
+`active[0].maybeTrapped` op `true` heeft staan.
 
 ## Curl Voorbeeld
 

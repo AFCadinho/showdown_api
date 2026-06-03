@@ -107,4 +107,38 @@ describe("createBattle", () => {
       accuracy: 100,
     });
   });
+
+  it("returns pokemon instance ids in battle requests", async () => {
+    const result = await createBattle({
+      p1: {
+        team: [
+          {
+            ...pikachu,
+            instanceId: "pokemon_123",
+          },
+        ],
+      },
+      p2: {
+        team: [
+          {
+            ...bulbasaur,
+            instanceId: "pokemon_456",
+          },
+        ],
+      },
+    });
+
+    expect(result.success).toBe(true);
+
+    const requests = result.requests as Record<string, any>;
+
+    expect(requests.p1.side.pokemon[0]).toMatchObject({
+      ident: "p1: Pikachu",
+      instanceId: "pokemon_123",
+    });
+    expect(requests.p2.side.pokemon[0]).toMatchObject({
+      ident: "p2: Bulbasaur",
+      instanceId: "pokemon_456",
+    });
+  });
 });
