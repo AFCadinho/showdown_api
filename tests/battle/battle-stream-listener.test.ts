@@ -15,6 +15,8 @@ describe("updateFieldFromBattleLine", () => {
         scope: "field",
         effectType: "weather",
         effect: "RainDance",
+        minDuration: 5,
+        maxDuration: 8,
       },
     ]);
   });
@@ -37,6 +39,8 @@ describe("updateFieldFromBattleLine", () => {
         scope: "field",
         effectType: "weather",
         effect: "Sandstorm",
+        minDuration: 5,
+        maxDuration: 8,
       },
     ]);
   });
@@ -78,6 +82,8 @@ describe("updateFieldFromBattleLine", () => {
         scope: "field",
         effectType: "weather",
         effect: "SunnyDay",
+        minDuration: 5,
+        maxDuration: 8,
       },
     ]);
   });
@@ -97,6 +103,8 @@ describe("updateFieldFromBattleLine", () => {
         scope: "field",
         effectType: "fieldCondition",
         effect: "move: Trick Room",
+        minDuration: 5,
+        maxDuration: 5,
       },
       {
         scope: "field",
@@ -217,6 +225,8 @@ describe("updateFieldFromBattleLine", () => {
         side: "p1",
         effectType: "sideCondition",
         effect: "move: Tailwind",
+        minDuration: 4,
+        maxDuration: 4,
       },
       {
         scope: "side",

@@ -98,6 +98,16 @@ if (!weatherEffect) {
   console.error("Expected field.effects to contain active RainDance weather.");
   process.exit(1);
 }
+
+if (weatherEvent.minDuration !== 5 || weatherEvent.maxDuration !== 8) {
+  console.error("Expected RainDance start event to include minDuration 5 and maxDuration 8.");
+  process.exit(1);
+}
+
+if (weatherEffect.minDuration !== 5 || weatherEffect.maxDuration !== 8) {
+  console.error("Expected RainDance field effect to include minDuration 5 and maxDuration 8.");
+  process.exit(1);
+}
 ' "$TURN_RESPONSE"
 
 curl -sS -X POST "$BASE_URL/battles/$BATTLE_ID/choice" \
@@ -138,6 +148,16 @@ if (!weatherEvent) {
 
 if (!weatherEffect) {
   console.error("Expected field.effects to keep active RainDance weather on turn 2.");
+  process.exit(1);
+}
+
+if (weatherEvent.minDuration !== 5 || weatherEvent.maxDuration !== 8) {
+  console.error("Expected RainDance upkeep event to include minDuration 5 and maxDuration 8.");
+  process.exit(1);
+}
+
+if (weatherEffect.minDuration !== 5 || weatherEffect.maxDuration !== 8) {
+  console.error("Expected active RainDance field effect to keep minDuration 5 and maxDuration 8.");
   process.exit(1);
 }
 ' "$TURN_2_RESPONSE"
@@ -194,6 +214,14 @@ console.log(JSON.stringify({
 
 if (!weatherEndEvent) {
   console.error("Expected events to contain weather end after RainDance expires.");
+  process.exit(1);
+}
+
+if (
+  weatherEndEvent.minDuration !== undefined ||
+  weatherEndEvent.maxDuration !== undefined
+) {
+  console.error("Expected weather none end event to omit duration metadata.");
   process.exit(1);
 }
 

@@ -97,6 +97,16 @@ if (!fieldEffect) {
   console.error("Expected field.effects to contain active Trick Room.");
   process.exit(1);
 }
+
+if (fieldEvent.minDuration !== 5 || fieldEvent.maxDuration !== 5) {
+  console.error("Expected Trick Room start event to include minDuration 5 and maxDuration 5.");
+  process.exit(1);
+}
+
+if (fieldEffect.minDuration !== 5 || fieldEffect.maxDuration !== 5) {
+  console.error("Expected active Trick Room field effect to include minDuration 5 and maxDuration 5.");
+  process.exit(1);
+}
 ' "$TURN_RESPONSE"
 
 for TURN in 2 3 4 5 6 7; do
@@ -156,6 +166,11 @@ console.log(JSON.stringify({
 
 if (!fieldEndEvent) {
   console.error("Expected events to contain Trick Room fieldCondition end.");
+  process.exit(1);
+}
+
+if (fieldEndEvent.minDuration !== 5 || fieldEndEvent.maxDuration !== 5) {
+  console.error("Expected Trick Room end event to include minDuration 5 and maxDuration 5.");
   process.exit(1);
 }
 

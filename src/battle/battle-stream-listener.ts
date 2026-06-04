@@ -4,6 +4,7 @@ import type {
   PlayerStream,
   PlayerStreams,
 } from "./types";
+import { getFieldEffectDurationMetadata } from "./battle-field-effect-metadata";
 
 /**
  * Start listeners voor beide spelerstreams van een Showdown battle.
@@ -110,11 +111,16 @@ export function updateFieldFromBattleLine(
     removeFieldEffect(battleData, "fieldCondition", effect);
     if (effectGroup) removeFieldEffectGroup(battleData, effectGroup);
 
-    battleData.field.effects.push({
+    const fieldEffect = {
       scope: "field",
       effectType: "fieldCondition",
       effectGroup,
       effect,
+    } as const;
+
+    battleData.field.effects.push({
+      ...fieldEffect,
+      ...getFieldEffectDurationMetadata(fieldEffect),
     });
     return;
   }
@@ -133,11 +139,16 @@ export function updateFieldFromBattleLine(
     if (!side || !effect) return;
 
     removeSideEffect(battleData, side, effect);
-    battleData.field.effects.push({
+    const sideEffect = {
       scope: "side",
       side,
       effectType: "sideCondition",
       effect,
+    } as const;
+
+    battleData.field.effects.push({
+      ...sideEffect,
+      ...getFieldEffectDurationMetadata(sideEffect),
     });
     return;
   }
@@ -161,10 +172,15 @@ export function updateFieldFromBattleLine(
 
   if (!weather || weather === "none") return;
 
-  battleData.field.effects.push({
+  const weatherEffect = {
     scope: "field",
     effectType: "weather",
     effect: weather,
+  } as const;
+
+  battleData.field.effects.push({
+    ...weatherEffect,
+    ...getFieldEffectDurationMetadata(weatherEffect),
   });
 }
 

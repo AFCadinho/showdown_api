@@ -558,12 +558,16 @@ Voorbeeld:
       {
         "scope": "field",
         "effectType": "weather",
-        "effect": "RainDance"
+        "effect": "RainDance",
+        "minDuration": 5,
+        "maxDuration": 8
       },
       {
         "scope": "field",
         "effectType": "fieldCondition",
-        "effect": "move: Trick Room"
+        "effect": "move: Trick Room",
+        "minDuration": 5,
+        "maxDuration": 5
       },
       {
         "scope": "field",
@@ -575,7 +579,9 @@ Voorbeeld:
         "scope": "side",
         "side": "p1",
         "effectType": "sideCondition",
-        "effect": "move: Tailwind"
+        "effect": "move: Tailwind",
+        "minDuration": 4,
+        "maxDuration": 4
       },
       {
         "scope": "side",
@@ -603,7 +609,9 @@ weather doorgaat.
   "scope": "field",
   "effectType": "weather",
   "effect": "RainDance",
-  "state": "start"
+  "state": "start",
+  "minDuration": 5,
+  "maxDuration": 8
 }
 ```
 
@@ -613,7 +621,9 @@ weather doorgaat.
   "scope": "field",
   "effectType": "fieldCondition",
   "effect": "move: Trick Room",
-  "state": "start"
+  "state": "start",
+  "minDuration": 5,
+  "maxDuration": 5
 }
 ```
 
@@ -624,9 +634,18 @@ weather doorgaat.
   "side": "p1",
   "effectType": "sideCondition",
   "effect": "move: Tailwind",
-  "state": "start"
+  "state": "start",
+  "minDuration": 4,
+  "maxDuration": 4
 }
 ```
+
+Sommige effecten krijgen `minDuration` en `maxDuration`. Dit is basisduur
+metadata voor de UI, geen aftellende timer. Rain heeft bijvoorbeeld `5` tot `8`
+omdat items de duur kunnen verlengen. Trick Room en Tailwind hebben dezelfde
+waarde voor min en max omdat ze een vaste duur hebben. Hazards zoals Stealth
+Rock krijgen geen duration metadata, omdat ze blijven staan totdat ze worden
+verwijderd.
 
 Zolang een effect actief is, staat het in `field.effects`. Als Showdown meldt
 dat een effect eindigt, verwijdert de API die entry uit `field.effects`.

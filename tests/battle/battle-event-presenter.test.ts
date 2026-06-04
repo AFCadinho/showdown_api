@@ -153,6 +153,8 @@ describe("presentBattleEventsForResponse", () => {
         effectType: "weather",
         effect: "RainDance",
         state: "start",
+        minDuration: 5,
+        maxDuration: 8,
       },
       {
         type: "fieldEffect",
@@ -160,6 +162,8 @@ describe("presentBattleEventsForResponse", () => {
         effectType: "weather",
         effect: "Sandstorm",
         state: "upkeep",
+        minDuration: 5,
+        maxDuration: 8,
       },
       {
         type: "fieldEffect",
@@ -189,6 +193,8 @@ describe("presentBattleEventsForResponse", () => {
         effectGroup: undefined,
         effect: "move: Trick Room",
         state: "start",
+        minDuration: 5,
+        maxDuration: 5,
       },
       {
         type: "fieldEffect",
@@ -205,6 +211,8 @@ describe("presentBattleEventsForResponse", () => {
         effectGroup: undefined,
         effect: "move: Trick Room",
         state: "end",
+        minDuration: 5,
+        maxDuration: 5,
       },
     ]);
   });
@@ -228,6 +236,8 @@ describe("presentBattleEventsForResponse", () => {
         effectType: "sideCondition",
         effect: "move: Tailwind",
         state: "start",
+        minDuration: 4,
+        maxDuration: 4,
       },
       {
         type: "fieldEffect",
@@ -244,6 +254,8 @@ describe("presentBattleEventsForResponse", () => {
         effectType: "sideCondition",
         effect: "move: Tailwind",
         state: "end",
+        minDuration: 4,
+        maxDuration: 4,
       },
       {
         type: "fieldEffect",

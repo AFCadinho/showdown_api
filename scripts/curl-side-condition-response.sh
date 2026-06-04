@@ -99,6 +99,16 @@ if (!sideEffect) {
   console.error("Expected field.effects to contain active Tailwind.");
   process.exit(1);
 }
+
+if (sideEvent.minDuration !== 4 || sideEvent.maxDuration !== 4) {
+  console.error("Expected Tailwind start event to include minDuration 4 and maxDuration 4.");
+  process.exit(1);
+}
+
+if (sideEffect.minDuration !== 4 || sideEffect.maxDuration !== 4) {
+  console.error("Expected active Tailwind field effect to include minDuration 4 and maxDuration 4.");
+  process.exit(1);
+}
 ' "$TURN_RESPONSE"
 
 for TURN in 2 3 4 5 6; do
@@ -161,6 +171,11 @@ console.log(JSON.stringify({
 
 if (!sideEndEvent) {
   console.error("Expected events to contain Tailwind sideCondition end.");
+  process.exit(1);
+}
+
+if (sideEndEvent.minDuration !== 4 || sideEndEvent.maxDuration !== 4) {
+  console.error("Expected Tailwind end event to include minDuration 4 and maxDuration 4.");
   process.exit(1);
 }
 

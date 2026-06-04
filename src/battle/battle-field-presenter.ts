@@ -4,6 +4,8 @@ export type BattleFieldEffect = {
   effectType?: "weather" | "fieldCondition" | "sideCondition";
   effectGroup?: "terrain";
   side?: "p1" | "p2";
+  minDuration?: number;
+  maxDuration?: number;
 };
 
 export type BattleFieldSnapshot = {

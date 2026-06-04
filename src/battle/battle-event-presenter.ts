@@ -1,4 +1,5 @@
 import type { BattleData } from "@/battle/types";
+import { getFieldEffectDurationMetadata } from "./battle-field-effect-metadata";
 
 export type MoveEvent = {
   type: "move";
@@ -85,6 +86,8 @@ export type FieldEffectEvent = {
   effect: string;
   effectGroup?: "terrain";
   state: "start" | "upkeep" | "end";
+  minDuration?: number;
+  maxDuration?: number;
 };
 
 export type BattleEvent =
@@ -375,13 +378,17 @@ function parseWinEvent(parts: string[]): WinEvent {
 function parseWeatherEvent(parts: string[]): FieldEffectEvent {
   const effect = parts[2];
   const isUpkeep = parts.includes("[upkeep]");
-
-  return {
+  const weatherEvent = {
     type: "fieldEffect",
     scope: "field",
     effectType: "weather",
     effect,
     state: effect === "none" ? "end" : isUpkeep ? "upkeep" : "start",
+  } as const;
+
+  return {
+    ...weatherEvent,
+    ...(effect === "none" ? {} : getFieldEffectDurationMetadata(weatherEvent)),
   };
 }
 
@@ -390,14 +397,18 @@ function parseFieldConditionEvent(
   state: "start" | "end"
 ): FieldEffectEvent {
   const effect = parts[2];
-
-  return {
+  const fieldEvent = {
     type: "fieldEffect",
     scope: "field",
     effectType: "fieldCondition",
     effectGroup: getFieldConditionGroup(effect),
     effect,
     state,
+  } as const;
+
+  return {
+    ...fieldEvent,
+    ...getFieldEffectDurationMetadata(fieldEvent),
   };
 }
 
@@ -409,14 +420,18 @@ function parseSideConditionEvent(
   const effect = normalizeSideConditionEffect(parts[3]);
 
   if (!side || !effect) return null;
-
-  return {
+  const sideEvent = {
     type: "fieldEffect",
     scope: "side",
     side,
     effectType: "sideCondition",
     effect,
     state,
+  } as const;
+
+  return {
+    ...sideEvent,
+    ...getFieldEffectDurationMetadata(sideEvent),
   };
 }
 
