@@ -98,4 +98,19 @@ describe("calculateFieldEffectRemainingTurns", () => {
       maxRemainingTurns: 0,
     });
   });
+
+  it("uses upkeep ticks when they are ahead of the visible turn count", () => {
+    expect(
+      calculateFieldEffectRemainingTurns({
+        currentTurn: 2,
+        startedTurn: 2,
+        minDuration: 5,
+        maxDuration: 8,
+        upkeepTicks: 1,
+      })
+    ).toEqual({
+      minRemainingTurns: 4,
+      maxRemainingTurns: 7,
+    });
+  });
 });

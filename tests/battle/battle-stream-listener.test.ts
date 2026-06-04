@@ -76,6 +76,7 @@ describe("updateFieldFromBattleLine", () => {
         startedTurn: 2,
         minDuration: 5,
         maxDuration: 8,
+        upkeepTicks: 1,
       },
     ]);
   });

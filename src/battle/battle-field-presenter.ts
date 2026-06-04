@@ -11,6 +11,7 @@ export type BattleFieldEffect = {
   maxDuration?: number;
   minRemainingTurns?: number;
   maxRemainingTurns?: number;
+  upkeepTicks?: number;
 };
 
 export type BattleFieldSnapshot = {
@@ -22,7 +23,7 @@ export function presentBattleField(
   currentTurn?: number
 ): BattleFieldSnapshot {
   return {
-    effects: field.effects.map((effect) => ({
+    effects: field.effects.map(({ upkeepTicks, ...effect }) => ({
       ...effect,
       ...(currentTurn === undefined
         ? {}
@@ -31,6 +32,7 @@ export function presentBattleField(
             startedTurn: effect.startedTurn,
             minDuration: effect.minDuration,
             maxDuration: effect.maxDuration,
+            upkeepTicks,
           })),
     })),
   };

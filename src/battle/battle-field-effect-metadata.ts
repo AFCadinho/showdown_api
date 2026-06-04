@@ -10,6 +10,7 @@ export type FieldEffectRemainingTurnsInput = {
   startedTurn?: number;
   minDuration?: number;
   maxDuration?: number;
+  upkeepTicks?: number;
 };
 
 export type FieldEffectRemainingTurnsMetadata = {
@@ -54,6 +55,7 @@ export function calculateFieldEffectRemainingTurns({
   startedTurn,
   minDuration,
   maxDuration,
+  upkeepTicks = 0,
 }: FieldEffectRemainingTurnsInput): FieldEffectRemainingTurnsMetadata {
   if (
     startedTurn === undefined ||
@@ -63,7 +65,7 @@ export function calculateFieldEffectRemainingTurns({
     return {};
   }
 
-  const elapsedTurns = Math.max(0, currentTurn - startedTurn);
+  const elapsedTurns = Math.max(0, currentTurn - startedTurn, upkeepTicks);
 
   return {
     minRemainingTurns: Math.max(0, minDuration - elapsedTurns),

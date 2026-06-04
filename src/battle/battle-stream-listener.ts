@@ -182,7 +182,10 @@ export function updateFieldFromBattleLine(
     (effect) => effect.effectType === "weather"
   );
 
-  if (isUpkeep && activeWeather?.effect === weather) return;
+  if (isUpkeep && activeWeather?.effect === weather) {
+    activeWeather.upkeepTicks = (activeWeather.upkeepTicks ?? 0) + 1;
+    return;
+  }
 
   battleData.field.effects = battleData.field.effects.filter(
     (effect) => effect.effectType !== "weather"

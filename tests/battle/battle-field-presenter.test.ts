@@ -84,4 +84,38 @@ describe("presentBattleField", () => {
       ],
     });
   });
+
+  it("counts down from upkeep ticks even when the visible turn did not change", () => {
+    expect(
+      presentBattleField(
+        {
+          effects: [
+            {
+              scope: "field",
+              effectType: "weather",
+              effect: "Sandstorm",
+              startedTurn: 2,
+              minDuration: 5,
+              maxDuration: 8,
+              upkeepTicks: 1,
+            },
+          ],
+        },
+        2
+      )
+    ).toEqual({
+      effects: [
+        {
+          scope: "field",
+          effectType: "weather",
+          effect: "Sandstorm",
+          startedTurn: 2,
+          minDuration: 5,
+          maxDuration: 8,
+          minRemainingTurns: 4,
+          maxRemainingTurns: 7,
+        },
+      ],
+    });
+  });
 });
