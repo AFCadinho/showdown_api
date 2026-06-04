@@ -142,6 +142,7 @@ describe("updateFieldFromBattleLine", () => {
       {
         scope: "field",
         effectType: "fieldCondition",
+        effectGroup: undefined,
         effect: "move: Trick Room",
         startedTurn: 2,
         minDuration: 5,
@@ -153,6 +154,8 @@ describe("updateFieldFromBattleLine", () => {
         effect: "move: Electric Terrain",
         effectGroup: "terrain",
         startedTurn: 3,
+        minDuration: 5,
+        maxDuration: 8,
       },
     ]);
   });
@@ -247,6 +250,8 @@ describe("updateFieldFromBattleLine", () => {
         effectGroup: "terrain",
         effect: "move: Grassy Terrain",
         startedTurn: 4,
+        minDuration: 5,
+        maxDuration: 8,
       },
     ]);
   });

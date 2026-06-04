@@ -226,6 +226,8 @@ describe("presentBattleEventsForResponse", () => {
         effectGroup: "terrain",
         effect: "move: Grassy Terrain",
         state: "start",
+        minDuration: 5,
+        maxDuration: 8,
       },
       {
         type: "fieldEffect",
@@ -258,6 +260,8 @@ describe("presentBattleEventsForResponse", () => {
         state: "start",
         source: "ability: Electric Surge",
         sourceTarget: "p1a: Pincurchin",
+        minDuration: 5,
+        maxDuration: 8,
       },
     ]);
   });

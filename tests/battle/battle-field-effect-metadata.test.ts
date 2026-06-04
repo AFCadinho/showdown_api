@@ -29,6 +29,18 @@ describe("getFieldEffectDurationMetadata", () => {
     });
   });
 
+  it("returns a duration range for terrain", () => {
+    expect(
+      getFieldEffectDurationMetadata({
+        effectType: "fieldCondition",
+        effect: "move: Psychic Terrain",
+      })
+    ).toEqual({
+      minDuration: 5,
+      maxDuration: 8,
+    });
+  });
+
   it("returns a fixed duration for Tailwind", () => {
     expect(
       getFieldEffectDurationMetadata({

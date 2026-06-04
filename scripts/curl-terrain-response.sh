@@ -96,6 +96,22 @@ if (terrainEffects.length !== 1 || terrainEffects[0].effect !== "move: Electric 
   console.error("Expected field.effects to contain only Electric Terrain.");
   process.exit(1);
 }
+
+if (terrainEvent.minDuration !== 5 || terrainEvent.maxDuration !== 8) {
+  console.error("Expected Electric Terrain event to include minDuration 5 and maxDuration 8.");
+  process.exit(1);
+}
+
+if (
+  terrainEffects[0].startedTurn !== 2 ||
+  terrainEffects[0].minDuration !== 5 ||
+  terrainEffects[0].maxDuration !== 8 ||
+  terrainEffects[0].minRemainingTurns !== 5 ||
+  terrainEffects[0].maxRemainingTurns !== 8
+) {
+  console.error("Expected Electric Terrain field effect to include duration and remaining turns 5 to 8.");
+  process.exit(1);
+}
 ' "$TURN_RESPONSE"
 
 curl -sS -X POST "$BASE_URL/battles/$BATTLE_ID/choice" \
@@ -135,6 +151,22 @@ if (!terrainEvent) {
 
 if (terrainEffects.length !== 1 || terrainEffects[0].effect !== "move: Grassy Terrain") {
   console.error("Expected field.effects to replace Electric Terrain with Grassy Terrain.");
+  process.exit(1);
+}
+
+if (terrainEvent.minDuration !== 5 || terrainEvent.maxDuration !== 8) {
+  console.error("Expected Grassy Terrain event to include minDuration 5 and maxDuration 8.");
+  process.exit(1);
+}
+
+if (
+  terrainEffects[0].startedTurn !== 3 ||
+  terrainEffects[0].minDuration !== 5 ||
+  terrainEffects[0].maxDuration !== 8 ||
+  terrainEffects[0].minRemainingTurns !== 5 ||
+  terrainEffects[0].maxRemainingTurns !== 8
+) {
+  console.error("Expected Grassy Terrain field effect to include duration and remaining turns 5 to 8.");
   process.exit(1);
 }
 ' "$TURN_2_RESPONSE"

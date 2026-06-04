@@ -584,7 +584,12 @@ Voorbeeld:
         "scope": "field",
         "effectType": "fieldCondition",
         "effectGroup": "terrain",
-        "effect": "move: Grassy Terrain"
+        "effect": "move: Grassy Terrain",
+        "startedTurn": 3,
+        "minDuration": 5,
+        "maxDuration": 8,
+        "minRemainingTurns": 5,
+        "maxRemainingTurns": 8
       },
       {
         "scope": "side",
@@ -640,7 +645,9 @@ weather doorgaat.
   "effect": "move: Electric Terrain",
   "state": "start",
   "source": "ability: Electric Surge",
-  "sourceTarget": "p1a: Pincurchin"
+  "sourceTarget": "p1a: Pincurchin",
+  "minDuration": 5,
+  "maxDuration": 8
 }
 ```
 
@@ -674,10 +681,10 @@ Sommige effecten krijgen timer metadata in `field.effects`:
 - `minRemainingTurns` en `maxRemainingTurns`: hoeveel turns het effect volgens
   die basisduur nog kan duren in de huidige response.
 
-Rain heeft bijvoorbeeld `5` tot `8` omdat items de duur kunnen verlengen. Trick
-Room en Tailwind hebben dezelfde waarde voor min en max omdat ze een vaste duur
-hebben. Hazards zoals Stealth Rock krijgen geen timer metadata, omdat ze blijven
-staan totdat ze worden verwijderd.
+Weather en terrain hebben `5` tot `8`, omdat items de duur kunnen verlengen.
+Trick Room en Tailwind hebben dezelfde waarde voor min en max omdat ze een vaste
+duur hebben. Hazards zoals Stealth Rock krijgen geen timer metadata, omdat ze
+blijven staan totdat ze worden verwijderd.
 
 Showdown blijft leidend voor het echte einde. Als Showdown meldt dat een effect
 eindigt, verwijdert de API het effect uit `field.effects`, ook als een
@@ -700,7 +707,12 @@ oude terrain vervangen:
         "scope": "field",
         "effectType": "fieldCondition",
         "effectGroup": "terrain",
-        "effect": "move: Grassy Terrain"
+        "effect": "move: Grassy Terrain",
+        "startedTurn": 3,
+        "minDuration": 5,
+        "maxDuration": 8,
+        "minRemainingTurns": 5,
+        "maxRemainingTurns": 8
       }
     ]
   }

@@ -33,6 +33,10 @@ export function getFieldEffectDurationMetadata(
     return { minDuration: 5, maxDuration: 8 };
   }
 
+  if (isTerrainEffect(effect.effect)) {
+    return { minDuration: 5, maxDuration: 8 };
+  }
+
   if (effect.effect === "move: Trick Room") {
     return { minDuration: 5, maxDuration: 5 };
   }
@@ -42,6 +46,15 @@ export function getFieldEffectDurationMetadata(
   }
 
   return {};
+}
+
+function isTerrainEffect(effect: string) {
+  return (
+    effect === "move: Electric Terrain" ||
+    effect === "move: Grassy Terrain" ||
+    effect === "move: Misty Terrain" ||
+    effect === "move: Psychic Terrain"
+  );
 }
 
 /**
