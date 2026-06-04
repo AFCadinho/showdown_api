@@ -19,7 +19,10 @@ type BattleRequestWithSide = {
   [key: string]: unknown;
 };
 
-export type PokemonInstanceIdMap = Record<string, string[]>;
+export type PokemonInstanceIdMap = {
+  byIdent: Record<string, string[]>;
+  byPlayerSlot: Partial<Record<PlayerId, Array<string | undefined>>>;
+};
 
 export type PokemonSaveState = {
   instanceId: string;
@@ -44,8 +47,14 @@ export function buildPokemonInstanceIdMap(
   p2Team: PokemonInput[]
 ): PokemonInstanceIdMap {
   return {
-    ...buildPlayerPokemonInstanceIdMap("p1", p1Team),
-    ...buildPlayerPokemonInstanceIdMap("p2", p2Team),
+    byIdent: {
+      ...buildPlayerPokemonInstanceIdMap("p1", p1Team),
+      ...buildPlayerPokemonInstanceIdMap("p2", p2Team),
+    },
+    byPlayerSlot: {
+      p1: buildPlayerPokemonInstanceIdSlots(p1Team),
+      p2: buildPlayerPokemonInstanceIdSlots(p2Team),
+    },
   };
 }
 
@@ -63,12 +72,17 @@ export function buildPokemonSaveStateMap(
  * Zet opgeslagen `instanceId`s terug op de request snapshot.
  *
  * Deze helper verandert de originele request niet. Hij maakt alleen een
- * response-versie waarin elke `side.pokemon[]` met een bekende Showdown ident
- * dezelfde `instanceId` terugkrijgt als bij battle creation is opgeslagen.
+ * response-versie waarin elke `side.pokemon[]` dezelfde `instanceId`
+ * terugkrijgt als bij battle creation is opgeslagen.
+ *
+ * Normaal koppelen we eerst op Showdown ident. Als die niet matcht, gebruiken
+ * we de request-side order als fallback. Dat is nodig voor forms zoals Mega
+ * Charizard Y: de originele team species kan `Charizard-Mega-Y` zijn, terwijl
+ * Showdown in `side.pokemon[].ident` nog `p1: Charizard` gebruikt.
  */
 export function applyPokemonInstanceIdsToRequests(
   requests: Record<string, unknown>,
-  instanceIdsByIdent: PokemonInstanceIdMap
+  instanceIdMap: PokemonInstanceIdMap
 ) {
   const requestsWithInstanceIds: Record<string, unknown> = {};
 
@@ -84,13 +98,18 @@ export function applyPokemonInstanceIdsToRequests(
       ...request,
       side: {
         ...request.side,
-        pokemon: request.side.pokemon.map((pokemon) => {
+        pokemon: request.side.pokemon.map((pokemon, slotIndex) => {
           if (!pokemon.ident) return pokemon;
 
           const occurrence = seenByIdent[pokemon.ident] ?? 0;
           seenByIdent[pokemon.ident] = occurrence + 1;
 
-          const instanceId = instanceIdsByIdent[pokemon.ident]?.[occurrence];
+          const requestPlayerId = getPlayerIdFromRequest(playerId, request);
+          const instanceId =
+            instanceIdMap.byIdent[pokemon.ident]?.[occurrence] ??
+            (requestPlayerId
+              ? instanceIdMap.byPlayerSlot[requestPlayerId]?.[slotIndex]
+              : undefined);
 
           if (!instanceId) return pokemon;
 
@@ -148,8 +167,8 @@ export function applyPokemonSaveStateToRequests(
 function buildPlayerPokemonInstanceIdMap(
   playerId: PlayerId,
   team: PokemonInput[]
-): PokemonInstanceIdMap {
-  const instanceIdsByIdent: PokemonInstanceIdMap = {};
+): Record<string, string[]> {
+  const instanceIdsByIdent: Record<string, string[]> = {};
 
   for (const pokemon of team) {
     if (!pokemon.instanceId) continue;
@@ -163,6 +182,10 @@ function buildPlayerPokemonInstanceIdMap(
   }
 
   return instanceIdsByIdent;
+}
+
+function buildPlayerPokemonInstanceIdSlots(team: PokemonInput[]) {
+  return team.map((pokemon) => pokemon.instanceId);
 }
 
 function buildPlayerPokemonSaveStateMap(
@@ -218,4 +241,16 @@ function isBattleRequestWithSide(
   request: unknown
 ): request is BattleRequestWithSide {
   return typeof request === "object" && request !== null;
+}
+
+function getPlayerIdFromRequest(
+  requestKey: string,
+  request: BattleRequestWithSide
+): PlayerId | null {
+  const sideId = request.side?.id;
+
+  if (sideId === "p1" || sideId === "p2") return sideId;
+  if (requestKey === "p1" || requestKey === "p2") return requestKey;
+
+  return null;
 }

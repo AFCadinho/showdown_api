@@ -37,4 +37,51 @@ describe("presentBattleField", () => {
       ],
     });
   });
+
+  it("adds remaining turns when current turn and duration data are available", () => {
+    expect(
+      presentBattleField(
+        {
+          effects: [
+            {
+              scope: "field",
+              effectType: "weather",
+              effect: "RainDance",
+              startedTurn: 2,
+              minDuration: 5,
+              maxDuration: 8,
+            },
+            {
+              scope: "side",
+              side: "p2",
+              effectType: "sideCondition",
+              effect: "move: Stealth Rock",
+              startedTurn: 2,
+            },
+          ],
+        },
+        3
+      )
+    ).toEqual({
+      effects: [
+        {
+          scope: "field",
+          effectType: "weather",
+          effect: "RainDance",
+          startedTurn: 2,
+          minDuration: 5,
+          maxDuration: 8,
+          minRemainingTurns: 4,
+          maxRemainingTurns: 7,
+        },
+        {
+          scope: "side",
+          side: "p2",
+          effectType: "sideCondition",
+          effect: "move: Stealth Rock",
+          startedTurn: 2,
+        },
+      ],
+    });
+  });
 });

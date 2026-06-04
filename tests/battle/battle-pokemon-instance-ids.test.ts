@@ -48,8 +48,14 @@ describe("battle pokemon instance ids", () => {
     );
 
     expect(instanceIds).toEqual({
-      "p1: Koraidon": ["pokemon_123"],
-      "p2: Pidgey": ["pokemon_456"],
+      byIdent: {
+        "p1: Koraidon": ["pokemon_123"],
+        "p2: Pidgey": ["pokemon_456"],
+      },
+      byPlayerSlot: {
+        p1: ["pokemon_123"],
+        p2: ["pokemon_456"],
+      },
     });
   });
 
@@ -66,7 +72,13 @@ describe("battle pokemon instance ids", () => {
     );
 
     expect(instanceIds).toEqual({
-      "p1: Red Wing": ["pokemon_charizard"],
+      byIdent: {
+        "p1: Red Wing": ["pokemon_charizard"],
+      },
+      byPlayerSlot: {
+        p1: ["pokemon_charizard"],
+        p2: [],
+      },
     });
   });
 
@@ -126,12 +138,53 @@ describe("battle pokemon instance ids", () => {
     };
 
     const snapshot = applyPokemonInstanceIdsToRequests(requests, {
-      "p1: Koraidon": ["pokemon_123"],
+      byIdent: {
+        "p1: Koraidon": ["pokemon_123"],
+      },
+      byPlayerSlot: {
+        p1: ["pokemon_123"],
+      },
     }) as any;
 
     expect(snapshot.p1.side.pokemon[0]).toMatchObject({
       ident: "p1: Koraidon",
       instanceId: "pokemon_123",
+    });
+  });
+
+  it("falls back to request side order when a form changes the request ident", () => {
+    const instanceIds = buildPokemonInstanceIdMap(
+      [
+        {
+          species: "Charizard-Mega-Y",
+          instanceId: "pokemon_charizard_mega_y",
+        },
+      ],
+      []
+    );
+
+    const snapshot = applyPokemonInstanceIdsToRequests(
+      {
+        p1: {
+          side: {
+            id: "p1",
+            pokemon: [
+              {
+                ident: "p1: Charizard",
+                details: "Charizard-Mega-Y, L50, M",
+                condition: "153/153",
+              },
+            ],
+          },
+        },
+      },
+      instanceIds
+    ) as any;
+
+    expect(snapshot.p1.side.pokemon[0]).toMatchObject({
+      ident: "p1: Charizard",
+      details: "Charizard-Mega-Y, L50, M",
+      instanceId: "pokemon_charizard_mega_y",
     });
   });
 
@@ -150,7 +203,12 @@ describe("battle pokemon instance ids", () => {
     };
 
     applyPokemonInstanceIdsToRequests(requests, {
-      "p1: Koraidon": ["pokemon_123"],
+      byIdent: {
+        "p1: Koraidon": ["pokemon_123"],
+      },
+      byPlayerSlot: {
+        p1: ["pokemon_123"],
+      },
     });
 
     expect(requests.p1.side.pokemon[0]).not.toHaveProperty("instanceId");

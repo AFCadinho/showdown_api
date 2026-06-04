@@ -55,7 +55,7 @@ const responseFields = [
   {
     name: "requests",
     type: "object",
-    description: "Laatste request per speler als response-snapshot, verrijkt met Dex-data. Als instanceId is meegestuurd, staat die terug op side.pokemon[].instanceId. Fainted Pokemon worden in de snapshot als condition 0 fnt getoond. Bij create_battle is dit meestal een teamPreview request met moves onder side.pokemon[].moves.",
+    description: "Laatste request per speler als response-snapshot, verrijkt met Dex-data. Als instanceId is meegestuurd, staat die terug op side.pokemon[].instanceId. Bij forms zoals Mega gebruikt de API team-slot volgorde als fallback als de Showdown ident verandert. Fainted Pokemon worden in de snapshot als condition 0 fnt getoond. Bij create_battle is dit meestal een teamPreview request met moves onder side.pokemon[].moves.",
   },
   {
     name: "events",
@@ -65,7 +65,7 @@ const responseFields = [
   {
     name: "field",
     type: "object",
-    description: "Actuele veldstatus voor UI-iconen en timers. field.effects bevat actieve weather, field conditions zoals Trick Room, terrain en side conditions zoals Tailwind of Stealth Rock. Terrain vervangt vorige terrain. Hazards blijven staan totdat Showdown removal meldt, bijvoorbeeld door Rapid Spin. Sommige effecten bevatten minDuration en maxDuration als basisduur metadata; dit telt nog niet per beurt af.",
+    description: "Actuele veldstatus voor UI-iconen en timers. field.effects bevat actieve weather, field conditions zoals Trick Room, terrain en side conditions zoals Tailwind of Stealth Rock. Terrain vervangt vorige terrain. Hazards blijven staan totdat Showdown removal meldt, bijvoorbeeld door Rapid Spin. Sommige effecten bevatten startedTurn, minDuration, maxDuration, minRemainingTurns en maxRemainingTurns in field.effects.",
   },
   {
     name: "log",

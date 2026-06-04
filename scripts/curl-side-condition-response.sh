@@ -109,6 +109,15 @@ if (sideEffect.minDuration !== 4 || sideEffect.maxDuration !== 4) {
   console.error("Expected active Tailwind field effect to include minDuration 4 and maxDuration 4.");
   process.exit(1);
 }
+
+if (
+  sideEffect.startedTurn !== 2 ||
+  sideEffect.minRemainingTurns !== 4 ||
+  sideEffect.maxRemainingTurns !== 4
+) {
+  console.error("Expected Tailwind field effect to start with remaining turns 4 to 4.");
+  process.exit(1);
+}
 ' "$TURN_RESPONSE"
 
 for TURN in 2 3 4 5 6; do

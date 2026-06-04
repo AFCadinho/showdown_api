@@ -8,13 +8,17 @@ describe("updateFieldFromBattleLine", () => {
       effects: [],
     };
 
-    updateFieldFromBattleLine("|-weather|RainDance", { field });
+    updateFieldFromBattleLine("|-weather|RainDance", {
+      field,
+      state: { turn: 2, ended: false, winner: null },
+    });
 
     expect(field.effects).toEqual([
       {
         scope: "field",
         effectType: "weather",
         effect: "RainDance",
+        startedTurn: 2,
         minDuration: 5,
         maxDuration: 8,
       },
@@ -39,6 +43,37 @@ describe("updateFieldFromBattleLine", () => {
         scope: "field",
         effectType: "weather",
         effect: "Sandstorm",
+        minDuration: 5,
+        maxDuration: 8,
+      },
+    ]);
+  });
+
+  it("keeps weather started turn when Showdown reports upkeep", () => {
+    const field: BattleFieldSnapshot = {
+      effects: [
+        {
+          scope: "field",
+          effectType: "weather",
+          effect: "RainDance",
+          startedTurn: 2,
+          minDuration: 5,
+          maxDuration: 8,
+        },
+      ],
+    };
+
+    updateFieldFromBattleLine("|-weather|RainDance|[upkeep]", {
+      field,
+      state: { turn: 3, ended: false, winner: null },
+    });
+
+    expect(field.effects).toEqual([
+      {
+        scope: "field",
+        effectType: "weather",
+        effect: "RainDance",
+        startedTurn: 2,
         minDuration: 5,
         maxDuration: 8,
       },
@@ -93,9 +128,13 @@ describe("updateFieldFromBattleLine", () => {
       effects: [],
     };
 
-    updateFieldFromBattleLine("|-fieldstart|move: Trick Room", { field });
+    updateFieldFromBattleLine("|-fieldstart|move: Trick Room", {
+      field,
+      state: { turn: 2, ended: false, winner: null },
+    });
     updateFieldFromBattleLine("|-fieldstart|move: Electric Terrain", {
       field,
+      state: { turn: 3, ended: false, winner: null },
     });
 
     expect(field.effects).toEqual([
@@ -103,6 +142,7 @@ describe("updateFieldFromBattleLine", () => {
         scope: "field",
         effectType: "fieldCondition",
         effect: "move: Trick Room",
+        startedTurn: 2,
         minDuration: 5,
         maxDuration: 5,
       },
@@ -111,6 +151,7 @@ describe("updateFieldFromBattleLine", () => {
         effectType: "fieldCondition",
         effect: "move: Electric Terrain",
         effectGroup: "terrain",
+        startedTurn: 3,
       },
     ]);
   });
@@ -190,6 +231,7 @@ describe("updateFieldFromBattleLine", () => {
 
     updateFieldFromBattleLine("|-fieldstart|move: Grassy Terrain", {
       field,
+      state: { turn: 4, ended: false, winner: null },
     });
 
     expect(field.effects).toEqual([
@@ -203,6 +245,7 @@ describe("updateFieldFromBattleLine", () => {
         effectType: "fieldCondition",
         effectGroup: "terrain",
         effect: "move: Grassy Terrain",
+        startedTurn: 4,
       },
     ]);
   });
@@ -214,9 +257,11 @@ describe("updateFieldFromBattleLine", () => {
 
     updateFieldFromBattleLine("|-sidestart|p1: Ash|move: Tailwind", {
       field,
+      state: { turn: 2, ended: false, winner: null },
     });
     updateFieldFromBattleLine("|-sidestart|p2: Wild|move: Stealth Rock", {
       field,
+      state: { turn: 3, ended: false, winner: null },
     });
 
     expect(field.effects).toEqual([
@@ -225,6 +270,7 @@ describe("updateFieldFromBattleLine", () => {
         side: "p1",
         effectType: "sideCondition",
         effect: "move: Tailwind",
+        startedTurn: 2,
         minDuration: 4,
         maxDuration: 4,
       },
@@ -233,6 +279,7 @@ describe("updateFieldFromBattleLine", () => {
         side: "p2",
         effectType: "sideCondition",
         effect: "move: Stealth Rock",
+        startedTurn: 3,
       },
     ]);
   });

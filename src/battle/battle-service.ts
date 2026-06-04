@@ -135,7 +135,7 @@ export async function createBattle(body: CreateBattleBody): Promise<CreateBattle
     players: battleData.players,
     requests: presentBattleRequests(requestSnapshot, battleData.formatid),
     events: consumeBattleEventsForResponse(battleData),
-    field: presentBattleField(battleData.field),
+    field: presentBattleField(battleData.field, battleData.state.turn),
     log: battleData.log,
   };
 }

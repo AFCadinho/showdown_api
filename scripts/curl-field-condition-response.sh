@@ -107,6 +107,15 @@ if (fieldEffect.minDuration !== 5 || fieldEffect.maxDuration !== 5) {
   console.error("Expected active Trick Room field effect to include minDuration 5 and maxDuration 5.");
   process.exit(1);
 }
+
+if (
+  fieldEffect.startedTurn !== 2 ||
+  fieldEffect.minRemainingTurns !== 5 ||
+  fieldEffect.maxRemainingTurns !== 5
+) {
+  console.error("Expected Trick Room field effect to start with remaining turns 5 to 5.");
+  process.exit(1);
+}
 ' "$TURN_RESPONSE"
 
 for TURN in 2 3 4 5 6 7; do

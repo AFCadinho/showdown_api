@@ -5,6 +5,18 @@ export type FieldEffectDurationMetadata = {
   maxDuration?: number;
 };
 
+export type FieldEffectRemainingTurnsInput = {
+  currentTurn: number;
+  startedTurn?: number;
+  minDuration?: number;
+  maxDuration?: number;
+};
+
+export type FieldEffectRemainingTurnsMetadata = {
+  minRemainingTurns?: number;
+  maxRemainingTurns?: number;
+};
+
 /**
  * Geeft UI-metadata voor effecten die een bekende beurtduur hebben.
  *
@@ -29,4 +41,32 @@ export function getFieldEffectDurationMetadata(
   }
 
   return {};
+}
+
+/**
+ * Berekent hoeveel beurten een effect ongeveer nog kan duren.
+ *
+ * Dit gebruikt alleen de basisduur metadata en de beurt waarop wij het effect
+ * zagen starten. Showdown blijft nog steeds leidend voor het echte einde.
+ */
+export function calculateFieldEffectRemainingTurns({
+  currentTurn,
+  startedTurn,
+  minDuration,
+  maxDuration,
+}: FieldEffectRemainingTurnsInput): FieldEffectRemainingTurnsMetadata {
+  if (
+    startedTurn === undefined ||
+    minDuration === undefined ||
+    maxDuration === undefined
+  ) {
+    return {};
+  }
+
+  const elapsedTurns = Math.max(0, currentTurn - startedTurn);
+
+  return {
+    minRemainingTurns: Math.max(0, minDuration - elapsedTurns),
+    maxRemainingTurns: Math.max(0, maxDuration - elapsedTurns),
+  };
 }

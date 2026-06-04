@@ -98,7 +98,7 @@ function handleBattleStreamLine(
 
 export function updateFieldFromBattleLine(
   line: string,
-  battleData: Pick<BattleData, "field">
+  battleData: Pick<BattleData, "field"> & Partial<Pick<BattleData, "state">>
 ) {
   const parts = line.split("|");
   const eventType = parts[1];
@@ -116,6 +116,7 @@ export function updateFieldFromBattleLine(
       effectType: "fieldCondition",
       effectGroup,
       effect,
+      startedTurn: battleData.state?.turn,
     } as const;
 
     battleData.field.effects.push({
@@ -144,6 +145,7 @@ export function updateFieldFromBattleLine(
       side,
       effectType: "sideCondition",
       effect,
+      startedTurn: battleData.state?.turn,
     } as const;
 
     battleData.field.effects.push({
@@ -165,17 +167,32 @@ export function updateFieldFromBattleLine(
   if (eventType !== "-weather") return;
 
   const weather = parts[2];
+  const isUpkeep = parts.includes("[upkeep]");
+
+  if (!weather) return;
+
+  if (weather === "none") {
+    battleData.field.effects = battleData.field.effects.filter(
+      (effect) => effect.effectType !== "weather"
+    );
+    return;
+  }
+
+  const activeWeather = battleData.field.effects.find(
+    (effect) => effect.effectType === "weather"
+  );
+
+  if (isUpkeep && activeWeather?.effect === weather) return;
 
   battleData.field.effects = battleData.field.effects.filter(
     (effect) => effect.effectType !== "weather"
   );
 
-  if (!weather || weather === "none") return;
-
   const weatherEffect = {
     scope: "field",
     effectType: "weather",
     effect: weather,
+    startedTurn: battleData.state?.turn,
   } as const;
 
   battleData.field.effects.push({

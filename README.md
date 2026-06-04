@@ -156,6 +156,11 @@ de client dit veld meestuurt, geeft de API dezelfde waarde terug in
 battle terugschrijven op basis van de vaste opgeslagen Pokemon-id, niet op basis
 van de plek in de teamlijst.
 
+De API koppelt `instanceId` eerst op Showdown ident. Als die ident verandert
+door een form, bijvoorbeeld `Charizard-Mega-Y` die in de request als
+`p1: Charizard` terugkomt, gebruikt de API de originele team-slot volgorde als
+fallback.
+
 ## Succes Response
 
 Voorbeeld:
@@ -559,15 +564,21 @@ Voorbeeld:
         "scope": "field",
         "effectType": "weather",
         "effect": "RainDance",
+        "startedTurn": 2,
         "minDuration": 5,
-        "maxDuration": 8
+        "maxDuration": 8,
+        "minRemainingTurns": 4,
+        "maxRemainingTurns": 7
       },
       {
         "scope": "field",
         "effectType": "fieldCondition",
         "effect": "move: Trick Room",
+        "startedTurn": 2,
         "minDuration": 5,
-        "maxDuration": 5
+        "maxDuration": 5,
+        "minRemainingTurns": 4,
+        "maxRemainingTurns": 4
       },
       {
         "scope": "field",
@@ -580,8 +591,11 @@ Voorbeeld:
         "side": "p1",
         "effectType": "sideCondition",
         "effect": "move: Tailwind",
+        "startedTurn": 2,
         "minDuration": 4,
-        "maxDuration": 4
+        "maxDuration": 4,
+        "minRemainingTurns": 3,
+        "maxRemainingTurns": 3
       },
       {
         "scope": "side",
@@ -640,12 +654,21 @@ weather doorgaat.
 }
 ```
 
-Sommige effecten krijgen `minDuration` en `maxDuration`. Dit is basisduur
-metadata voor de UI, geen aftellende timer. Rain heeft bijvoorbeeld `5` tot `8`
-omdat items de duur kunnen verlengen. Trick Room en Tailwind hebben dezelfde
-waarde voor min en max omdat ze een vaste duur hebben. Hazards zoals Stealth
-Rock krijgen geen duration metadata, omdat ze blijven staan totdat ze worden
-verwijderd.
+Sommige effecten krijgen timer metadata in `field.effects`:
+
+- `startedTurn`: de turn waarop de API het effect zag starten.
+- `minDuration` en `maxDuration`: de basisduur van het effect.
+- `minRemainingTurns` en `maxRemainingTurns`: hoeveel turns het effect volgens
+  die basisduur nog kan duren in de huidige response.
+
+Rain heeft bijvoorbeeld `5` tot `8` omdat items de duur kunnen verlengen. Trick
+Room en Tailwind hebben dezelfde waarde voor min en max omdat ze een vaste duur
+hebben. Hazards zoals Stealth Rock krijgen geen timer metadata, omdat ze blijven
+staan totdat ze worden verwijderd.
+
+Showdown blijft leidend voor het echte einde. Als Showdown meldt dat een effect
+eindigt, verwijdert de API het effect uit `field.effects`, ook als een
+remaining waarde nog hoger zou zijn.
 
 Zolang een effect actief is, staat het in `field.effects`. Als Showdown meldt
 dat een effect eindigt, verwijdert de API die entry uit `field.effects`.

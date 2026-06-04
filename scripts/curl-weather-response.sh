@@ -108,6 +108,15 @@ if (weatherEffect.minDuration !== 5 || weatherEffect.maxDuration !== 8) {
   console.error("Expected RainDance field effect to include minDuration 5 and maxDuration 8.");
   process.exit(1);
 }
+
+if (
+  weatherEffect.startedTurn !== 2 ||
+  weatherEffect.minRemainingTurns !== 5 ||
+  weatherEffect.maxRemainingTurns !== 8
+) {
+  console.error("Expected RainDance field effect to start with remaining turns 5 to 8.");
+  process.exit(1);
+}
 ' "$TURN_RESPONSE"
 
 curl -sS -X POST "$BASE_URL/battles/$BATTLE_ID/choice" \
@@ -158,6 +167,15 @@ if (weatherEvent.minDuration !== 5 || weatherEvent.maxDuration !== 8) {
 
 if (weatherEffect.minDuration !== 5 || weatherEffect.maxDuration !== 8) {
   console.error("Expected active RainDance field effect to keep minDuration 5 and maxDuration 8.");
+  process.exit(1);
+}
+
+if (
+  weatherEffect.startedTurn !== 2 ||
+  weatherEffect.minRemainingTurns !== 4 ||
+  weatherEffect.maxRemainingTurns !== 7
+) {
+  console.error("Expected RainDance field effect to count down to remaining turns 4 to 7.");
   process.exit(1);
 }
 ' "$TURN_2_RESPONSE"

@@ -155,7 +155,7 @@ function buildBattleResponse(
     players: battle.players,
     requests: presentBattleRequests(requestSnapshot, battle.formatid),
     events: consumeBattleEventsForResponse(battle),
-    field: presentBattleField(battle.field),
+    field: presentBattleField(battle.field, battle.state.turn),
     log: battle.log,
     state: battle.state
   }

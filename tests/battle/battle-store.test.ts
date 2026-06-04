@@ -17,7 +17,10 @@ function createBattleData(): BattleData {
     conditionByPokemon: {},
     activeByPlayer: {},
     field: { effects: [] },
-    instanceIdsByPokemonIdent: {},
+    instanceIdsByPokemonIdent: {
+      byIdent: {},
+      byPlayerSlot: {},
+    },
     pokemonSaveStateByIdent: {},
     state: {
       turn: 1,

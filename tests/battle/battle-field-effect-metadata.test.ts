@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { getFieldEffectDurationMetadata } from "../../src/battle/battle-field-effect-metadata";
+import {
+  calculateFieldEffectRemainingTurns,
+  getFieldEffectDurationMetadata,
+} from "../../src/battle/battle-field-effect-metadata";
 
 describe("getFieldEffectDurationMetadata", () => {
   it("returns a duration range for weather", () => {
@@ -45,5 +48,54 @@ describe("getFieldEffectDurationMetadata", () => {
         effect: "move: Stealth Rock",
       })
     ).toEqual({});
+  });
+});
+
+describe("calculateFieldEffectRemainingTurns", () => {
+  it("calculates remaining turns from the started turn and current turn", () => {
+    expect(
+      calculateFieldEffectRemainingTurns({
+        currentTurn: 3,
+        startedTurn: 2,
+        minDuration: 5,
+        maxDuration: 8,
+      })
+    ).toEqual({
+      minRemainingTurns: 4,
+      maxRemainingTurns: 7,
+    });
+  });
+
+  it("does not return remaining turns when duration data is missing", () => {
+    expect(
+      calculateFieldEffectRemainingTurns({
+        currentTurn: 3,
+        startedTurn: 2,
+      })
+    ).toEqual({});
+  });
+
+  it("does not return remaining turns when started turn is missing", () => {
+    expect(
+      calculateFieldEffectRemainingTurns({
+        currentTurn: 3,
+        minDuration: 5,
+        maxDuration: 8,
+      })
+    ).toEqual({});
+  });
+
+  it("does not go below zero", () => {
+    expect(
+      calculateFieldEffectRemainingTurns({
+        currentTurn: 10,
+        startedTurn: 2,
+        minDuration: 5,
+        maxDuration: 8,
+      })
+    ).toEqual({
+      minRemainingTurns: 0,
+      maxRemainingTurns: 0,
+    });
   });
 });
