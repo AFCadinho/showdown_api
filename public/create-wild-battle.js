@@ -60,7 +60,7 @@ const responseFields = [
   {
     name: "events",
     type: "BattleEvent[]",
-    description: "Nieuwe game-vriendelijke events sinds de vorige API response. Weather, field conditions en side conditions komen terug als fieldEffect events met state start, upkeep of end.",
+    description: "Nieuwe game-vriendelijke events sinds de vorige API response. Weather, field conditions en side conditions komen terug als fieldEffect events met state start, upkeep of end. Als Showdown metadata meestuurt, bevat het event ook source en sourceTarget.",
   },
   {
     name: "field",

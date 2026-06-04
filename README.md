@@ -624,6 +624,8 @@ weather doorgaat.
   "effectType": "weather",
   "effect": "RainDance",
   "state": "start",
+  "source": "ability: Drizzle",
+  "sourceTarget": "p1a: Pelipper",
   "minDuration": 5,
   "maxDuration": 8
 }
@@ -634,10 +636,11 @@ weather doorgaat.
   "type": "fieldEffect",
   "scope": "field",
   "effectType": "fieldCondition",
-  "effect": "move: Trick Room",
+  "effectGroup": "terrain",
+  "effect": "move: Electric Terrain",
   "state": "start",
-  "minDuration": 5,
-  "maxDuration": 5
+  "source": "ability: Electric Surge",
+  "sourceTarget": "p1a: Pincurchin"
 }
 ```
 
@@ -653,6 +656,16 @@ weather doorgaat.
   "maxDuration": 4
 }
 ```
+
+Als Showdown extra metadata meestuurt, zet de API die op het `fieldEffect`
+event:
+
+- `source`: de waarde uit Showdown `[from]`, bijvoorbeeld `ability: Drizzle`.
+- `sourceTarget`: de waarde uit Showdown `[of]`, bijvoorbeeld `p1a: Pelipper`.
+
+Deze velden zijn optioneel. Showdown stuurt ze niet voor elk effect mee. De
+velden staan op het event, omdat ze uitleggen waarom iets net gebeurde. Ze staan
+niet op `field.effects`, want de snapshot beschrijft alleen wat nu actief is.
 
 Sommige effecten krijgen timer metadata in `field.effects`:
 

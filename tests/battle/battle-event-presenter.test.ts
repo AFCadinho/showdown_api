@@ -175,6 +175,29 @@ describe("presentBattleEventsForResponse", () => {
     ]);
   });
 
+  it("parses weather source metadata from Showdown bracket fields", () => {
+    const events = presentBattleEventsForResponse([
+      [
+        "p1",
+        "|-weather|RainDance|[from] ability: Drizzle|[of] p1a: Pelipper",
+      ].join("\n"),
+    ]);
+
+    expect(events).toEqual([
+      {
+        type: "fieldEffect",
+        scope: "field",
+        effectType: "weather",
+        effect: "RainDance",
+        state: "start",
+        source: "ability: Drizzle",
+        sourceTarget: "p1a: Pelipper",
+        minDuration: 5,
+        maxDuration: 8,
+      },
+    ]);
+  });
+
   it("parses field condition events as field effects", () => {
     const events = presentBattleEventsForResponse([
       [
@@ -213,6 +236,28 @@ describe("presentBattleEventsForResponse", () => {
         state: "end",
         minDuration: 5,
         maxDuration: 5,
+      },
+    ]);
+  });
+
+  it("parses field condition source metadata from Showdown bracket fields", () => {
+    const events = presentBattleEventsForResponse([
+      [
+        "p1",
+        "|-fieldstart|move: Electric Terrain|[from] ability: Electric Surge|[of] p1a: Pincurchin",
+      ].join("\n"),
+    ]);
+
+    expect(events).toEqual([
+      {
+        type: "fieldEffect",
+        scope: "field",
+        effectType: "fieldCondition",
+        effectGroup: "terrain",
+        effect: "move: Electric Terrain",
+        state: "start",
+        source: "ability: Electric Surge",
+        sourceTarget: "p1a: Pincurchin",
       },
     ]);
   });
@@ -264,6 +309,28 @@ describe("presentBattleEventsForResponse", () => {
         effectType: "sideCondition",
         effect: "move: Stealth Rock",
         state: "end",
+      },
+    ]);
+  });
+
+  it("parses side condition source metadata from Showdown bracket fields", () => {
+    const events = presentBattleEventsForResponse([
+      [
+        "p1",
+        "|-sidestart|p2: Wild|move: Stealth Rock|[from] move: Stealth Rock|[of] p1a: Golem",
+      ].join("\n"),
+    ]);
+
+    expect(events).toEqual([
+      {
+        type: "fieldEffect",
+        scope: "side",
+        side: "p2",
+        effectType: "sideCondition",
+        effect: "move: Stealth Rock",
+        state: "start",
+        source: "move: Stealth Rock",
+        sourceTarget: "p1a: Golem",
       },
     ]);
   });

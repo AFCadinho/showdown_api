@@ -88,6 +88,8 @@ export type FieldEffectEvent = {
   state: "start" | "upkeep" | "end";
   minDuration?: number;
   maxDuration?: number;
+  source?: string;
+  sourceTarget?: string;
 };
 
 export type BattleEvent =
@@ -378,6 +380,8 @@ function parseWinEvent(parts: string[]): WinEvent {
 function parseWeatherEvent(parts: string[]): FieldEffectEvent {
   const effect = parts[2];
   const isUpkeep = parts.includes("[upkeep]");
+  const source = parseBracketValue(parts, "[from]");
+  const sourceTarget = parseBracketValue(parts, "[of]");
   const weatherEvent = {
     type: "fieldEffect",
     scope: "field",
@@ -388,6 +392,8 @@ function parseWeatherEvent(parts: string[]): FieldEffectEvent {
 
   return {
     ...weatherEvent,
+    ...(source ? { source } : {}),
+    ...(sourceTarget ? { sourceTarget } : {}),
     ...(effect === "none" ? {} : getFieldEffectDurationMetadata(weatherEvent)),
   };
 }
@@ -397,6 +403,8 @@ function parseFieldConditionEvent(
   state: "start" | "end"
 ): FieldEffectEvent {
   const effect = parts[2];
+  const source = parseBracketValue(parts, "[from]");
+  const sourceTarget = parseBracketValue(parts, "[of]");
   const fieldEvent = {
     type: "fieldEffect",
     scope: "field",
@@ -408,6 +416,8 @@ function parseFieldConditionEvent(
 
   return {
     ...fieldEvent,
+    ...(source ? { source } : {}),
+    ...(sourceTarget ? { sourceTarget } : {}),
     ...getFieldEffectDurationMetadata(fieldEvent),
   };
 }
@@ -418,6 +428,8 @@ function parseSideConditionEvent(
 ): FieldEffectEvent | null {
   const side = getPlayerIdFromSideText(parts[2]);
   const effect = normalizeSideConditionEffect(parts[3]);
+  const source = parseBracketValue(parts, "[from]");
+  const sourceTarget = parseBracketValue(parts, "[of]");
 
   if (!side || !effect) return null;
   const sideEvent = {
@@ -431,6 +443,8 @@ function parseSideConditionEvent(
 
   return {
     ...sideEvent,
+    ...(source ? { source } : {}),
+    ...(sourceTarget ? { sourceTarget } : {}),
     ...getFieldEffectDurationMetadata(sideEvent),
   };
 }

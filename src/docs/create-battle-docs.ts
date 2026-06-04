@@ -75,7 +75,7 @@ export const createBattleDocs = {
     "Als de client instanceId meestuurt op een team-Pokemon, geeft de API dezelfde instanceId terug in requests[p1|p2].side.pokemon[].instanceId. Bij forms zoals Mega gebruikt de API team-slot volgorde als fallback als de Showdown ident verandert.",
     "Als requests[p1|p2].forceSwitch[0] true is, moet de game de verplichte switch UI openen. Dit gebeurt alleen wanneer de battle nog doorloopt na een faint.",
     "Tijdens actieve battle requests moet de game switchen blokkeren als requests[p1|p2].active[0].trapped of requests[p1|p2].active[0].maybeTrapped true is.",
-    "field.effects bevat actuele veldstatus zoals actieve weather, field conditions, terrain en side conditions. Terrain vervangt vorige terrain. Hazards zoals Stealth Rock blijven staan totdat Showdown removal meldt, bijvoorbeeld door Rapid Spin. Sommige effecten bevatten startedTurn, minDuration, maxDuration, minRemainingTurns en maxRemainingTurns in field.effects. Veranderingen komen daarnaast terug als fieldEffect events met state start, upkeep of end.",
+    "field.effects bevat actuele veldstatus zoals actieve weather, field conditions, terrain en side conditions. Terrain vervangt vorige terrain. Hazards zoals Stealth Rock blijven staan totdat Showdown removal meldt, bijvoorbeeld door Rapid Spin. Sommige effecten bevatten startedTurn, minDuration, maxDuration, minRemainingTurns en maxRemainingTurns in field.effects. Veranderingen komen daarnaast terug als fieldEffect events met state start, upkeep of end. Als Showdown metadata meestuurt, bevat het event ook source en sourceTarget.",
   ],
   successResponse: {
     success: true,
@@ -147,7 +147,7 @@ export const createWildBattleDocs = {
     "De response bevat daardoor normaal direct requests[p1|p2].active[].moves met actuele pp, maxpp, disabled state, type-effectiveness tegen de actieve tegenstander, verplichte switches via forceSwitch en eventuele switch-blokkades zoals trapped of maybeTrapped.",
     "Requests worden als response-snapshot teruggegeven. Als een Pokemon fainted is, wordt side.pokemon[].condition in die snapshot bijgewerkt naar 0 fnt.",
     "Tijdens actieve battle requests moet de game switchen blokkeren als requests[p1|p2].active[0].trapped of requests[p1|p2].active[0].maybeTrapped true is.",
-    "field.effects bevat actuele veldstatus zoals actieve weather, field conditions, terrain en side conditions. Terrain vervangt vorige terrain. Hazards zoals Stealth Rock blijven staan totdat Showdown removal meldt, bijvoorbeeld door Rapid Spin. Sommige effecten bevatten startedTurn, minDuration, maxDuration, minRemainingTurns en maxRemainingTurns in field.effects. Veranderingen komen daarnaast terug als fieldEffect events met state start, upkeep of end.",
+    "field.effects bevat actuele veldstatus zoals actieve weather, field conditions, terrain en side conditions. Terrain vervangt vorige terrain. Hazards zoals Stealth Rock blijven staan totdat Showdown removal meldt, bijvoorbeeld door Rapid Spin. Sommige effecten bevatten startedTurn, minDuration, maxDuration, minRemainingTurns en maxRemainingTurns in field.effects. Veranderingen komen daarnaast terug als fieldEffect events met state start, upkeep of end. Als Showdown metadata meestuurt, bevat het event ook source en sourceTarget.",
     "Gebruik deze route voor wild battles waarin geen handmatige team preview stap nodig is.",
   ],
   successResponse: {
