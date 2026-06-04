@@ -21,6 +21,10 @@ docsRoutes.get("/create_wild_battle", (_, res) => {
   res.sendFile(path.join(publicPath, "create-wild-battle.html"));
 });
 
+docsRoutes.get("/parse_pokemon", (_, res) => {
+  res.sendFile(path.join(publicPath, "parse-pokemon.html"));
+});
+
 docsRoutes.get("/create_battle/schema", (_, res) => {
   res.json(createBattleDocs);
 });

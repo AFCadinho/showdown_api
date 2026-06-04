@@ -59,7 +59,7 @@ const responseFields = [
   {
     name: "events",
     type: "BattleEvent[]",
-    description: "Nieuwe game-vriendelijke events sinds de vorige API response, zoals turn, move, damage, heal, status, cant, fail, switch, fieldEffect, faint en win. Weather, field conditions en side conditions komen terug als fieldEffect events met state start, upkeep of end. Als Showdown metadata meestuurt, bevat het event ook source en sourceTarget.",
+    description: "Nieuwe game-vriendelijke events sinds de vorige API response, zoals turn, move, damage, heal, status, cant, fail, switch, ability, statChange, pokemonEffect, fieldEffect, faint en win. Weather, field conditions en side conditions komen terug als fieldEffect events met state start, upkeep of end. Als Showdown metadata meestuurt, bevat het event ook source en sourceTarget.",
   },
   {
     name: "field",
@@ -170,6 +170,38 @@ const successExample = {
       amount: 55,
       source: "drain",
       sourceTarget: "p1a: Pikachu",
+    },
+    {
+      type: "ability",
+      target: "p2a: Weavile",
+      ability: "Pressure",
+    },
+    {
+      type: "ability",
+      target: "p1a: Arcanine",
+      ability: "Intimidate",
+      modifier: "boost",
+    },
+    {
+      type: "statChange",
+      target: "p2a: Gyarados",
+      stat: "atk",
+      amount: -1,
+    },
+    {
+      type: "statChange",
+      target: "p1a: Dragonite",
+      stat: "atk",
+      amount: 1,
+      source: "move: Dragon Dance",
+      sourceTarget: "p1a: Dragonite",
+    },
+    {
+      type: "pokemonEffect",
+      target: "p2a: Blissey",
+      effect: "move: Infestation",
+      state: "activate",
+      sourceTarget: "p1a: Shuckle",
     },
     {
       type: "turn",

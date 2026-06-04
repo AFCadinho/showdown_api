@@ -21,6 +21,7 @@ systemRoutes.get("/info", (_, res) => {
       home: "/",
       health: "/health",
       info: "/info",
+      parsePokemon: "/parse_pokemon",
       createBattle: "/create_battle",
       createBattleSchema: "/create_battle/schema",
       createWildBattle: "/create_wild_battle",

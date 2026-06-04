@@ -136,6 +136,100 @@ describe("presentBattleEventsForResponse", () => {
     ]);
   });
 
+  it("parses ability reveal events", () => {
+    const events = presentBattleEventsForResponse([
+      [
+        "p1",
+        "|-ability|p2a: Weavile|Pressure",
+        "|-ability|p1a: Arcanine|Intimidate|boost",
+      ].join("\n"),
+    ]);
+
+    expect(events).toEqual([
+      {
+        type: "ability",
+        target: "p2a: Weavile",
+        ability: "Pressure",
+        modifier: undefined,
+      },
+      {
+        type: "ability",
+        target: "p1a: Arcanine",
+        ability: "Intimidate",
+        modifier: "boost",
+      },
+    ]);
+  });
+
+  it("parses stat change events", () => {
+    const events = presentBattleEventsForResponse([
+      [
+        "p1",
+        "|-boost|p1a: Dragonite|atk|1",
+        "|-unboost|p2a: Gyarados|atk|1|[from] ability: Intimidate|[of] p1a: Arcanine",
+      ].join("\n"),
+    ]);
+
+    expect(events).toEqual([
+      {
+        type: "statChange",
+        target: "p1a: Dragonite",
+        stat: "atk",
+        amount: 1,
+      },
+      {
+        type: "statChange",
+        target: "p2a: Gyarados",
+        stat: "atk",
+        amount: -1,
+        source: "ability: Intimidate",
+        sourceTarget: "p1a: Arcanine",
+      },
+    ]);
+  });
+
+  it("parses pokemon effect start and end events", () => {
+    const events = presentBattleEventsForResponse([
+      [
+        "p1",
+        "|-start|p2a: Gyarados|move: Fire Spin",
+        "|-end|p2a: Gyarados|move: Fire Spin",
+        "|-activate|p2a: Blissey|move: Infestation|[of] p1a: Shuckle",
+        "|-start|p2a: Gyarados|confusion|[from] move: Confuse Ray|[of] p1a: Golduck",
+      ].join("\n"),
+    ]);
+
+    expect(events).toEqual([
+      {
+        type: "pokemonEffect",
+        target: "p2a: Gyarados",
+        effect: "move: Fire Spin",
+        state: "start",
+      },
+      {
+        type: "pokemonEffect",
+        target: "p2a: Gyarados",
+        effect: "move: Fire Spin",
+        state: "end",
+      },
+      {
+        type: "pokemonEffect",
+        target: "p2a: Blissey",
+        effect: "move: Infestation",
+        state: "activate",
+        sourceTarget: "p1a: Shuckle",
+      },
+      {
+        type: "pokemonEffect",
+        target: "p2a: Gyarados",
+        effect: "confusion",
+        state: "start",
+        source: "move: Confuse Ray",
+        sourceTarget: "p1a: Golduck",
+      },
+    ]);
+  });
+
   it("parses weather events as field effects", () => {
     const events = presentBattleEventsForResponse([
       [

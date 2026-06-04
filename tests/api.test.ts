@@ -84,9 +84,69 @@ describe("Showdown API", () => {
       version: "1.0.0",
       engine: "pokemon-showdown",
       routes: {
+        parsePokemon: "/parse_pokemon",
         createBattle: "/create_battle",
         chooseLead: "/battles/:battleId/lead",
       },
+    });
+  });
+
+  it("parses one Pokemon from Showdown export text", async () => {
+    const response = await postJson("/parse_pokemon", {
+      text: [
+        "Pika (Pikachu) @ Light Ball",
+        "Ability: Static",
+        "Level: 50",
+        "Tera Type: Electric",
+        "EVs: 252 Atk / 4 SpD / 252 Spe",
+        "Jolly Nature",
+        "- Volt Tackle",
+        "- Quick Attack",
+      ].join("\n"),
+    });
+
+    const body = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(body).toEqual({
+      success: true,
+      pokemon: {
+        name: "Pika",
+        species: "Pikachu",
+        item: "Light Ball",
+        ability: "Static",
+        gender: "",
+        nature: "Jolly",
+        evs: {
+          hp: 0,
+          atk: 252,
+          def: 0,
+          spa: 0,
+          spd: 4,
+          spe: 252,
+        },
+        ivs: {
+          hp: 31,
+          atk: 31,
+          def: 31,
+          spa: 31,
+          spd: 31,
+          spe: 31,
+        },
+        level: 50,
+        moves: ["Volt Tackle", "Quick Attack"],
+        teraType: "Electric",
+      },
+    });
+  });
+
+  it("rejects parse Pokemon requests without text", async () => {
+    const response = await postJson("/parse_pokemon", {});
+
+    expect(response.status).toBe(400);
+    expect(await response.json()).toEqual({
+      success: false,
+      error: "text is required",
     });
   });
 

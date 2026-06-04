@@ -1,4 +1,5 @@
 import { Router } from "express";
+import { Teams } from "pokemon-showdown";
 import { createBattle } from "@/battle/battle-service";
 import { battleStore } from "@/battle/battle-store";
 import { presentBattleRequests } from "@/battle/battle-request-presenter";
@@ -19,6 +20,39 @@ import { buildApplySavedHpEvalCommand } from "@/battle/battle-saved-hp";
 import { presentBattleField } from "@/battle/battle-field-presenter";
 
 export const battleRoutes = Router();
+
+battleRoutes.post("/parse_pokemon", (req, res) => {
+  const text = req.body?.text;
+
+  if (typeof text !== "string" || text.trim() === "") {
+    return res.status(400).json({
+      success: false,
+      error: "text is required",
+    });
+  }
+
+  try {
+    const team = Teams.import(text);
+    const pokemon = team?.[0];
+
+    if (!pokemon) {
+      return res.status(400).json({
+        success: false,
+        error: "Could not parse Pokemon text",
+      });
+    }
+
+    return res.json({
+      success: true,
+      pokemon,
+    });
+  } catch {
+    return res.status(400).json({
+      success: false,
+      error: "Could not parse Pokemon text",
+    });
+  }
+});
 
 battleRoutes.post("/create_battle", async (req, res) => {
   const result = await createBattle(req.body);

@@ -13,6 +13,13 @@ const routes = [
   },
   {
     method: "POST",
+    path: "/parse_pokemon",
+    description: "Zet Pokemon Showdown/Pokepaste tekst om naar een Pokemon object dat je in een team kunt gebruiken.",
+    href: "/parse_pokemon",
+    linkText: "docs",
+  },
+  {
+    method: "POST",
     path: "/create_battle",
     description: "Maakt een battle aan met twee Pokemon Showdown teams. Open de docs om te zien wat je meegeeft en terugkrijgt.",
     href: "/create_battle",

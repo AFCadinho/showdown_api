@@ -78,6 +78,31 @@ export type WinEvent = {
   winner: string;
 };
 
+export type AbilityEvent = {
+  type: "ability";
+  target: string;
+  ability: string;
+  modifier?: string;
+};
+
+export type StatChangeEvent = {
+  type: "statChange";
+  target: string;
+  stat: string;
+  amount: number;
+  source?: string;
+  sourceTarget?: string;
+};
+
+export type PokemonEffectEvent = {
+  type: "pokemonEffect";
+  target: string;
+  effect: string;
+  state: "start" | "activate" | "end";
+  source?: string;
+  sourceTarget?: string;
+};
+
 export type FieldEffectEvent = {
   type: "fieldEffect";
   scope: "field" | "side";
@@ -103,6 +128,9 @@ export type BattleEvent =
   | FaintEvent
   | TurnEvent
   | WinEvent
+  | AbilityEvent
+  | StatChangeEvent
+  | PokemonEffectEvent
   | FieldEffectEvent;
 
 
@@ -189,6 +217,18 @@ function parseBattleEventLine(
       return parseCantEvent(parts);
     case "-fail":
       return parseFailEvent(parts);
+    case "-ability":
+      return parseAbilityEvent(parts);
+    case "-boost":
+      return parseStatChangeEvent(parts, 1);
+    case "-unboost":
+      return parseStatChangeEvent(parts, -1);
+    case "-start":
+      return parsePokemonEffectEvent(parts, "start");
+    case "-activate":
+      return parsePokemonEffectEvent(parts, "activate");
+    case "-end":
+      return parsePokemonEffectEvent(parts, "end");
     case "-weather":
       return parseWeatherEvent(parts);
     case "-fieldstart":
@@ -374,6 +414,53 @@ function parseWinEvent(parts: string[]): WinEvent {
   return {
     type: "win",
     winner: parts[2],
+  };
+}
+
+function parseAbilityEvent(parts: string[]): AbilityEvent {
+  return {
+    type: "ability",
+    target: parts[2],
+    ability: parts[3],
+    modifier: parts[4],
+  };
+}
+
+function parseStatChangeEvent(
+  parts: string[],
+  direction: 1 | -1
+): StatChangeEvent | null {
+  const amount = Number(parts[4]);
+
+  if (!Number.isFinite(amount)) return null;
+
+  const source = parseBracketValue(parts, "[from]");
+  const sourceTarget = parseBracketValue(parts, "[of]");
+
+  return {
+    type: "statChange",
+    target: parts[2],
+    stat: parts[3],
+    amount: amount * direction,
+    ...(source ? { source } : {}),
+    ...(sourceTarget ? { sourceTarget } : {}),
+  };
+}
+
+function parsePokemonEffectEvent(
+  parts: string[],
+  state: "start" | "activate" | "end"
+): PokemonEffectEvent {
+  const source = parseBracketValue(parts, "[from]");
+  const sourceTarget = parseBracketValue(parts, "[of]");
+
+  return {
+    type: "pokemonEffect",
+    target: parts[2],
+    effect: parts[3],
+    state,
+    ...(source ? { source } : {}),
+    ...(sourceTarget ? { sourceTarget } : {}),
   };
 }
 

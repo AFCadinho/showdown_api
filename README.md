@@ -46,6 +46,7 @@ Response:
     "home": "/",
     "health": "/health",
     "info": "/info",
+    "parsePokemon": "/parse_pokemon",
     "createBattle": "/create_battle",
     "createBattleSchema": "/create_battle/schema",
     "createWildBattle": "/create_wild_battle",
@@ -55,6 +56,63 @@ Response:
   }
 }
 ```
+
+## Pokemon Tekst Parsen
+
+```http
+POST /parse_pokemon
+Content-Type: application/json
+```
+
+Deze route zet Pokemon Showdown/Pokepaste tekst om naar een Pokemon object dat
+je direct in een battle team kunt gebruiken. De API gebruikt hiervoor de parser
+van Pokemon Showdown zelf.
+
+### Request Body
+
+```json
+{
+  "text": "Pika (Pikachu) @ Light Ball\nAbility: Static\nLevel: 50\nTera Type: Electric\nEVs: 252 Atk / 4 SpD / 252 Spe\nJolly Nature\n- Volt Tackle\n- Quick Attack"
+}
+```
+
+### Response
+
+```json
+{
+  "success": true,
+  "pokemon": {
+    "name": "Pika",
+    "species": "Pikachu",
+    "item": "Light Ball",
+    "ability": "Static",
+    "gender": "",
+    "nature": "Jolly",
+    "evs": {
+      "hp": 0,
+      "atk": 252,
+      "def": 0,
+      "spa": 0,
+      "spd": 4,
+      "spe": 252
+    },
+    "ivs": {
+      "hp": 31,
+      "atk": 31,
+      "def": 31,
+      "spa": 31,
+      "spd": 31,
+      "spe": 31
+    },
+    "level": 50,
+    "moves": ["Volt Tackle", "Quick Attack"],
+    "teraType": "Electric"
+  }
+}
+```
+
+Als de tekst leeg is of niet geparsed kan worden, komt er een `400` response
+terug met `success: false`.
 
 ## Battle Aanmaken
 
@@ -750,6 +808,9 @@ Zo rekenen HUD en event-animaties met dezelfde eindstate.
 | `damage` | `target`, `previousCondition`, `condition`, `previousHp`, `hp`, `maxHp`, `amount` | Een Pokemon krijgt damage. Als vorige HP bekend is, bevat het event ook self-contained HP-waarden voor UI-animaties. |
 | `heal` | `target`, `previousCondition`, `condition`, `previousHp`, `hp`, `maxHp`, `amount`, `source`, `sourceTarget` | Een Pokemon krijgt HP terug. Als vorige HP bekend is, bevat het event ook self-contained HP-waarden voor UI-animaties. |
 | `status` | `target`, `status` | Een Pokemon krijgt een status, zoals `par`. |
+| `ability` | `target`, `ability`, `modifier` | Een ability wordt door Showdown zichtbaar of actief, bijvoorbeeld `Pressure` of `Intimidate`. Gebruik dit voor de ability banner. |
+| `statChange` | `target`, `stat`, `amount`, `source`, `sourceTarget` | Een stat verandert. `amount` is positief bij boost en negatief bij unboost. |
+| `pokemonEffect` | `target`, `effect`, `state`, `source`, `sourceTarget` | Een tijdelijk effect op een Pokemon start, activeert of eindigt. Komt uit Showdown `-start`, `-activate` en `-end`. |
 | `cant` | `target`, `reason`, `move` | Een Pokemon kan geen move uitvoeren, bijvoorbeeld door flinch, paralysis, sleep of recharge. |
 | `fail` | `target`, `action` | Een move of action faalt door eigen mechanics, zoals Fake Out buiten de eerste beurt of Protect die faalt. |
 | `switch` | `playerId`, `from`, `fromIdent`, `to`, `toIdent`, `pokemon`, `details`, `condition` | Een Pokemon komt actief het veld in. Als de vorige actieve Pokemon bekend is, bevat het event ook wie eruit ging. |
@@ -757,6 +818,78 @@ Zo rekenen HUD en event-animaties met dezelfde eindstate.
 | `faint` | `target` | Een Pokemon faint. |
 | `turn` | `turn` | Showdown start een nieuwe turn. |
 | `win` | `winner` | De battle is afgelopen. |
+
+Ability-effecten blijven in Showdown-volgorde staan. Bij Intimidate komt eerst
+het `ability` event voor de banner, daarna een `statChange` event voor de
+Attack drop:
+
+Los ability event:
+
+```json
+{
+  "type": "ability",
+  "target": "p2a: Weavile",
+  "ability": "Pressure"
+}
+```
+
+Los stat boost event:
+
+```json
+{
+  "type": "statChange",
+  "target": "p1a: Dragonite",
+  "stat": "atk",
+  "amount": 1
+}
+```
+
+Los stat drop event met Showdown metadata:
+
+```json
+{
+  "type": "statChange",
+  "target": "p2a: Gyarados",
+  "stat": "atk",
+  "amount": -1,
+  "source": "ability: Intimidate",
+  "sourceTarget": "p1a: Arcanine"
+}
+```
+
+```json
+[
+  {
+    "type": "ability",
+    "target": "p1a: Arcanine",
+    "ability": "Intimidate",
+    "modifier": "boost"
+  },
+  {
+    "type": "statChange",
+    "target": "p2a: Gyarados",
+    "stat": "atk",
+    "amount": -1
+  }
+]
+```
+
+Tijdelijke Pokemon-effecten komen terug als `pokemonEffect`. Dit is generiek,
+zodat de API niet elke mechanic apart hoeft te kennen. Bijvoorbeeld trapping
+door Infestation:
+
+```json
+{
+  "type": "pokemonEffect",
+  "target": "p2a: Blissey",
+  "effect": "move: Infestation",
+  "state": "activate",
+  "sourceTarget": "p1a: Shuckle"
+}
+```
+
+De client kan op basis van `effect` zelf tekst of animatie kiezen, bijvoorbeeld
+`Blissey is trapped by Infestation!`.
 
 ## Error Response
 
