@@ -160,6 +160,13 @@ const successExample = {
       target: "p1a: Pikachu",
     },
     {
+      type: "move",
+      actor: "p1a: Hatterene",
+      move: "Tail Whip",
+      target: "p2a: Rattata",
+      source: "ability: Magic Bounce",
+    },
+    {
       type: "heal",
       target: "p2a: Bulbasaur",
       previousCondition: "176/231",
@@ -181,6 +188,13 @@ const successExample = {
       target: "p1a: Arcanine",
       ability: "Intimidate",
       modifier: "boost",
+    },
+    {
+      type: "ability",
+      target: "p1a: Great Tusk",
+      ability: "Protosynthesis",
+      effect: "boost",
+      stat: "atk",
     },
     {
       type: "statChange",

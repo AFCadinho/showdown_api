@@ -61,6 +61,39 @@ describe("presentBattleEventsForResponse", () => {
     ]);
   });
 
+  it("parses move source metadata for reflected moves like Magic Bounce", () => {
+    const events = presentBattleEventsForResponse([
+      [
+        "p1",
+        "|move|p2a: Rattata|Tail Whip|p1a: Hatterene",
+        "|move|p1a: Hatterene|Tail Whip|p2a: Rattata|[from] ability: Magic Bounce",
+        "|-unboost|p2a: Rattata|def|1",
+      ].join("\n"),
+    ]);
+
+    expect(events).toEqual([
+      {
+        type: "move",
+        actor: "p2a: Rattata",
+        move: "Tail Whip",
+        target: "p1a: Hatterene",
+      },
+      {
+        type: "move",
+        actor: "p1a: Hatterene",
+        move: "Tail Whip",
+        target: "p2a: Rattata",
+        source: "ability: Magic Bounce",
+      },
+      {
+        type: "statChange",
+        target: "p2a: Rattata",
+        stat: "def",
+        amount: -1,
+      },
+    ]);
+  });
+
   it("parses status, faint and win events", () => {
     const events = presentBattleEventsForResponse([
       [
@@ -157,6 +190,33 @@ describe("presentBattleEventsForResponse", () => {
         target: "p1a: Arcanine",
         ability: "Intimidate",
         modifier: "boost",
+      },
+    ]);
+  });
+
+  it("normalizes Protosynthesis and Quark Drive stat boost effects as ability events", () => {
+    const events = presentBattleEventsForResponse([
+      [
+        "p1",
+        "|-activate|p1a: Great Tusk|Protosynthesisatk",
+        "|-activate|p2a: Iron Hands|QuarkDrivedef",
+      ].join("\n"),
+    ]);
+
+    expect(events).toEqual([
+      {
+        type: "ability",
+        target: "p1a: Great Tusk",
+        ability: "Protosynthesis",
+        effect: "boost",
+        stat: "atk",
+      },
+      {
+        type: "ability",
+        target: "p2a: Iron Hands",
+        ability: "Quark Drive",
+        effect: "boost",
+        stat: "def",
       },
     ]);
   });

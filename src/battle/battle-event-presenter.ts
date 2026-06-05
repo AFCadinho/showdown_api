@@ -6,6 +6,8 @@ export type MoveEvent = {
   actor: string;
   move: string;
   target?: string;
+  source?: string;
+  sourceTarget?: string;
 };
 
 export type DamageEvent = {
@@ -83,6 +85,10 @@ export type AbilityEvent = {
   target: string;
   ability: string;
   modifier?: string;
+  effect?: string;
+  stat?: string;
+  source?: string;
+  sourceTarget?: string;
 };
 
 export type StatChangeEvent = {
@@ -254,11 +260,16 @@ function parseBattleEventLine(
 }
 
 function parseMoveEvent(parts: string[]): MoveEvent {
+  const source = parseBracketValue(parts, "[from]");
+  const sourceTarget = parseBracketValue(parts, "[of]");
+
   return {
     type: "move",
     actor: parts[2],
     move: parts[3],
     target: parts[4],
+    ...(source ? { source } : {}),
+    ...(sourceTarget ? { sourceTarget } : {}),
   };
 }
 
@@ -450,9 +461,22 @@ function parseStatChangeEvent(
 function parsePokemonEffectEvent(
   parts: string[],
   state: "start" | "activate" | "end"
-): PokemonEffectEvent {
+): PokemonEffectEvent | AbilityEvent {
   const source = parseBracketValue(parts, "[from]");
   const sourceTarget = parseBracketValue(parts, "[of]");
+  const abilityStatBoost = parseAbilityStatBoostEffect(parts[3]);
+
+  if (state === "activate" && abilityStatBoost) {
+    return {
+      type: "ability",
+      target: parts[2],
+      ability: abilityStatBoost.ability,
+      effect: "boost",
+      stat: abilityStatBoost.stat,
+      ...(source ? { source } : {}),
+      ...(sourceTarget ? { sourceTarget } : {}),
+    };
+  }
 
   return {
     type: "pokemonEffect",
@@ -461,6 +485,19 @@ function parsePokemonEffectEvent(
     state,
     ...(source ? { source } : {}),
     ...(sourceTarget ? { sourceTarget } : {}),
+  };
+}
+
+function parseAbilityStatBoostEffect(
+  effect: string
+): { ability: string; stat: string } | null {
+  const match = /^(Protosynthesis|QuarkDrive)(hp|atk|def|spa|spd|spe)$/.exec(effect);
+
+  if (!match) return null;
+
+  return {
+    ability: match[1] === "QuarkDrive" ? "Quark Drive" : match[1],
+    stat: match[2],
   };
 }
 

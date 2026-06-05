@@ -804,11 +804,11 @@ Zo rekenen HUD en event-animaties met dezelfde eindstate.
 
 | Type | Velden | Beschrijving |
 | --- | --- | --- |
-| `move` | `actor`, `move`, `target` | Een Pokemon gebruikt een move. |
+| `move` | `actor`, `move`, `target`, `source`, `sourceTarget` | Een Pokemon gebruikt een move. Als Showdown metadata meestuurt, bijvoorbeeld bij Magic Bounce, bevat het event ook de bron. |
 | `damage` | `target`, `previousCondition`, `condition`, `previousHp`, `hp`, `maxHp`, `amount` | Een Pokemon krijgt damage. Als vorige HP bekend is, bevat het event ook self-contained HP-waarden voor UI-animaties. |
 | `heal` | `target`, `previousCondition`, `condition`, `previousHp`, `hp`, `maxHp`, `amount`, `source`, `sourceTarget` | Een Pokemon krijgt HP terug. Als vorige HP bekend is, bevat het event ook self-contained HP-waarden voor UI-animaties. |
 | `status` | `target`, `status` | Een Pokemon krijgt een status, zoals `par`. |
-| `ability` | `target`, `ability`, `modifier` | Een ability wordt door Showdown zichtbaar of actief, bijvoorbeeld `Pressure` of `Intimidate`. Gebruik dit voor de ability banner. |
+| `ability` | `target`, `ability`, `modifier`, `effect`, `stat`, `source`, `sourceTarget` | Een ability wordt door Showdown zichtbaar of actief, bijvoorbeeld `Pressure`, `Intimidate` of `Protosynthesis`. Gebruik dit voor de ability banner. |
 | `statChange` | `target`, `stat`, `amount`, `source`, `sourceTarget` | Een stat verandert. `amount` is positief bij boost en negatief bij unboost. |
 | `pokemonEffect` | `target`, `effect`, `state`, `source`, `sourceTarget` | Een tijdelijk effect op een Pokemon start, activeert of eindigt. Komt uit Showdown `-start`, `-activate` en `-end`. |
 | `cant` | `target`, `reason`, `move` | Een Pokemon kan geen move uitvoeren, bijvoorbeeld door flinch, paralysis, sleep of recharge. |
@@ -823,6 +823,19 @@ Ability-effecten blijven in Showdown-volgorde staan. Bij Intimidate komt eerst
 het `ability` event voor de banner, daarna een `statChange` event voor de
 Attack drop:
 
+Als een move wordt teruggekaatst door bijvoorbeeld Magic Bounce, komt dat terug
+op het `move` event via `source`:
+
+```json
+{
+  "type": "move",
+  "actor": "p1a: Hatterene",
+  "move": "Tail Whip",
+  "target": "p2a: Rattata",
+  "source": "ability: Magic Bounce"
+}
+```
+
 Los ability event:
 
 ```json
@@ -830,6 +843,18 @@ Los ability event:
   "type": "ability",
   "target": "p2a: Weavile",
   "ability": "Pressure"
+}
+```
+
+Ability boost event zonder normale stat stage, bijvoorbeeld Protosynthesis:
+
+```json
+{
+  "type": "ability",
+  "target": "p1a: Great Tusk",
+  "ability": "Protosynthesis",
+  "effect": "boost",
+  "stat": "atk"
 }
 ```
 
