@@ -13,6 +13,11 @@ export type ChoiceInput = {
   slot: number;
 };
 
+export type PokemonInfoQuery = {
+  viewerId: PlayerId;
+  ident: string;
+};
+
 export type ValidationSuccess<TData> = {
   success: true;
   data: TData;
@@ -127,4 +132,42 @@ function validateBody(body: unknown): boolean {
   }
 
   return true;
+}
+
+export function validatePokemonInfoQuery(
+  query: unknown
+): ValidationResult<PokemonInfoQuery> {
+  if (!validateBody(query)) {
+    return {
+      success: false,
+      error: "Invalid query parameters",
+    };
+  }
+
+  const { viewerId, ident } = query as {
+    viewerId?: unknown;
+    ident?: unknown;
+  };
+
+  if (viewerId !== "p1" && viewerId !== "p2") {
+    return {
+      success: false,
+      error: "Invalid player",
+    };
+  }
+
+  if (typeof ident !== "string" || ident.trim().length === 0) {
+    return {
+      success: false,
+      error: "Invalid ident",
+    };
+  }
+
+  return {
+    success: true,
+    data: {
+      viewerId,
+      ident: ident.trim(),
+    },
+  };
 }

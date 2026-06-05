@@ -40,3 +40,7 @@ docsRoutes.get("/battles/:battleId/lead", (_, res) => {
 docsRoutes.get("/battles/:battleId/choice", (_, res) => {
   res.sendFile(path.join(publicPath, "choice-battle.html"));
 });
+
+docsRoutes.get("/docs/battles/:battleId/pokemon-info", (_, res) => {
+  res.sendFile(path.join(publicPath, "pokemon-info.html"));
+});

@@ -33,6 +33,13 @@ const routes = [
     linkText: "docs",
   },
   {
+    method: "GET",
+    path: "/battles/:battleId/pokemon-info",
+    description: "Geeft per Pokémon bevestigde data terug (PP, maxPP, item, ability) op basis van de `viewerId` die om opvragen.",
+    href: "/docs/battles/example-battle-id/pokemon-info",
+    linkText: "docs",
+  },
+  {
     method: "POST",
     path: "/battles/:battleId/lead",
     description: "Kiest de lead Pokemon voor p1 of p2 in een bestaande battle. Open de docs met een voorbeeld battle id.",

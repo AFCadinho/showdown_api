@@ -26,6 +26,7 @@ systemRoutes.get("/info", (_, res) => {
       createBattleSchema: "/create_battle/schema",
       createWildBattle: "/create_wild_battle",
       createWildBattleSchema: "/create_wild_battle/schema",
+      pokemonInfo: "/battles/:battleId/pokemon-info",
       chooseLead: "/battles/:battleId/lead",
       chooseAction: "/battles/:battleId/choice",
     },

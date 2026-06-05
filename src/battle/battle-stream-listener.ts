@@ -5,6 +5,11 @@ import type {
   PlayerStreams,
 } from "./types";
 import { getFieldEffectDurationMetadata } from "./battle-field-effect-metadata";
+import {
+  updateKnownPokemonInfoFromLine,
+  updateKnownPokemonInfoFromRequest,
+} from "./battle-pokemon-knowledge";
+import { updatePokemonStatStagesFromLine } from "./battle-pokemon-stat-stages";
 
 /**
  * Start listeners voor beide spelerstreams van een Showdown battle.
@@ -46,6 +51,14 @@ async function listenToPlayerStream(
     const lines = chunk.split("\n");
 
     for (const line of lines) {
+      if (side === "p1") {
+        updateKnownPokemonInfoFromLine(
+          battleData.pokemonKnownInfoByViewer,
+          line,
+          battleData.formatid
+        );
+        updatePokemonStatStagesFromLine(battleData.statStagesByPokemon, line);
+      }
       handleBattleStreamLine(line, side, battleData);
     }
   }
@@ -65,6 +78,12 @@ function handleBattleStreamLine(
     try {
       const request = JSON.parse(requestText);
       battleData.requests[side] = request;
+      updateKnownPokemonInfoFromRequest(
+        battleData.pokemonKnownInfoByViewer,
+        side,
+        request,
+        battleData.formatid
+      );
       updateKnownConditionsFromRequest(request, battleData);
     } catch (error) {
       console.log(`Could not parse ${side} request:`, error);
@@ -80,6 +99,15 @@ function handleBattleStreamLine(
 
     if (Number.isInteger(turn)) {
       battleData.state.turn = turn;
+    }
+
+    return;
+  }
+
+  if (line.startsWith("|switch|")) {
+    const [, , ident] = line.split("|");
+    if (ident) {
+      battleData.activeByPlayer[getPlayerIdFromIdent(ident)] = ident;
     }
 
     return;
@@ -294,7 +322,7 @@ function updateKnownConditionsFromRequest(
 
     if (pokemon.active === true) {
       const playerId = request.side.id ?? getPlayerIdFromIdent(pokemon.ident);
-      battleData.activeByPlayer[playerId] ??= activeIdent;
+      battleData.activeByPlayer[playerId] = activeIdent;
     }
   }
 }

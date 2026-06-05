@@ -21,6 +21,11 @@ function createBattleData(): BattleData {
       byIdent: {},
       byPlayerSlot: {},
     },
+    pokemonKnownInfoByViewer: {
+      p1: {},
+      p2: {},
+    },
+    statStagesByPokemon: {},
     pokemonSaveStateByIdent: {},
     state: {
       turn: 1,

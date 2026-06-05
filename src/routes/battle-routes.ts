@@ -6,11 +6,13 @@ import { presentBattleRequests } from "@/battle/battle-request-presenter";
 import {
   validateChoiceInput,
   validateLeadInput,
+  validatePokemonInfoQuery,
 } from "@/battle/battle-route-validators";
 import { buildChoiceCommand } from "@/battle/battle-choice-command";
 import { consumeBattleEventsForResponse } from "@/battle/battle-event-presenter";
 import type { BattleData } from "@/battle/types";
 import { buildBattleRequestSnapshot } from "@/battle/battle-request-snapshot";
+import { getViewerKnownPokemonInfo } from "@/battle/battle-pokemon-knowledge";
 import {
   applyPokemonInstanceIdsToRequests,
   applyPokemonSaveStateToRequests,
@@ -20,6 +22,46 @@ import { buildApplySavedHpEvalCommand } from "@/battle/battle-saved-hp";
 import { presentBattleField } from "@/battle/battle-field-presenter";
 
 export const battleRoutes = Router();
+
+battleRoutes.get("/battles/:battleId/pokemon-info", (req, res) => {
+  const { battleId } = req.params;
+
+  const battle = battleStore.getBattle(battleId);
+
+  if (!battle) {
+    return res.status(404).json({
+      success: false,
+      error: "Battle not found",
+    });
+  }
+
+  const validation = validatePokemonInfoQuery(req.query);
+
+  if (!validation.success) {
+    return res.status(400).json(validation);
+  }
+
+  const { viewerId, ident } = validation.data;
+  const pokemon = getViewerKnownPokemonInfo(
+    battle.pokemonKnownInfoByViewer,
+    viewerId,
+    ident,
+    battle.activeByPlayer,
+    battle.statStagesByPokemon
+  );
+
+  if (!pokemon) {
+    return res.json({
+      success: true,
+      pokemon: null,
+    });
+  }
+
+  return res.json({
+    success: true,
+    pokemon,
+  });
+});
 
 battleRoutes.post("/parse_pokemon", (req, res) => {
   const text = req.body?.text;

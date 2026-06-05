@@ -51,6 +51,7 @@ Response:
     "createBattleSchema": "/create_battle/schema",
     "createWildBattle": "/create_wild_battle",
     "createWildBattleSchema": "/create_wild_battle/schema",
+    "pokemonInfo": "/battles/:battleId/pokemon-info",
     "chooseLead": "/battles/:battleId/lead",
     "chooseAction": "/battles/:battleId/choice"
   }
@@ -113,6 +114,53 @@ van Pokemon Showdown zelf.
 
 Als de tekst leeg is of niet geparsed kan worden, komt er een `400` response
 terug met `success: false`.
+
+## Pokemon Informatie Oproepen
+
+```http
+GET /battles/:battleId/pokemon-info?viewerId=p1&ident=p1a:%20Mewtwo
+```
+
+Deze route geeft alleen bevestigde informatie terug die al zichtbaar is voor de
+gegeven `viewerId`.
+
+### Query Parameters
+
+- `viewerId`: `p1` of `p2`.
+- `ident`: ident van de Pokemon in battle-formaat, bijvoorbeeld `p1a: Mewtwo` of `p1: Mewtwo`.
+
+### Voorbeeld Response
+
+```json
+{
+  "success": true,
+  "pokemon": {
+    "ident": "p1: Mewtwo",
+    "confirmedMoves": [
+      {
+        "name": "Aura Sphere",
+        "pp": 19,
+        "maxpp": 32
+      }
+    ],
+    "confirmedItem": "Leftovers",
+    "confirmedAbility": "Pressure",
+    "statChanges": {
+      "spa": 1,
+      "spd": 1,
+      "atk": -1
+    }
+  }
+}
+```
+
+Als de gevraagde Pokemon nog niet bekend is voor die viewer, krijgt de API
+`{"success": true, "pokemon": null}` terug.
+
+`statChanges` bevat alleen non-zero stat stages voor de actieve Pokemon.
+Deze waardes zijn battle-local, publiek zichtbaar voor beide viewers en resetten
+bij switch, faint of battle end. Ability modifiers zoals Protosynthesis en
+Quark Drive vallen hier niet onder.
 
 ## Battle Aanmaken
 

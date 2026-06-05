@@ -4,6 +4,22 @@ import type { PokemonInstanceIdMap } from "./battle-pokemon-instance-ids";
 
 export type PlayerId = "p1" | "p2";
 
+export type ConfirmedMove = {
+  name: string;
+  pp?: number;
+  maxpp?: number;
+};
+
+export type PokemonKnownInfo = {
+  confirmedMoves?: ConfirmedMove[];
+  confirmedItem?: string;
+  confirmedAbility?: string;
+  statChanges?: Record<string, number>;
+};
+
+export type PokemonKnownInfoByViewer = Record<PlayerId, Record<string, PokemonKnownInfo>>;
+export type PokemonStatStagesByIdent = Record<string, Record<string, number>>;
+
 export type BattleData = {
   stream: BattleStream;
   playerStreams: PlayerStreams;
@@ -15,6 +31,8 @@ export type BattleData = {
   activeByPlayer: Record<string, string>;
   field: BattleFieldSnapshot;
   instanceIdsByPokemonIdent: PokemonInstanceIdMap;
+  pokemonKnownInfoByViewer: PokemonKnownInfoByViewer;
+  statStagesByPokemon: PokemonStatStagesByIdent;
   pokemonSaveStateByIdent: Record<
     string,
     Array<{

@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pokemon Info | Showdown API</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script src="/pokemon-info.js" defer></script>
+</head>
+<body class="bg-body-tertiary">
+  <main class="container py-5">
+    <header class="mb-5">
+      <p class="mb-3"><a href="/" class="link-primary text-decoration-none">Terug naar overzicht</a></p>
+      <h1 class="display-1 fw-bold lh-1 mb-3">Pokemon Info</h1>
+      <p class="lead text-secondary">Geeft bevestigde battle-info terug voor een Pokemon vanuit het perspectief van een speler.</p>
+    </header>
+
+    <section class="mt-4">
+      <h2 class="h4 mb-3">Endpoint</h2>
+      <div class="card">
+        <div class="card-body">
+          <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-start gap-2">
+            <code><span class="text-success">GET</span> /battles/:battleId/pokemon-info</code>
+            <span class="text-secondary">Query parameters required</span>
+          </div>
+          <p class="card-text text-secondary mt-2 mb-0">Gebruik deze route voor hover-cards of UI-panelen die alleen bekende moves, PP, item en ability mogen tonen.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="mt-4">
+      <h2 class="h4 mb-3">Path Parameter</h2>
+      <p class="text-secondary">De battle id komt uit de response van <code>/create_battle</code> of <code>/create_wild_battle</code>.</p>
+      <div id="path-fields" class="row g-3 mt-1"></div>
+    </section>
+
+    <section class="mt-4">
+      <h2 class="h4 mb-3">Query Parameters</h2>
+      <p class="text-secondary">De API kijkt vanuit de opgegeven viewer. Daardoor wordt tegenstander-info alleen teruggegeven als die in deze battle al bekend is geworden.</p>
+      <div id="query-fields" class="row g-3 mt-1"></div>
+    </section>
+
+    <section class="mt-4">
+      <h2 class="h4 mb-3">Request Voorbeeld</h2>
+      <pre class="border rounded bg-body p-3 overflow-auto"><code id="request-example"></code></pre>
+    </section>
+
+    <section class="mt-4">
+      <h2 class="h4 mb-3">Wat Krijg Je Terug?</h2>
+      <p class="text-secondary">Bij bekende info krijg je een Pokemon object terug. Als de viewer nog niets mag weten, is <code>pokemon</code> null.</p>
+      <div id="response-fields" class="row g-3 mt-1"></div>
+    </section>
+
+    <section class="mt-4">
+      <h2 class="h4 mb-3">Succes Response</h2>
+      <pre class="border rounded bg-body p-3 overflow-auto"><code id="success-example"></code></pre>
+    </section>
+
+    <section class="mt-4">
+      <h2 class="h4 mb-3">Onbekend Voor Viewer</h2>
+      <pre class="border rounded bg-body p-3 overflow-auto"><code id="unknown-example"></code></pre>
+    </section>
+
+    <section class="mt-4">
+      <h2 class="h4 mb-3">Error Response</h2>
+      <p class="text-secondary">Als de battle id, viewerId of ident niet klopt, krijg je een foutmelding terug.</p>
+      <pre class="border rounded bg-body p-3 overflow-auto"><code id="error-example"></code></pre>
+    </section>
+
+    <section class="mt-4">
+      <h2 class="h4 mb-3">Curl Voorbeeld</h2>
+      <pre class="border rounded bg-body p-3 overflow-auto"><code id="curl-example"></code></pre>
+    </section>
+  </main>
+</body>
+</html>

@@ -10,6 +10,7 @@ import {
   buildPokemonInstanceIdMap,
   buildPokemonSaveStateMap,
 } from "./battle-pokemon-instance-ids";
+import { initializeKnownPokemonInfoByViewer } from "./battle-pokemon-knowledge";
 import { presentBattleField } from "./battle-field-presenter";
 
 type ShowdownPokemonTeam = NonNullable<Parameters<typeof Teams.pack>[0]>;
@@ -86,6 +87,8 @@ export async function createBattle(body: CreateBattleBody): Promise<CreateBattle
     activeByPlayer: {},
     field: { effects: [] },
     instanceIdsByPokemonIdent,
+    pokemonKnownInfoByViewer: initializeKnownPokemonInfoByViewer(),
+    statStagesByPokemon: {},
     pokemonSaveStateByIdent,
     state: {
       turn: 1,
