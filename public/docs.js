@@ -12,6 +12,13 @@ const routes = [
     href: "/info",
   },
   {
+    method: "GET",
+    path: "/pokemon-stats",
+    description: "Geeft Dex/stat-calculator data terug voor een Pokemon, inclusief speed ranges op basis van species en level.",
+    href: "/pokemon-stats/docs",
+    linkText: "docs",
+  },
+  {
     method: "POST",
     path: "/parse_pokemon",
     description: "Zet Pokemon Showdown/Pokepaste tekst om naar een Pokemon object dat je in een team kunt gebruiken.",

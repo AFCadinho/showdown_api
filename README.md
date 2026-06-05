@@ -46,6 +46,7 @@ Response:
     "home": "/",
     "health": "/health",
     "info": "/info",
+    "pokemonStats": "/pokemon-stats",
     "parsePokemon": "/parse_pokemon",
     "createBattle": "/create_battle",
     "createBattleSchema": "/create_battle/schema",
@@ -57,6 +58,58 @@ Response:
   }
 }
 ```
+
+## Pokemon Stats
+
+```http
+GET /pokemon-stats?species=Mewtwo&level=50
+```
+
+Deze route geeft Dex/stat-calculator informatie terug voor een Pokemon. De
+route verandert geen battle-state en gebruikt Pokemon Showdown alleen voor de
+species/base stat data.
+
+### Query Parameters
+
+- `species`: verplicht. Pokemon species, bijvoorbeeld `Mewtwo` of `Rillaboom`.
+- `level`: optioneel. Heel getal van `1` tot en met `100`. Default is `100`,
+  omdat PvP battles standaard op level 100 gespeeld worden.
+
+### Voorbeeld Response
+
+```json
+{
+  "success": true,
+  "pokemon": {
+    "species": "Mewtwo",
+    "level": 50,
+    "baseStats": {
+      "hp": 106,
+      "atk": 110,
+      "def": 90,
+      "spa": 154,
+      "spd": 90,
+      "spe": 130
+    },
+    "speed": {
+      "min": 121,
+      "minNeutral31Iv": 150,
+      "maxNeutral31Iv": 182,
+      "max": 200
+    }
+  }
+}
+```
+
+Speed ranges betekenen:
+
+- `min`: 0 Speed IV, 0 Speed EV, negatieve Speed nature.
+- `minNeutral31Iv`: 31 Speed IV, 0 Speed EV, neutrale nature.
+- `maxNeutral31Iv`: 31 Speed IV, 252 Speed EV, neutrale nature.
+- `max`: 31 Speed IV, 252 Speed EV, positieve Speed nature.
+
+Als `species` onbekend is of `level` buiten `1..100` valt, geeft de API een
+`400` response met `success: false`.
 
 ## Pokemon Tekst Parsen
 

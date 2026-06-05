@@ -25,6 +25,10 @@ docsRoutes.get("/parse_pokemon", (_, res) => {
   res.sendFile(path.join(publicPath, "parse-pokemon.html"));
 });
 
+docsRoutes.get("/pokemon-stats/docs", (_, res) => {
+  res.sendFile(path.join(publicPath, "pokemon-stats.html"));
+});
+
 docsRoutes.get("/create_battle/schema", (_, res) => {
   res.json(createBattleDocs);
 });

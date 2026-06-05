@@ -2,6 +2,7 @@ import cors from "cors";
 import express from "express";
 import path from "path";
 import { battleRoutes } from "./routes/battle-routes";
+import { dexRoutes } from "./routes/dex-routes";
 import { docsRoutes } from "./routes/docs-routes";
 import { systemRoutes } from "./routes/system-routes";
 
@@ -12,4 +13,5 @@ app.use(express.json());
 app.use(express.static(path.join(__dirname, "../public")));
 app.use(docsRoutes);
 app.use(systemRoutes);
+app.use(dexRoutes);
 app.use(battleRoutes);

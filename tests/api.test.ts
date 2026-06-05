@@ -84,10 +84,76 @@ describe("Showdown API", () => {
       version: "1.0.0",
       engine: "pokemon-showdown",
       routes: {
+        pokemonStats: "/pokemon-stats",
         parsePokemon: "/parse_pokemon",
         createBattle: "/create_battle",
         chooseLead: "/battles/:battleId/lead",
       },
+    });
+  });
+
+  it("returns Pokemon speed ranges with level 100 as default", async () => {
+    const response = await fetch(`${baseUrl}/pokemon-stats?species=Mewtwo`);
+    const body = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(body).toEqual({
+      success: true,
+      pokemon: {
+        species: "Mewtwo",
+        level: 100,
+        baseStats: {
+          hp: 106,
+          atk: 110,
+          def: 90,
+          spa: 154,
+          spd: 90,
+          spe: 130,
+        },
+        speed: {
+          min: 238,
+          minNeutral31Iv: 296,
+          maxNeutral31Iv: 359,
+          max: 394,
+        },
+      },
+    });
+  });
+
+  it("returns Pokemon speed ranges for a custom level", async () => {
+    const response = await fetch(`${baseUrl}/pokemon-stats?species=Mewtwo&level=50`);
+    const body = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(body.pokemon).toMatchObject({
+      species: "Mewtwo",
+      level: 50,
+      speed: {
+        min: 121,
+        minNeutral31Iv: 150,
+        maxNeutral31Iv: 182,
+        max: 200,
+      },
+    });
+  });
+
+  it("rejects unknown Pokemon stats species", async () => {
+    const response = await fetch(`${baseUrl}/pokemon-stats?species=Missingnope`);
+
+    expect(response.status).toBe(400);
+    expect(await response.json()).toEqual({
+      success: false,
+      error: "Unknown species",
+    });
+  });
+
+  it("rejects invalid Pokemon stats levels", async () => {
+    const response = await fetch(`${baseUrl}/pokemon-stats?species=Mewtwo&level=101`);
+
+    expect(response.status).toBe(400);
+    expect(await response.json()).toEqual({
+      success: false,
+      error: "level must be an integer from 1 to 100",
     });
   });
 
