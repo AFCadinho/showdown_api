@@ -86,6 +86,7 @@ describe("Showdown API", () => {
       routes: {
         pokemonStats: "/pokemon-stats",
         parsePokemon: "/parse_pokemon",
+        parseTeam: "/parse_team",
         createBattle: "/create_battle",
         chooseLead: "/battles/:battleId/lead",
       },
@@ -213,6 +214,84 @@ describe("Showdown API", () => {
     expect(await response.json()).toEqual({
       success: false,
       error: "text is required",
+    });
+  });
+
+  it("parses a full Pokemon Showdown team export", async () => {
+    const response = await postJson("/parse_team", {
+      text: [
+        "Rillaboom @ Assault Vest",
+        "Ability: Grassy Surge",
+        "Level: 50",
+        "Tera Type: Grass",
+        "EVs: 204 HP / 252 Atk / 52 Spe",
+        "Adamant Nature",
+        "- Grassy Glide",
+        "- Knock Off",
+        "- U-turn",
+        "- Low Kick",
+        "",
+        "Mewtwo @ Leftovers",
+        "Ability: Pressure",
+        "Level: 100",
+        "Tera Type: Psychic",
+        "Timid Nature",
+        "- Psystrike",
+        "- Aura Sphere",
+      ].join("\n"),
+    });
+
+    const body = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(body).toEqual({
+      success: true,
+      team: [
+        expect.objectContaining({
+          species: "Rillaboom",
+          item: "Assault Vest",
+          ability: "Grassy Surge",
+          level: 50,
+          nature: "Adamant",
+          moves: ["Grassy Glide", "Knock Off", "U-turn", "Low Kick"],
+        }),
+        expect.objectContaining({
+          species: "Mewtwo",
+          item: "Leftovers",
+          ability: "Pressure",
+          level: 100,
+          nature: "Timid",
+          moves: ["Psystrike", "Aura Sphere"],
+        }),
+      ],
+    });
+  });
+
+  it("rejects parse team requests without text", async () => {
+    const response = await postJson("/parse_team", {});
+
+    expect(response.status).toBe(400);
+    expect(await response.json()).toEqual({
+      success: false,
+      error: "text is required",
+    });
+  });
+
+  it("rejects parsed teams with more than six Pokemon", async () => {
+    const text = Array.from({ length: 7 }, (_, index) =>
+      [
+        `Pikachu${index + 1} (Pikachu)`,
+        "Ability: Static",
+        "- Thunderbolt",
+      ].join("\n")
+    ).join("\n\n");
+
+    const response = await postJson("/parse_team", { text });
+
+    expect(response.status).toBe(400);
+    expect(await response.json()).toEqual({
+      success: false,
+      error: "Team must contain 1 to 6 Pokemon",
     });
   });
 

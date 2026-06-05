@@ -23,6 +23,7 @@ systemRoutes.get("/info", (_, res) => {
       info: "/info",
       pokemonStats: "/pokemon-stats",
       parsePokemon: "/parse_pokemon",
+      parseTeam: "/parse_team",
       createBattle: "/create_battle",
       createBattleSchema: "/create_battle/schema",
       createWildBattle: "/create_wild_battle",

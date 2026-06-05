@@ -27,6 +27,13 @@ const routes = [
   },
   {
     method: "POST",
+    path: "/parse_team",
+    description: "Zet Pokemon Showdown/Pokepaste teamtekst om naar een team array van 1 tot 6 Pokemon.",
+    href: "/parse_team",
+    linkText: "docs",
+  },
+  {
+    method: "POST",
     path: "/create_battle",
     description: "Maakt een battle aan met twee Pokemon Showdown teams. Open de docs om te zien wat je meegeeft en terugkrijgt.",
     href: "/create_battle",

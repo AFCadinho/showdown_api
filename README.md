@@ -48,6 +48,7 @@ Response:
     "info": "/info",
     "pokemonStats": "/pokemon-stats",
     "parsePokemon": "/parse_pokemon",
+    "parseTeam": "/parse_team",
     "createBattle": "/create_battle",
     "createBattleSchema": "/create_battle/schema",
     "createWildBattle": "/create_wild_battle",
@@ -167,6 +168,64 @@ van Pokemon Showdown zelf.
 
 Als de tekst leeg is of niet geparsed kan worden, komt er een `400` response
 terug met `success: false`.
+
+## Team Tekst Parsen
+
+```http
+POST /parse_team
+Content-Type: application/json
+```
+
+Deze route zet Pokemon Showdown/Pokepaste teamtekst om naar een team array. De
+API gebruikt hiervoor de parser van Pokemon Showdown zelf en accepteert minimaal
+1 en maximaal 6 Pokemon.
+
+### Request Body
+
+```json
+{
+  "text": "Rillaboom @ Assault Vest\nAbility: Grassy Surge\nLevel: 50\nTera Type: Grass\nEVs: 204 HP / 252 Atk / 52 Spe\nAdamant Nature\n- Grassy Glide\n- Knock Off\n- U-turn\n- Low Kick\n\nMewtwo @ Leftovers\nAbility: Pressure\nLevel: 100\nTera Type: Psychic\nTimid Nature\n- Psystrike\n- Aura Sphere"
+}
+```
+
+### Response
+
+```json
+{
+  "success": true,
+  "team": [
+    {
+      "species": "Rillaboom",
+      "item": "Assault Vest",
+      "ability": "Grassy Surge",
+      "nature": "Adamant",
+      "evs": {
+        "hp": 204,
+        "atk": 252,
+        "def": 0,
+        "spa": 0,
+        "spd": 0,
+        "spe": 52
+      },
+      "level": 50,
+      "moves": ["Grassy Glide", "Knock Off", "U-turn", "Low Kick"],
+      "teraType": "Grass"
+    },
+    {
+      "species": "Mewtwo",
+      "item": "Leftovers",
+      "ability": "Pressure",
+      "nature": "Timid",
+      "level": 100,
+      "moves": ["Psystrike", "Aura Sphere"],
+      "teraType": "Psychic"
+    }
+  ]
+}
+```
+
+Als de tekst ontbreekt, niet geparsed kan worden of meer dan 6 Pokemon bevat,
+krijg je een `400` response met `success: false`.
 
 ## Pokemon Informatie Oproepen
 

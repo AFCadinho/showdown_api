@@ -96,6 +96,45 @@ battleRoutes.post("/parse_pokemon", (req, res) => {
   }
 });
 
+battleRoutes.post("/parse_team", (req, res) => {
+  const text = req.body?.text;
+
+  if (typeof text !== "string" || text.trim() === "") {
+    return res.status(400).json({
+      success: false,
+      error: "text is required",
+    });
+  }
+
+  try {
+    const team = Teams.import(text);
+
+    if (!team || team.length < 1) {
+      return res.status(400).json({
+        success: false,
+        error: "Could not parse team text",
+      });
+    }
+
+    if (team.length > 6) {
+      return res.status(400).json({
+        success: false,
+        error: "Team must contain 1 to 6 Pokemon",
+      });
+    }
+
+    return res.json({
+      success: true,
+      team,
+    });
+  } catch {
+    return res.status(400).json({
+      success: false,
+      error: "Could not parse team text",
+    });
+  }
+});
+
 battleRoutes.post("/create_battle", async (req, res) => {
   const result = await createBattle(req.body);
 
