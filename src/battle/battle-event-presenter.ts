@@ -55,6 +55,14 @@ export type FailEvent = {
   action?: string;
 };
 
+export type MissEvent = {
+  type: "miss";
+  actor: string;
+  target?: string;
+  source?: string;
+  sourceTarget?: string;
+};
+
 export type SwitchEvent = {
   type: "switch";
   playerId?: string;
@@ -132,6 +140,7 @@ export type BattleEvent =
   | StatusEvent
   | CantEvent
   | FailEvent
+  | MissEvent
   | SwitchEvent
   | FaintEvent
   | TurnEvent
@@ -235,6 +244,8 @@ function parseBattleEventLine(
       return parseCantEvent(parts);
     case "-fail":
       return parseFailEvent(parts);
+    case "-miss":
+      return parseMissEvent(parts);
     case "-ability":
       return parseAbilityEvent(parts);
     case "-boost":
@@ -280,6 +291,19 @@ function parseMoveEvent(parts: string[]): MoveEvent {
     actor: parts[2],
     move: parts[3],
     target: parts[4],
+    ...(source ? { source } : {}),
+    ...(sourceTarget ? { sourceTarget } : {}),
+  };
+}
+
+function parseMissEvent(parts: string[]): MissEvent {
+  const source = parseBracketValue(parts, "[from]");
+  const sourceTarget = parseBracketValue(parts, "[of]");
+
+  return {
+    type: "miss",
+    actor: parts[2],
+    target: parts[3],
     ...(source ? { source } : {}),
     ...(sourceTarget ? { sourceTarget } : {}),
   };

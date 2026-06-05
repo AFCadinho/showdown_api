@@ -94,6 +94,30 @@ describe("presentBattleEventsForResponse", () => {
     ]);
   });
 
+  it("parses miss events when a move misses", () => {
+    const events = presentBattleEventsForResponse([
+      [
+        "p1",
+        "|move|p1a: Pikachu|Thunder|p2a: Charizard|[miss]",
+        "|-miss|p1a: Pikachu|p2a: Charizard",
+      ].join("\n"),
+    ]);
+
+    expect(events).toEqual([
+      {
+        type: "move",
+        actor: "p1a: Pikachu",
+        move: "Thunder",
+        target: "p2a: Charizard",
+      },
+      {
+        type: "miss",
+        actor: "p1a: Pikachu",
+        target: "p2a: Charizard",
+      },
+    ]);
+  });
+
   it("parses damage source metadata for residual damage", () => {
     const events = presentBattleEventsForResponse([
       [

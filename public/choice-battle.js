@@ -171,6 +171,11 @@ const successExample = {
       target: "p1a: Pikachu",
     },
     {
+      type: "miss",
+      actor: "p1a: Pikachu",
+      target: "p2a: Charizard",
+    },
+    {
       type: "move",
       actor: "p1a: Hatterene",
       move: "Tail Whip",

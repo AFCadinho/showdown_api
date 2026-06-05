@@ -813,6 +813,7 @@ Zo rekenen HUD en event-animaties met dezelfde eindstate.
 | `pokemonEffect` | `target`, `effect`, `state`, `source`, `sourceTarget` | Een tijdelijk effect op een Pokemon start, activeert of eindigt. Komt uit Showdown `-start`, `-activate` en `-end`. |
 | `cant` | `target`, `reason`, `move` | Een Pokemon kan geen move uitvoeren, bijvoorbeeld door flinch, paralysis, sleep of recharge. |
 | `fail` | `target`, `action` | Een move of action faalt door eigen mechanics, zoals Fake Out buiten de eerste beurt of Protect die faalt. |
+| `miss` | `actor`, `target`, `source`, `sourceTarget` | Een move mist het doelwit. |
 | `switch` | `playerId`, `from`, `fromIdent`, `to`, `toIdent`, `pokemon`, `details`, `condition` | Een Pokemon komt actief het veld in. Als de vorige actieve Pokemon bekend is, bevat het event ook wie eruit ging. |
 | `fieldEffect` | `scope`, `side`, `effectType`, `effectGroup`, `effect`, `state` | Een veld-effect verandert. `effectType` is `weather`, `fieldCondition` of `sideCondition`. |
 | `faint` | `target` | Een Pokemon faint. |
