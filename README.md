@@ -805,7 +805,7 @@ Zo rekenen HUD en event-animaties met dezelfde eindstate.
 | Type | Velden | Beschrijving |
 | --- | --- | --- |
 | `move` | `actor`, `move`, `target`, `source`, `sourceTarget` | Een Pokemon gebruikt een move. Als Showdown metadata meestuurt, bijvoorbeeld bij Magic Bounce, bevat het event ook de bron. |
-| `damage` | `target`, `previousCondition`, `condition`, `previousHp`, `hp`, `maxHp`, `amount` | Een Pokemon krijgt damage. Als vorige HP bekend is, bevat het event ook self-contained HP-waarden voor UI-animaties. |
+| `damage` | `target`, `previousCondition`, `condition`, `previousHp`, `hp`, `maxHp`, `amount`, `source`, `sourceTarget` | Een Pokemon krijgt damage. Als vorige HP bekend is, bevat het event ook self-contained HP-waarden voor UI-animaties. Als Showdown metadata meestuurt, bevat het event ook de bron, zoals `psn`, `brn`, sandstorm, hazards of binding moves. |
 | `heal` | `target`, `previousCondition`, `condition`, `previousHp`, `hp`, `maxHp`, `amount`, `source`, `sourceTarget` | Een Pokemon krijgt HP terug. Als vorige HP bekend is, bevat het event ook self-contained HP-waarden voor UI-animaties. |
 | `status` | `target`, `status` | Een Pokemon krijgt een status, zoals `par`. |
 | `ability` | `target`, `ability`, `modifier`, `effect`, `stat`, `source`, `sourceTarget` | Een ability wordt door Showdown zichtbaar of actief, bijvoorbeeld `Pressure`, `Intimidate` of `Protosynthesis`. Gebruik dit voor de ability banner. |
@@ -833,6 +833,23 @@ op het `move` event via `source`:
   "move": "Tail Whip",
   "target": "p2a: Rattata",
   "source": "ability: Magic Bounce"
+}
+```
+
+Residual damage zoals poison, burn, weather, hazards of binding moves komt terug
+als `damage` event met `source`:
+
+```json
+{
+  "type": "damage",
+  "target": "p1a: Pikachu",
+  "previousCondition": "140/150",
+  "condition": "120/150",
+  "previousHp": 140,
+  "hp": 120,
+  "maxHp": 150,
+  "amount": 20,
+  "source": "psn"
 }
 ```
 

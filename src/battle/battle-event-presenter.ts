@@ -19,6 +19,8 @@ export type DamageEvent = {
   hp?: number;
   maxHp?: number;
   amount?: number;
+  source?: string;
+  sourceTarget?: string;
 };
 
 export type HealEvent = {
@@ -170,14 +172,21 @@ function presentBattleEvents(
   log: string[],
   conditionByPokemon: Record<string, string>,
   requests: Record<string, unknown>,
-  activeByPlayer: Record<string, string>
+  activeByPlayer: Record<string, string>,
+  exactConditionQueues: Record<string, string[]> = buildExactConditionQueues(log)
 ): BattleEvent[] {
   return log.flatMap((chunk) => {
     const lines = chunk.split("\n");
 
     return lines
       .map((line) =>
-        parseBattleEventLine(line, conditionByPokemon, requests, activeByPlayer)
+        parseBattleEventLine(
+          line,
+          conditionByPokemon,
+          requests,
+          activeByPlayer,
+          exactConditionQueues
+        )
       )
       .filter((event): event is BattleEvent => event !== null);
   });
@@ -190,12 +199,14 @@ export function presentBattleEventsForResponse(
   activeByPlayer: Record<string, string> = {}
 ): BattleEvent[] {
   const playerOneChunks = log.filter((chunk) => chunk.startsWith("p1\n"));
+  const exactConditionQueues = buildExactConditionQueues(log);
 
   return presentBattleEvents(
     playerOneChunks,
     conditionByPokemon,
     requests,
-    activeByPlayer
+    activeByPlayer,
+    exactConditionQueues
   );
 }
 
@@ -203,7 +214,8 @@ function parseBattleEventLine(
   line: string,
   conditionByPokemon: Record<string, string>,
   requests: Record<string, unknown>,
-  activeByPlayer: Record<string, string>
+  activeByPlayer: Record<string, string>,
+  exactConditionQueues: Record<string, string[]>
 ): BattleEvent | null {
   const parts = line.split("|");
   // Showdown protocolregels beginnen meestal met "|"; daardoor is parts[0] leeg
@@ -214,9 +226,9 @@ function parseBattleEventLine(
     case "move":
       return parseMoveEvent(parts);
     case "-damage":
-      return parseDamageEvent(parts, conditionByPokemon, requests);
+      return parseDamageEvent(parts, conditionByPokemon, requests, exactConditionQueues);
     case "-heal":
-      return parseHealEvent(parts, conditionByPokemon, requests);
+      return parseHealEvent(parts, conditionByPokemon, requests, exactConditionQueues);
     case "-status":
       return parseStatusEvent(parts);
     case "cant":
@@ -276,11 +288,20 @@ function parseMoveEvent(parts: string[]): MoveEvent {
 function parseDamageEvent(
   parts: string[],
   conditionByPokemon: Record<string, string>,
-  requests: Record<string, unknown>
-): DamageEvent {
+  requests: Record<string, unknown>,
+  exactConditionQueues: Record<string, string[]>
+): DamageEvent | null {
   const target = parts[2];
   const previousCondition = conditionByPokemon[target] ?? null;
-  const condition = resolveEventCondition(parts[3], requests, target, previousCondition);
+  const condition = resolveEventCondition(
+    parts,
+    requests,
+    target,
+    previousCondition,
+    exactConditionQueues
+  );
+  const source = parseBracketValue(parts, "[from]");
+  const sourceTarget = parseBracketValue(parts, "[of]");
   const previous = previousCondition
     ? parseHpCondition(previousCondition)
     : null;
@@ -294,10 +315,16 @@ function parseDamageEvent(
     return {
       type: "damage",
       target,
-      condition
+      condition,
+      ...(source ? { source } : {}),
+      ...(sourceTarget ? { sourceTarget } : {}),
     }
   }
   
+  const amount = Math.abs(previous.hp - current.hp);
+
+  if (amount === 0) return null;
+
   return {
     type: "damage",
     target,
@@ -306,18 +333,27 @@ function parseDamageEvent(
     previousHp: previous.hp,
     hp: current.hp,
     maxHp: current.maxHp,
-    amount: Math.abs(previous.hp - current.hp)
+    amount,
+    ...(source ? { source } : {}),
+    ...(sourceTarget ? { sourceTarget } : {}),
   };
 }
 
 function parseHealEvent(
   parts: string[],
   conditionByPokemon: Record<string, string>,
-  requests: Record<string, unknown>
+  requests: Record<string, unknown>,
+  exactConditionQueues: Record<string, string[]>
 ): HealEvent {
   const target = parts[2];
   const previousCondition = conditionByPokemon[target] ?? null;
-  const condition = resolveEventCondition(parts[3], requests, target, previousCondition);
+  const condition = resolveEventCondition(
+    parts,
+    requests,
+    target,
+    previousCondition,
+    exactConditionQueues
+  );
   const source = parseBracketValue(parts, "[from]");
   const sourceTarget = parseBracketValue(parts, "[of]");
 
@@ -666,7 +702,7 @@ function parseHpCondition(condition: string, previousCondition?: string): Parsed
 
   const [hpText, maxHpText] = condition.split("/");
   const hp = Number(hpText);
-  const maxHp = Number(maxHpText);
+  const maxHp = Number(maxHpText?.split(" ")[0]);
 
   if (!Number.isFinite(hp) || !Number.isFinite(maxHp) || maxHp <= 0) {
     return null
@@ -679,18 +715,101 @@ function parseHpCondition(condition: string, previousCondition?: string): Parsed
 }
 
 function resolveEventCondition(
-  logCondition: string,
+  parts: string[],
   requests: Record<string, unknown>,
   target: string,
-  previousCondition: string | null
+  previousCondition: string | null,
+  exactConditionQueues: Record<string, string[]>
 ) {
+  const logCondition = parts[3];
+  const exactCondition = takeExactConditionOverride(
+    parts,
+    previousCondition,
+    exactConditionQueues
+  );
+
+  if (exactCondition) {
+    return exactCondition;
+  }
+
   const requestCondition = findRequestCondition(requests, target);
 
-  if (requestCondition && requestCondition !== previousCondition) {
+  if (!requestCondition) {
+    return logCondition;
+  }
+
+  if (
+    requestCondition !== previousCondition ||
+    shouldPreferRequestCondition(logCondition, previousCondition)
+  ) {
     return requestCondition;
   }
 
   return logCondition;
+}
+
+function buildExactConditionQueues(log: string[]): Record<string, string[]> {
+  const queues: Record<string, string[]> = {};
+
+  for (const chunk of log) {
+    for (const line of chunk.split("\n")) {
+      const parts = line.split("|");
+      const eventType = parts[1];
+
+      if (eventType !== "-damage" && eventType !== "-heal") continue;
+
+      const condition = parts[3];
+      const parsed = parseHpCondition(condition);
+
+      if (!parsed || parsed.maxHp === 100) continue;
+
+      const key = getConditionEventKey(parts);
+      queues[key] ??= [];
+      queues[key].push(condition);
+    }
+  }
+
+  return queues;
+}
+
+function takeExactConditionOverride(
+  parts: string[],
+  previousCondition: string | null,
+  exactConditionQueues: Record<string, string[]>
+) {
+  if (!shouldPreferExactCondition(parts[3], previousCondition)) {
+    return null;
+  }
+
+  const queue = exactConditionQueues[getConditionEventKey(parts)];
+
+  return queue?.shift() ?? null;
+}
+
+function getConditionEventKey(parts: string[]) {
+  const source = parseBracketValue(parts, "[from]") ?? "";
+  const sourceTarget = parseBracketValue(parts, "[of]") ?? "";
+
+  return [parts[1], parts[2], source, sourceTarget].join("|");
+}
+
+function shouldPreferRequestCondition(
+  logCondition: string,
+  previousCondition: string | null
+) {
+  const previous = previousCondition ? parseHpCondition(previousCondition) : null;
+  const logged = parseHpCondition(logCondition, previousCondition ?? undefined);
+
+  if (!previous || !logged) return false;
+
+  return previous.maxHp !== 100 && logged.maxHp === 100;
+}
+
+function shouldPreferExactCondition(
+  logCondition: string,
+  previousCondition: string | null
+) {
+  return shouldPreferRequestCondition(logCondition, previousCondition);
 }
 
 function findRequestCondition(

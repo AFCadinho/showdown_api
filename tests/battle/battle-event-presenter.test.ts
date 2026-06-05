@@ -94,6 +94,203 @@ describe("presentBattleEventsForResponse", () => {
     ]);
   });
 
+  it("parses damage source metadata for residual damage", () => {
+    const events = presentBattleEventsForResponse([
+      [
+        "p1",
+        "|-damage|p1a: Pikachu|140/150",
+        "|-damage|p1a: Pikachu|120/150|[from] psn",
+        "|-damage|p2a: Bulbasaur|90/150|[from] move: Leech Seed|[of] p1a: Pikachu",
+      ].join("\n"),
+    ]);
+
+    expect(events).toEqual([
+      {
+        type: "damage",
+        target: "p1a: Pikachu",
+        condition: "140/150",
+      },
+      {
+        type: "damage",
+        target: "p1a: Pikachu",
+        previousCondition: "140/150",
+        condition: "120/150",
+        previousHp: 140,
+        hp: 120,
+        maxHp: 150,
+        amount: 20,
+        source: "psn",
+      },
+      {
+        type: "damage",
+        target: "p2a: Bulbasaur",
+        condition: "90/150",
+        source: "move: Leech Seed",
+        sourceTarget: "p1a: Pikachu",
+      },
+    ]);
+  });
+
+  it("uses real request HP for residual damage when Showdown logs percentages", () => {
+    const requests = {
+      p2: {
+        side: {
+          pokemon: [
+            {
+              ident: "p2: Mewtwo",
+              condition: "243/353 psn",
+            },
+          ],
+        },
+      },
+    };
+
+    const events = presentBattleEventsForResponse(
+      [
+        [
+          "p1",
+          "|-damage|p2a: Mewtwo|82/100 psn|[from] psn",
+        ].join("\n"),
+      ],
+      {
+        "p2a: Mewtwo": "287/353 psn",
+      },
+      requests
+    );
+
+    expect(events).toEqual([
+      {
+        type: "damage",
+        target: "p2a: Mewtwo",
+        previousCondition: "287/353 psn",
+        condition: "243/353 psn",
+        previousHp: 287,
+        hp: 243,
+        maxHp: 353,
+        amount: 44,
+        source: "psn",
+      },
+    ]);
+  });
+
+  it("does not emit damage events when source metadata has no HP change", () => {
+    const requests = {
+      p2: {
+        side: {
+          pokemon: [
+            {
+              ident: "p2: Mewtwo",
+              condition: "284/353 psn",
+            },
+          ],
+        },
+      },
+    };
+
+    const events = presentBattleEventsForResponse(
+      [
+        [
+          "p1",
+          "|-damage|p2a: Mewtwo|80/100 psn|[from] psn",
+        ].join("\n"),
+      ],
+      {
+        "p2a: Mewtwo": "284/353 psn",
+      },
+      requests
+    );
+
+    expect(events).toEqual([]);
+  });
+
+  it("keeps move damage and same-turn poison residual damage separate when player logs include exact HP", () => {
+    const events = presentBattleEventsForResponse(
+      [
+        [
+          "p1",
+          "|move|p1a: Glimmora|Mortal Spin|p2a: Groudon",
+          "|-damage|p2a: Groudon|98/100",
+          "|-status|p2a: Groudon|psn",
+          "|-weather|SunnyDay|[upkeep]",
+          "|-damage|p2a: Groudon|86/100 psn|[from] psn",
+          "|turn|2",
+        ].join("\n"),
+        [
+          "p2",
+          "|move|p1a: Glimmora|Mortal Spin|p2a: Groudon",
+          "|-damage|p2a: Groudon|171/175",
+          "|-status|p2a: Groudon|psn",
+          "|-weather|SunnyDay|[upkeep]",
+          "|-damage|p2a: Groudon|150/175 psn|[from] psn",
+          "|turn|2",
+        ].join("\n"),
+      ],
+      {
+        "p2a: Groudon": "175/175",
+      },
+      {
+        p2: {
+          side: {
+            pokemon: [
+              {
+                ident: "p2: Groudon",
+                condition: "150/175 psn",
+              },
+            ],
+          },
+        },
+      }
+    );
+
+    expect(events).toEqual([
+      {
+        type: "move",
+        actor: "p1a: Glimmora",
+        move: "Mortal Spin",
+        target: "p2a: Groudon",
+      },
+      {
+        type: "damage",
+        target: "p2a: Groudon",
+        previousCondition: "175/175",
+        condition: "171/175",
+        previousHp: 175,
+        hp: 171,
+        maxHp: 175,
+        amount: 4,
+      },
+      {
+        type: "status",
+        target: "p2a: Groudon",
+        status: "psn",
+      },
+      {
+        type: "fieldEffect",
+        scope: "field",
+        effectType: "weather",
+        effect: "SunnyDay",
+        state: "upkeep",
+        minDuration: 5,
+        maxDuration: 8,
+      },
+      {
+        type: "damage",
+        target: "p2a: Groudon",
+        previousCondition: "171/175",
+        condition: "150/175 psn",
+        previousHp: 171,
+        hp: 150,
+        maxHp: 175,
+        amount: 21,
+        source: "psn",
+      },
+      {
+        type: "turn",
+        turn: 2,
+      },
+    ]);
+  });
+
   it("parses status, faint and win events", () => {
     const events = presentBattleEventsForResponse([
       [

@@ -154,6 +154,17 @@ const successExample = {
       amount: 55,
     },
     {
+      type: "damage",
+      target: "p1a: Pikachu",
+      previousCondition: "140/150",
+      condition: "120/150",
+      previousHp: 140,
+      hp: 120,
+      maxHp: 150,
+      amount: 20,
+      source: "psn",
+    },
+    {
       type: "move",
       actor: "p2a: Bulbasaur",
       move: "Giga Drain",
