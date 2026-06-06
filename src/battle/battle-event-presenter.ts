@@ -129,6 +129,7 @@ export type FieldEffectEvent = {
   state: "start" | "upkeep" | "end";
   minDuration?: number;
   maxDuration?: number;
+  layers?: number;
   source?: string;
   sourceTarget?: string;
 };
@@ -184,6 +185,8 @@ function presentBattleEvents(
   activeByPlayer: Record<string, string>,
   exactConditionQueues: Record<string, string[]> = buildExactConditionQueues(log)
 ): BattleEvent[] {
+  const sideConditionLayers: Record<string, number> = {};
+
   return log.flatMap((chunk) => {
     const lines = chunk.split("\n");
 
@@ -194,7 +197,8 @@ function presentBattleEvents(
           conditionByPokemon,
           requests,
           activeByPlayer,
-          exactConditionQueues
+          exactConditionQueues,
+          sideConditionLayers
         )
       )
       .filter((event): event is BattleEvent => event !== null);
@@ -224,7 +228,8 @@ function parseBattleEventLine(
   conditionByPokemon: Record<string, string>,
   requests: Record<string, unknown>,
   activeByPlayer: Record<string, string>,
-  exactConditionQueues: Record<string, string[]>
+  exactConditionQueues: Record<string, string[]>,
+  sideConditionLayers: Record<string, number>
 ): BattleEvent | null {
   const parts = line.split("|");
   // Showdown protocolregels beginnen meestal met "|"; daardoor is parts[0] leeg
@@ -265,9 +270,9 @@ function parseBattleEventLine(
     case "-fieldend":
       return parseFieldConditionEvent(parts, "end");
     case "-sidestart":
-      return parseSideConditionEvent(parts, "start");
+      return parseSideConditionEvent(parts, "start", sideConditionLayers);
     case "-sideend":
-      return parseSideConditionEvent(parts, "end");
+      return parseSideConditionEvent(parts, "end", sideConditionLayers);
     case "switch":
       return parseSwitchEvent(parts, activeByPlayer);
     case "faint":
@@ -608,7 +613,8 @@ function parseFieldConditionEvent(
 
 function parseSideConditionEvent(
   parts: string[],
-  state: "start" | "end"
+  state: "start" | "end",
+  sideConditionLayers: Record<string, number>
 ): FieldEffectEvent | null {
   const side = getPlayerIdFromSideText(parts[2]);
   const effect = normalizeSideConditionEffect(parts[3]);
@@ -616,6 +622,21 @@ function parseSideConditionEvent(
   const sourceTarget = parseBracketValue(parts, "[of]");
 
   if (!side || !effect) return null;
+  const layerLimit = getLayeredSideConditionLimit(effect);
+  const layerKey = `${side}|${effect}`;
+  const layers =
+    state === "start" && layerLimit
+      ? Math.min(layerLimit, (sideConditionLayers[layerKey] ?? 0) + 1)
+      : undefined;
+
+  if (state === "start" && layerLimit && layers !== undefined) {
+    sideConditionLayers[layerKey] = layers;
+  }
+
+  if (state === "end") {
+    delete sideConditionLayers[layerKey];
+  }
+
   const sideEvent = {
     type: "fieldEffect",
     scope: "side",
@@ -623,6 +644,7 @@ function parseSideConditionEvent(
     effectType: "sideCondition",
     effect,
     state,
+    ...(layers ? { layers } : {}),
   } as const;
 
   return {
@@ -659,6 +681,12 @@ function normalizeSideConditionEffect(effect: string | undefined) {
   if (effect.includes(":")) return effect;
 
   return `move: ${effect}`;
+}
+
+function getLayeredSideConditionLimit(effect: string): number | undefined {
+  if (effect === "move: Spikes") return 3;
+  if (effect === "move: Toxic Spikes") return 2;
+  return undefined;
 }
 
 function parseBracketValue(

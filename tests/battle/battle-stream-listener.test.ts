@@ -290,6 +290,67 @@ describe("updateFieldFromBattleLine", () => {
     ]);
   });
 
+  it("tracks layers for stackable side conditions", () => {
+    const field: BattleFieldSnapshot = {
+      effects: [],
+    };
+
+    updateFieldFromBattleLine("|-sidestart|p2: Wild|move: Spikes", {
+      field,
+      state: { turn: 2, ended: false, winner: null },
+    });
+    updateFieldFromBattleLine("|-sidestart|p2: Wild|move: Spikes", {
+      field,
+      state: { turn: 3, ended: false, winner: null },
+    });
+    updateFieldFromBattleLine("|-sidestart|p2: Wild|move: Spikes", {
+      field,
+      state: { turn: 4, ended: false, winner: null },
+    });
+    updateFieldFromBattleLine("|-sidestart|p2: Wild|move: Spikes", {
+      field,
+      state: { turn: 5, ended: false, winner: null },
+    });
+
+    expect(field.effects).toEqual([
+      {
+        scope: "side",
+        side: "p2",
+        effectType: "sideCondition",
+        effect: "move: Spikes",
+        startedTurn: 2,
+        layers: 3,
+      },
+    ]);
+  });
+
+  it("tracks Toxic Spikes up to two layers", () => {
+    const field: BattleFieldSnapshot = {
+      effects: [],
+    };
+
+    updateFieldFromBattleLine("|-sidestart|p1: Ash|move: Toxic Spikes", {
+      field,
+    });
+    updateFieldFromBattleLine("|-sidestart|p1: Ash|move: Toxic Spikes", {
+      field,
+    });
+    updateFieldFromBattleLine("|-sidestart|p1: Ash|move: Toxic Spikes", {
+      field,
+    });
+
+    expect(field.effects).toEqual([
+      {
+        scope: "side",
+        side: "p1",
+        effectType: "sideCondition",
+        effect: "move: Toxic Spikes",
+        startedTurn: undefined,
+        layers: 2,
+      },
+    ]);
+  });
+
   it("removes side conditions from the field snapshot", () => {
     const field: BattleFieldSnapshot = {
       effects: [

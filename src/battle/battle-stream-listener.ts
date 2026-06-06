@@ -167,6 +167,25 @@ export function updateFieldFromBattleLine(
     const effect = normalizeSideConditionEffect(parts[3]);
     if (!side || !effect) return;
 
+    const layerLimit = getLayeredSideConditionLimit(effect);
+    const existingLayeredEffect = layerLimit
+      ? battleData.field.effects.find(
+          (fieldEffect) =>
+            fieldEffect.scope === "side" &&
+            fieldEffect.side === side &&
+            fieldEffect.effectType === "sideCondition" &&
+            fieldEffect.effect === effect
+        )
+      : undefined;
+
+    if (existingLayeredEffect && layerLimit !== undefined) {
+      existingLayeredEffect.layers = Math.min(
+        layerLimit,
+        (existingLayeredEffect.layers ?? 1) + 1
+      );
+      return;
+    }
+
     removeSideEffect(battleData, side, effect);
     const sideEffect = {
       scope: "side",
@@ -174,6 +193,7 @@ export function updateFieldFromBattleLine(
       effectType: "sideCondition",
       effect,
       startedTurn: battleData.state?.turn,
+      ...(layerLimit ? { layers: 1 } : {}),
     } as const;
 
     battleData.field.effects.push({
@@ -261,6 +281,12 @@ function normalizeSideConditionEffect(effect: string | undefined) {
   if (effect.includes(":")) return effect;
 
   return `move: ${effect}`;
+}
+
+function getLayeredSideConditionLimit(effect: string): number | undefined {
+  if (effect === "move: Spikes") return 3;
+  if (effect === "move: Toxic Spikes") return 2;
+  return undefined;
 }
 
 function removeFieldEffectGroup(

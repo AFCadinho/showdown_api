@@ -12,6 +12,7 @@ export type BattleFieldEffect = {
   minRemainingTurns?: number;
   maxRemainingTurns?: number;
   upkeepTicks?: number;
+  layers?: number;
 };
 
 export type BattleFieldSnapshot = {

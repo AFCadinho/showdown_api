@@ -692,6 +692,87 @@ describe("presentBattleEventsForResponse", () => {
     ]);
   });
 
+  it("adds layers to stackable side condition events", () => {
+    const events = presentBattleEventsForResponse([
+      [
+        "p1",
+        "|-sidestart|p2: Wild|move: Spikes",
+        "|-sidestart|p2: Wild|move: Spikes",
+        "|-sidestart|p2: Wild|move: Spikes",
+        "|-sidestart|p2: Wild|move: Spikes",
+        "|-sidestart|p1: Ash|move: Toxic Spikes",
+        "|-sidestart|p1: Ash|move: Toxic Spikes",
+        "|-sidestart|p1: Ash|move: Toxic Spikes",
+      ].join("\n"),
+    ]);
+
+    expect(events).toEqual([
+      {
+        type: "fieldEffect",
+        scope: "side",
+        side: "p2",
+        effectType: "sideCondition",
+        effect: "move: Spikes",
+        state: "start",
+        layers: 1,
+      },
+      {
+        type: "fieldEffect",
+        scope: "side",
+        side: "p2",
+        effectType: "sideCondition",
+        effect: "move: Spikes",
+        state: "start",
+        layers: 2,
+      },
+      {
+        type: "fieldEffect",
+        scope: "side",
+        side: "p2",
+        effectType: "sideCondition",
+        effect: "move: Spikes",
+        state: "start",
+        layers: 3,
+      },
+      {
+        type: "fieldEffect",
+        scope: "side",
+        side: "p2",
+        effectType: "sideCondition",
+        effect: "move: Spikes",
+        state: "start",
+        layers: 3,
+      },
+      {
+        type: "fieldEffect",
+        scope: "side",
+        side: "p1",
+        effectType: "sideCondition",
+        effect: "move: Toxic Spikes",
+        state: "start",
+        layers: 1,
+      },
+      {
+        type: "fieldEffect",
+        scope: "side",
+        side: "p1",
+        effectType: "sideCondition",
+        effect: "move: Toxic Spikes",
+        state: "start",
+        layers: 2,
+      },
+      {
+        type: "fieldEffect",
+        scope: "side",
+        side: "p1",
+        effectType: "sideCondition",
+        effect: "move: Toxic Spikes",
+        state: "start",
+        layers: 2,
+      },
+    ]);
+  });
+
   it("parses side condition source metadata from Showdown bracket fields", () => {
     const events = presentBattleEventsForResponse([
       [

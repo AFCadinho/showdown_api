@@ -955,6 +955,22 @@ Spin. De API normaliseert de naam, zodat zowel start als end dezelfde
 
 Na zo'n end event staat Stealth Rock niet meer in `field.effects`.
 
+Stackbare hazards krijgen een `layers` veld in `field.effects` en op start
+events:
+
+```json
+{
+  "scope": "side",
+  "side": "p2",
+  "effectType": "sideCondition",
+  "effect": "move: Spikes",
+  "layers": 2
+}
+```
+
+`Spikes` telt tot maximaal 3 layers. `Toxic Spikes` telt tot maximaal 2
+layers. Niet-stackbare hazards zoals Stealth Rock blijven zonder `layers`.
+
 Ondersteunde event types:
 
 De numerieke HP-velden op `damage` en `heal` events gebruiken dezelfde schaal
