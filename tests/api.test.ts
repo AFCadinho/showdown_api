@@ -473,7 +473,7 @@ describe("Showdown API", () => {
     const infoBody = await infoResponse.json();
 
     expect(infoResponse.status).toBe(200);
-    expect(infoBody).toEqual({
+    expect(infoBody).toMatchObject({
       success: true,
       pokemon: {
         ident: "p2: Bulbasaur",

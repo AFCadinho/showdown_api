@@ -64,7 +64,7 @@ const responseFields = [
   {
     name: "field",
     type: "object",
-    description: "Actuele veldstatus voor UI-iconen en timers. field.effects bevat actieve weather, field conditions zoals Trick Room, terrain en side conditions zoals Tailwind of Stealth Rock. Terrain vervangt vorige terrain. Hazards blijven staan totdat Showdown removal meldt, bijvoorbeeld door Rapid Spin. Spikes en Toxic Spikes bevatten layers. Weather, terrain, Trick Room en Tailwind bevatten startedTurn, minDuration, maxDuration, minRemainingTurns en maxRemainingTurns in field.effects.",
+    description: "Actuele veldstatus voor UI-iconen en timers. field.effects bevat actieve weather, field conditions zoals Trick Room, terrain en side conditions zoals Tailwind of Stealth Rock. Terrain vervangt vorige terrain. Hazards blijven staan totdat Showdown removal meldt, bijvoorbeeld door Rapid Spin. Spikes en Toxic Spikes bevatten layers. Effecten met een bekende duur bevatten startedTurn, minDuration, maxDuration, minRemainingTurns en maxRemainingTurns in field.effects.",
   },
   {
     name: "log",

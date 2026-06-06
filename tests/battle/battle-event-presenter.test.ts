@@ -661,7 +661,7 @@ describe("presentBattleEventsForResponse", () => {
         effect: "move: Tailwind",
         state: "start",
         minDuration: 4,
-        maxDuration: 4,
+        maxDuration: 6,
       },
       {
         type: "fieldEffect",
@@ -679,7 +679,7 @@ describe("presentBattleEventsForResponse", () => {
         effect: "move: Tailwind",
         state: "end",
         minDuration: 4,
-        maxDuration: 4,
+        maxDuration: 6,
       },
       {
         type: "fieldEffect",

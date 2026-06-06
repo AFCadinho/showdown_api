@@ -278,7 +278,7 @@ describe("updateFieldFromBattleLine", () => {
         effect: "move: Tailwind",
         startedTurn: 2,
         minDuration: 4,
-        maxDuration: 4,
+        maxDuration: 6,
       },
       {
         scope: "side",
@@ -347,6 +347,42 @@ describe("updateFieldFromBattleLine", () => {
         effect: "move: Toxic Spikes",
         startedTurn: undefined,
         layers: 2,
+      },
+    ]);
+  });
+
+  it("adds duration metadata for side effects with Showdown condition durations", () => {
+    const field: BattleFieldSnapshot = {
+      effects: [],
+    };
+
+    updateFieldFromBattleLine("|-sidestart|p1: Ash|move: Reflect", {
+      field,
+      state: { turn: 2, ended: false, winner: null },
+    });
+    updateFieldFromBattleLine("|-sidestart|p2: Wild|move: Safeguard", {
+      field,
+      state: { turn: 3, ended: false, winner: null },
+    });
+
+    expect(field.effects).toEqual([
+      {
+        scope: "side",
+        side: "p1",
+        effectType: "sideCondition",
+        effect: "move: Reflect",
+        startedTurn: 2,
+        minDuration: 5,
+        maxDuration: 8,
+      },
+      {
+        scope: "side",
+        side: "p2",
+        effectType: "sideCondition",
+        effect: "move: Safeguard",
+        startedTurn: 3,
+        minDuration: 5,
+        maxDuration: 7,
       },
     ]);
   });

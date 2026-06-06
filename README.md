@@ -878,7 +878,7 @@ weather doorgaat.
   "effect": "move: Tailwind",
   "state": "start",
   "minDuration": 4,
-  "maxDuration": 4
+  "maxDuration": 6
 }
 ```
 
@@ -899,10 +899,13 @@ Sommige effecten krijgen timer metadata in `field.effects`:
 - `minRemainingTurns` en `maxRemainingTurns`: hoeveel turns het effect volgens
   die basisduur nog kan duren in de huidige response.
 
-Weather en terrain hebben `5` tot `8`, omdat items de duur kunnen verlengen.
-Trick Room en Tailwind hebben dezelfde waarde voor min en max omdat ze een vaste
-duur hebben. Hazards zoals Stealth Rock krijgen geen timer metadata, omdat ze
-blijven staan totdat ze worden verwijderd.
+Weather, terrain, screens en sommige side effects gebruiken een publieke range,
+omdat items of abilities de duur kunnen verlengen zonder dat de API verborgen
+informatie moet lekken. Bijvoorbeeld Reflect, Light Screen en Aurora Veil zijn
+`5` tot `8`, Safeguard is `5` tot `7` en Tailwind is `4` tot `6`. Effecten met
+een vaste duur, zoals Trick Room of Mist, krijgen dezelfde waarde voor min en
+max. Hazards zoals Stealth Rock krijgen geen timer metadata, omdat ze blijven
+staan totdat ze worden verwijderd.
 
 Showdown blijft leidend voor het echte einde. Als Showdown meldt dat een effect
 eindigt, verwijdert de API het effect uit `field.effects`, ook als een

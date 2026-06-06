@@ -41,7 +41,7 @@ describe("getFieldEffectDurationMetadata", () => {
     });
   });
 
-  it("returns a fixed duration for Tailwind", () => {
+  it("returns a duration range for Tailwind", () => {
     expect(
       getFieldEffectDurationMetadata({
         effectType: "sideCondition",
@@ -49,7 +49,41 @@ describe("getFieldEffectDurationMetadata", () => {
       })
     ).toEqual({
       minDuration: 4,
-      maxDuration: 4,
+      maxDuration: 6,
+    });
+  });
+
+  it("returns duration ranges for screens and Safeguard", () => {
+    expect(
+      getFieldEffectDurationMetadata({
+        effectType: "sideCondition",
+        effect: "move: Reflect",
+      })
+    ).toEqual({
+      minDuration: 5,
+      maxDuration: 8,
+    });
+
+    expect(
+      getFieldEffectDurationMetadata({
+        effectType: "sideCondition",
+        effect: "move: Safeguard",
+      })
+    ).toEqual({
+      minDuration: 5,
+      maxDuration: 7,
+    });
+  });
+
+  it("returns fixed durations from Showdown condition data", () => {
+    expect(
+      getFieldEffectDurationMetadata({
+        effectType: "sideCondition",
+        effect: "move: Mist",
+      })
+    ).toEqual({
+      minDuration: 5,
+      maxDuration: 5,
     });
   });
 

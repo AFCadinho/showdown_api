@@ -1,3 +1,4 @@
+import { Dex } from "pokemon-showdown";
 import type { BattleFieldEffect } from "./battle-field-presenter";
 
 export type FieldEffectDurationMetadata = {
@@ -33,28 +34,54 @@ export function getFieldEffectDurationMetadata(
     return { minDuration: 5, maxDuration: 8 };
   }
 
-  if (isTerrainEffect(effect.effect)) {
-    return { minDuration: 5, maxDuration: 8 };
-  }
-
-  if (effect.effect === "move: Trick Room") {
-    return { minDuration: 5, maxDuration: 5 };
-  }
-
-  if (effect.effect === "move: Tailwind") {
-    return { minDuration: 4, maxDuration: 4 };
-  }
+  const moveDuration = getMoveEffectDurationMetadata(effect.effect);
+  if (moveDuration) return moveDuration;
 
   return {};
 }
 
-function isTerrainEffect(effect: string) {
-  return (
-    effect === "move: Electric Terrain" ||
-    effect === "move: Grassy Terrain" ||
-    effect === "move: Misty Terrain" ||
-    effect === "move: Psychic Terrain"
-  );
+function getMoveEffectDurationMetadata(effect: string): FieldEffectDurationMetadata | null {
+  const moveName = effect.startsWith("move: ") ? effect.slice("move: ".length) : effect;
+  const move = Dex.moves.get(moveName);
+  const duration = move.condition?.duration;
+
+  if (!move.exists || typeof duration !== "number") {
+    return null;
+  }
+
+  return {
+    minDuration: duration,
+    maxDuration: getPublicMaxDuration(move.id, duration),
+  };
+}
+
+function getPublicMaxDuration(moveId: string, duration: number): number {
+  if (
+    moveId === "reflect" ||
+    moveId === "lightscreen" ||
+    moveId === "auroraveil"
+  ) {
+    return 8;
+  }
+
+  if (moveId === "safeguard") {
+    return 7;
+  }
+
+  if (moveId === "tailwind") {
+    return 6;
+  }
+
+  if (
+    moveId === "electricterrain" ||
+    moveId === "grassyterrain" ||
+    moveId === "mistyterrain" ||
+    moveId === "psychicterrain"
+  ) {
+    return 8;
+  }
+
+  return duration;
 }
 
 /**
